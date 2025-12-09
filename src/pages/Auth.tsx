@@ -1,29 +1,38 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Box, Loader2, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { z } from 'zod';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Box, Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
-const signupSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Senhas não conferem',
-  path: ['confirmPassword'],
-});
+const signupSchema = z
+  .object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.string().email("E-mail inválido"),
+    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Senhas não conferem",
+    path: ["confirmPassword"],
+  });
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -31,19 +40,17 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Login form
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
-  // Signup form
-  const [signupName, setSignupName] = useState('');
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate("/");
     }
   }, [user, navigate]);
 
@@ -51,7 +58,10 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
 
-    const validation = loginSchema.safeParse({ email: loginEmail, password: loginPassword });
+    const validation = loginSchema.safeParse({
+      email: loginEmail,
+      password: loginPassword,
+    });
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
       validation.error.errors.forEach((err) => {
@@ -68,13 +78,13 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('E-mail ou senha incorretos');
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("E-mail ou senha incorretos");
       } else {
         toast.error(error.message);
       }
     } else {
-      toast.success('Login realizado com sucesso!');
+      toast.success("Login realizado com sucesso!");
     }
   };
 
@@ -105,13 +115,13 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
-      if (error.message.includes('already registered')) {
-        toast.error('Este e-mail já está cadastrado');
+      if (error.message.includes("already registered")) {
+        toast.error("Este e-mail já está cadastrado");
       } else {
         toast.error(error.message);
       }
     } else {
-      toast.success('Conta criada com sucesso! Você já pode fazer login.');
+      toast.success("Conta criada com sucesso! Você já pode fazer login.");
     }
   };
 
@@ -131,7 +141,9 @@ export default function Auth() {
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
             <Box className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-foreground">StockControl</h1>
+          <h1 className="mt-4 text-2xl font-bold text-foreground">
+            StockControl
+          </h1>
           <p className="text-muted-foreground">Sistema de Gestão de Estoque</p>
         </div>
 
@@ -184,7 +196,9 @@ export default function Auth() {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Entrar
                   </Button>
                 </CardFooter>
@@ -246,7 +260,9 @@ export default function Auth() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm-password">Confirmar Senha</Label>
+                    <Label htmlFor="signup-confirm-password">
+                      Confirmar Senha
+                    </Label>
                     <Input
                       id="signup-confirm-password"
                       type="password"
@@ -265,7 +281,9 @@ export default function Auth() {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Criar Conta
                   </Button>
                 </CardFooter>
