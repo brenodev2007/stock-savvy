@@ -1,215 +1,188 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ProductsTable } from '@/components/products/ProductsTable';
-import { ProductForm } from '@/components/products/ProductForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Download, Filter, Plus, Search, Upload } from 'lucide-react';
-import {
-  mockProducts,
-  mockCategories,
-  mockStockBalances,
-} from '@/data/mockData';
-import { Product } from '@/types/inventory';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Download, Filter, Plus, Search, Upload, Package, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, Product } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
+import { useStockByProduct } from '@/hooks/useStockBalances';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+
+const productSchema = z.object({
+  sku: z.string().min(1, 'SKU é obrigatório').max(50),
+  name: z.string().min(1, 'Nome é obrigatório').max(200),
+  description: z.string().max(500).optional(),
+  unit: z.string().min(1, 'Unidade é obrigatória'),
+  category_id: z.string().optional(),
+  cost: z.coerce.number().min(0),
+  price: z.coerce.number().min(0),
+  min_stock: z.coerce.number().min(0),
+});
+
+const units = [
+  { value: 'un', label: 'Unidade (un)' },
+  { value: 'cx', label: 'Caixa (cx)' },
+  { value: 'pct', label: 'Pacote (pct)' },
+  { value: 'kg', label: 'Quilograma (kg)' },
+  { value: 'l', label: 'Litro (l)' },
+  { value: 'm', label: 'Metro (m)' },
+  { value: 'resma', label: 'Resma' },
+];
 
 export default function Products() {
-  const [products, setProducts] = useState(mockProducts);
+  const { data: products, isLoading } = useProducts();
+  const { data: categories } = useCategories();
+  const { data: stockByProduct } = useStockByProduct();
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
-  // Calculate stock balances by product
-  const stockByProduct: Record<string, number> = {};
-  mockStockBalances.forEach((balance) => {
-    stockByProduct[balance.productId] =
-      (stockByProduct[balance.productId] ?? 0) + balance.quantity;
-  });
+  const form = useForm({ resolver: zodResolver(productSchema), defaultValues: { sku: '', name: '', description: '', unit: 'un', category_id: '', cost: 0, price: 0, min_stock: 0 } });
 
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      categoryFilter === 'all' || product.categoryId === categoryFilter;
+  const filteredProducts = products?.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || product.category_id === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+    form.reset({ sku: product.sku, name: product.name, description: product.description || '', unit: product.unit, category_id: product.category_id || '', cost: product.cost, price: product.price, min_stock: product.min_stock });
     setFormOpen(true);
   };
 
-  const handleDelete = (product: Product) => {
-    setDeleteProduct(product);
-  };
-
-  const confirmDelete = () => {
-    if (deleteProduct) {
-      setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-      toast.success('Produto excluído com sucesso');
-      setDeleteProduct(null);
-    }
-  };
-
   const handleSubmit = async (data: any) => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     if (editingProduct) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                ...data,
-                category: mockCategories.find((c) => c.id === data.categoryId),
-                updatedAt: new Date(),
-              }
-            : p
-        )
-      );
-      toast.success('Produto atualizado com sucesso');
+      await updateProduct.mutateAsync({ id: editingProduct.id, ...data });
     } else {
-      const newProduct: Product = {
-        id: String(Date.now()),
-        ...data,
-        category: mockCategories.find((c) => c.id === data.categoryId),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setProducts((prev) => [newProduct, ...prev]);
-      toast.success('Produto cadastrado com sucesso');
+      await createProduct.mutateAsync(data);
     }
-
-    setIsLoading(false);
     setFormOpen(false);
     setEditingProduct(null);
+    form.reset();
   };
 
-  const handleFormClose = (open: boolean) => {
-    if (!open) {
-      setEditingProduct(null);
+  const confirmDelete = async () => {
+    if (deleteTarget) {
+      await deleteProduct.mutateAsync(deleteTarget.id);
+      setDeleteTarget(null);
     }
-    setFormOpen(open);
   };
+
+  const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  if (isLoading) {
+    return (
+      <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
-      {/* Toolbar */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-3">
           <div className="relative flex-1 sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar por nome ou SKU..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+            <Input type="search" placeholder="Buscar por nome ou SKU..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
           </div>
-
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[180px]"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Categoria" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas categorias</SelectItem>
-              {mockCategories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
+              {categories?.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Upload className="mr-2 h-4 w-4" />
-            Importar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Produto
-          </Button>
-        </div>
+        <Button onClick={() => { setEditingProduct(null); form.reset(); setFormOpen(true); }}><Plus className="mr-2 h-4 w-4" />Novo Produto</Button>
       </div>
 
-      {/* Results count */}
-      <div className="mb-4">
-        <p className="text-sm text-muted-foreground">
-          {filteredProducts.length} produto(s) encontrado(s)
-        </p>
+      <p className="mb-4 text-sm text-muted-foreground">{filteredProducts?.length || 0} produto(s) encontrado(s)</p>
+
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <table className="data-table">
+          <thead><tr><th>Produto</th><th>SKU</th><th>Categoria</th><th className="text-right">Estoque</th><th className="text-right">Custo</th><th className="text-right">Preço</th><th className="text-center">Status</th><th className="w-12"></th></tr></thead>
+          <tbody>
+            {filteredProducts?.map((product) => {
+              const stock = stockByProduct?.[product.id] ?? 0;
+              const isLowStock = stock < product.min_stock;
+              const isOutOfStock = stock === 0;
+              return (
+                <tr key={product.id}>
+                  <td><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted"><Package className="h-5 w-5 text-muted-foreground" /></div><div><p className="font-medium text-foreground">{product.name}</p>{product.description && <p className="text-sm text-muted-foreground line-clamp-1">{product.description}</p>}</div></div></td>
+                  <td><code className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono">{product.sku}</code></td>
+                  <td className="text-muted-foreground">{product.category?.name ?? '-'}</td>
+                  <td className="text-right"><span className={cn('font-medium', isOutOfStock && 'text-destructive', isLowStock && !isOutOfStock && 'text-warning')}>{stock}</span><span className="text-sm text-muted-foreground ml-1">{product.unit}</span></td>
+                  <td className="text-right text-muted-foreground">{formatCurrency(product.cost)}</td>
+                  <td className="text-right font-medium">{formatCurrency(product.price)}</td>
+                  <td className="text-center">{isOutOfStock ? <span className="badge-danger">Sem estoque</span> : isLowStock ? <span className="badge-warning">Baixo</span> : <span className="badge-success">OK</span>}</td>
+                  <td>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(product)}><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setDeleteTarget(product)} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {filteredProducts?.length === 0 && <div className="flex flex-col items-center justify-center py-12 text-center"><Package className="h-12 w-12 text-muted-foreground/50" /><p className="mt-4 font-medium">Nenhum produto cadastrado</p></div>}
       </div>
 
-      {/* Products Table */}
-      <ProductsTable
-        products={filteredProducts}
-        stockBalances={stockByProduct}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Dialog open={formOpen} onOpenChange={(open) => { setFormOpen(open); if (!open) { setEditingProduct(null); form.reset(); } }}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader><DialogTitle>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle><DialogDescription>{editingProduct ? 'Atualize as informações do produto.' : 'Preencha os dados para cadastrar um novo produto.'}</DialogDescription></DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="sku" render={({ field }) => (<FormItem><FormLabel>SKU</FormLabel><FormControl><Input placeholder="PROD-001" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="unit" render={({ field }) => (<FormItem><FormLabel>Unidade</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl><SelectContent>{units.map((u) => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+              </div>
+              <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Nome do Produto</FormLabel><FormControl><Input placeholder="Nome completo do produto" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Descrição</FormLabel><FormControl><Textarea placeholder="Descrição opcional" rows={2} {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="category_id" render={({ field }) => (<FormItem><FormLabel>Categoria</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger></FormControl><SelectContent>{categories?.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+              <div className="grid grid-cols-3 gap-4">
+                <FormField control={form.control} name="cost" render={({ field }) => (<FormItem><FormLabel>Custo (R$)</FormLabel><FormControl><Input type="number" step="0.01" min="0" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>Preço (R$)</FormLabel><FormControl><Input type="number" step="0.01" min="0" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="min_stock" render={({ field }) => (<FormItem><FormLabel>Estoque Mínimo</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={createProduct.isPending || updateProduct.isPending}>{(createProduct.isPending || updateProduct.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{editingProduct ? 'Salvar' : 'Cadastrar'}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Product Form Dialog */}
-      <ProductForm
-        open={formOpen}
-        onOpenChange={handleFormClose}
-        product={editingProduct}
-        categories={mockCategories}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o produto{' '}
-              <strong>{deleteProduct?.name}</strong>? Esta ação não pode ser
-              desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Confirmar exclusão</AlertDialogTitle><AlertDialogDescription>Excluir <strong>{deleteTarget?.name}</strong>? Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
     </AppLayout>
   );
