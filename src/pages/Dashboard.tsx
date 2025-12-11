@@ -41,16 +41,16 @@ export default function Dashboard() {
 
   return (
     <AppLayout title="Dashboard" subtitle="Visão geral do estoque">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
         <StatCard title="Total de Produtos" value={stats?.totalProducts || 0} icon={Package} />
         <StatCard title="Valor em Estoque" value={formatCurrency(stats?.totalValue || 0)} icon={DollarSign} variant="primary" />
         <StatCard title="Estoque Baixo" value={stats?.lowStockCount || 0} subtitle="itens abaixo do mínimo" icon={AlertTriangle} variant="warning" />
         <StatCard title="Vencendo" value={stats?.expiringCount || 0} subtitle="próximos 30 dias" icon={Calendar} variant="warning" />
-        <StatCard title="Movimentações Hoje" value={stats?.movementsToday || 0} icon={ArrowLeftRight} />
-        <StatCard title="Depósitos Ativos" value={stats?.warehousesCount || 0} icon={Warehouse} />
+        <StatCard title="Mov. Hoje" value={stats?.movementsToday || 0} icon={ArrowLeftRight} />
+        <StatCard title="Depósitos" value={stats?.warehousesCount || 0} icon={Warehouse} />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-4 md:mt-6 grid gap-4 md:gap-6 lg:grid-cols-2">
         <LowStockAlert products={lowStockFormatted} />
         <RecentMovements movements={movementsFormatted} />
       </div>

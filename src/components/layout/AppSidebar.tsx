@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -10,10 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Box,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/hooks/useSidebar';
+import { useEffect } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -29,22 +31,25 @@ const bottomNavigation = [
 ];
 
 export function AppSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } = useSidebar();
+  const location = useLocation();
 
-  return (
-    <aside
-      className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300',
-        collapsed ? 'w-16' : 'w-64'
-      )}
-    >
-      <div className="flex h-full flex-col">
-        {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  }, [location.pathname, isMobile, setMobileOpen]);
+
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div className="flex h-16 items-center justify-between gap-3 border-b border-sidebar-border px-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary flex-shrink-0">
             <Box className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
-          {!collapsed && (
+          {(!collapsed || isMobile) && (
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-sidebar-foreground">
                 StockControl
@@ -55,50 +60,66 @@ export function AppSidebar() {
             </div>
           )}
         </div>
+        {isMobile && mobileOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(false)}
+            className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground md:hidden"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-                )
-              }
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
-            </NavLink>
-          ))}
-        </nav>
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+        {navigation.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.href}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                collapsed && !isMobile ? 'justify-center' : '',
+                isActive
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+              )
+            }
+            title={collapsed && !isMobile ? item.name : undefined}
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            {(!collapsed || isMobile) && <span>{item.name}</span>}
+          </NavLink>
+        ))}
+      </nav>
 
-        {/* Bottom navigation */}
-        <div className="border-t border-sidebar-border px-2 py-4">
-          {bottomNavigation.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-                )
-              }
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
-            </NavLink>
-          ))}
-        </div>
+      {/* Bottom navigation */}
+      <div className="border-t border-sidebar-border px-2 py-4">
+        {bottomNavigation.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.href}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                collapsed && !isMobile ? 'justify-center' : '',
+                isActive
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+              )
+            }
+            title={collapsed && !isMobile ? item.name : undefined}
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            {(!collapsed || isMobile) && <span>{item.name}</span>}
+          </NavLink>
+        ))}
+      </div>
 
-        {/* Collapse toggle */}
+      {/* Collapse toggle - only on desktop */}
+      {!isMobile && (
         <div className="border-t border-sidebar-border p-2">
           <Button
             variant="ghost"
@@ -113,7 +134,35 @@ export function AppSidebar() {
             )}
           </Button>
         </div>
-      </div>
-    </aside>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isMobile && mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-300',
+          isMobile
+            ? mobileOpen
+              ? 'w-64 translate-x-0'
+              : '-translate-x-full w-64'
+            : collapsed
+            ? 'w-16'
+            : 'w-64'
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
