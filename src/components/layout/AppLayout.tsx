@@ -1,7 +1,7 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { AppSidebar } from './AppSidebar';
 import { cn } from '@/lib/utils';
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,6 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useSidebar } from '@/hooks/useSidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -20,7 +23,14 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
-  const [sidebarCollapsed] = useState(false);
+  const { collapsed, isMobile, setMobileOpen } = useSidebar();
+  const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,33 +39,50 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
       {/* Main content */}
       <div
         className={cn(
-          'transition-all duration-300',
-          sidebarCollapsed ? 'ml-16' : 'ml-64'
+          'transition-all duration-300 min-h-screen flex flex-col',
+          isMobile ? 'ml-0' : collapsed ? 'ml-16' : 'ml-64'
         )}
       >
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-3 md:gap-4">
+            {/* Mobile menu button */}
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileOpen(true)}
+                className="md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
+
             {title && (
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+              <div className="min-w-0">
+                <h1 className="text-base md:text-lg font-semibold text-foreground truncate">{title}</h1>
                 {subtitle && (
-                  <p className="text-sm text-muted-foreground">{subtitle}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground truncate hidden sm:block">{subtitle}</p>
                 )}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="relative hidden md:block">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Search - hidden on mobile */}
+            <div className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Buscar produtos, SKU..."
-                className="w-64 pl-9"
+                className="w-48 xl:w-64 pl-9"
               />
             </div>
+
+            {/* Mobile search button */}
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </Button>
 
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative">
@@ -74,20 +101,20 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>Administrador</span>
+                    <span>{profile?.name || 'Usuário'}</span>
                     <span className="text-xs font-normal text-muted-foreground">
-                      admin@empresa.com
+                      {profile?.email}
                     </span>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>Meu Perfil</DropdownMenuItem>
                 <DropdownMenuItem>Preferências</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -96,7 +123,7 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

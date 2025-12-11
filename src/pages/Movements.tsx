@@ -56,15 +56,27 @@ export default function Movements() {
 
   return (
     <AppLayout title="Movimentações" subtitle="Registre entradas, saídas e transferências">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 sm:max-w-xs">
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Buscar por produto ou referência..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => openForm('IN')}><ArrowDownLeft className="mr-2 h-4 w-4 text-success" />Entrada</Button>
-          <Button variant="outline" onClick={() => openForm('OUT')}><ArrowUpRight className="mr-2 h-4 w-4 text-destructive" />Saída</Button>
-          <Button onClick={() => openForm('TRANSFER')}><ArrowRightLeft className="mr-2 h-4 w-4" />Transferência</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => openForm('IN')}>
+            <ArrowDownLeft className="mr-2 h-4 w-4 text-success" />
+            <span className="hidden xs:inline">Entrada</span>
+            <span className="xs:hidden">Ent.</span>
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => openForm('OUT')}>
+            <ArrowUpRight className="mr-2 h-4 w-4 text-destructive" />
+            <span className="hidden xs:inline">Saída</span>
+            <span className="xs:hidden">Saída</span>
+          </Button>
+          <Button size="sm" className="flex-1 sm:flex-none" onClick={() => openForm('TRANSFER')}>
+            <ArrowRightLeft className="mr-2 h-4 w-4" />
+            <span className="hidden xs:inline">Transferência</span>
+            <span className="xs:hidden">Transf.</span>
+          </Button>
         </div>
       </div>
 
@@ -75,47 +87,90 @@ export default function Movements() {
           <p className="text-sm text-muted-foreground">Registre sua primeira movimentação acima.</p>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Produto</th>
-                <th>Origem</th>
-                <th>Destino</th>
-                <th className="text-right">Qtd</th>
-                <th>Referência</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMovements?.map((movement) => {
-                const config = typeConfig[movement.type];
-                const Icon = config.icon;
-                return (
-                  <tr key={movement.id}>
-                    <td>
-                      <div className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}>
-                        <Icon className="h-3 w-3" />{config.label}
-                      </div>
-                    </td>
-                    <td>
-                      <div>
-                        <p className="font-medium">{movement.product?.name}</p>
-                        <p className="text-xs text-muted-foreground">{movement.product?.sku}</p>
-                      </div>
-                    </td>
-                    <td className="text-muted-foreground">{movement.warehouse_from?.name || '-'}</td>
-                    <td className="text-muted-foreground">{movement.warehouse_to?.name || '-'}</td>
-                    <td className="text-right font-medium">{movement.quantity}</td>
-                    <td><code className="rounded bg-muted px-1.5 py-0.5 text-xs">{movement.reference || '-'}</code></td>
-                    <td className="text-muted-foreground text-sm">{format(new Date(movement.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-lg border border-border bg-card overflow-hidden">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Produto</th>
+                  <th>Origem</th>
+                  <th>Destino</th>
+                  <th className="text-right">Qtd</th>
+                  <th>Referência</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMovements?.map((movement) => {
+                  const config = typeConfig[movement.type];
+                  const Icon = config.icon;
+                  return (
+                    <tr key={movement.id}>
+                      <td>
+                        <div className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}>
+                          <Icon className="h-3 w-3" />{config.label}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <p className="font-medium">{movement.product?.name}</p>
+                          <p className="text-xs text-muted-foreground">{movement.product?.sku}</p>
+                        </div>
+                      </td>
+                      <td className="text-muted-foreground">{movement.warehouse_from?.name || '-'}</td>
+                      <td className="text-muted-foreground">{movement.warehouse_to?.name || '-'}</td>
+                      <td className="text-right font-medium">{movement.quantity}</td>
+                      <td><code className="rounded bg-muted px-1.5 py-0.5 text-xs">{movement.reference || '-'}</code></td>
+                      <td className="text-muted-foreground text-sm">{format(new Date(movement.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {filteredMovements?.map((movement) => {
+              const config = typeConfig[movement.type];
+              const Icon = config.icon;
+              return (
+                <div key={movement.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}>
+                      <Icon className="h-3 w-3" />{config.label}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(movement.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium">{movement.product?.name}</p>
+                    <p className="text-xs text-muted-foreground">{movement.product?.sku}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="space-y-1">
+                      {movement.warehouse_from && (
+                        <p className="text-muted-foreground">De: <span className="text-foreground">{movement.warehouse_from.name}</span></p>
+                      )}
+                      {movement.warehouse_to && (
+                        <p className="text-muted-foreground">Para: <span className="text-foreground">{movement.warehouse_to.name}</span></p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold">{movement.quantity}</p>
+                      {movement.reference && (
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{movement.reference}</code>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
       <MovementForm open={formOpen} onOpenChange={setFormOpen} type={movementType} products={products || []} warehouses={warehouses || []} onSubmit={handleSubmit} isLoading={createMovement.isPending} />

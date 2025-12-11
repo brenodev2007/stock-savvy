@@ -58,14 +58,14 @@ export default function Warehouses() {
 
   return (
     <AppLayout title="Depósitos" subtitle="Gerencie locais de armazenamento">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">{warehouses?.length || 0} depósito(s) cadastrado(s)</p>
-        <Button onClick={() => { setEditingWarehouse(null); setFormOpen(true); }}>
+        <Button onClick={() => { setEditingWarehouse(null); setFormOpen(true); }} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />Novo Depósito
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {warehouses?.map((warehouse, index) => (
           <div key={warehouse.id} className="rounded-lg border border-border bg-card p-6 transition-all hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
             <div className="flex items-start justify-between">

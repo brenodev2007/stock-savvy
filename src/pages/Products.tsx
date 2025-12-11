@@ -197,9 +197,9 @@ export default function Products() {
 
   return (
     <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative flex-1 sm:max-w-xs">
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
@@ -210,7 +210,7 @@ export default function Products() {
             />
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <Filter className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
@@ -224,18 +224,23 @@ export default function Products() {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          onClick={() => {
-            setEditingProduct(null);
-            form.reset();
-            setFormOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto
-        </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={() => {
+              setEditingProduct(null);
+              form.reset();
+              setFormOpen(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Produto
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 sm:flex-none"
             onClick={() => {
               setEditingCategory(null);
               setCategoryFormOpen(true);
@@ -250,7 +255,8 @@ export default function Products() {
         {filteredProducts?.length || 0} produto(s) encontrado(s)
       </p>
 
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden lg:block rounded-lg border border-border bg-card overflow-hidden">
         <table className="data-table">
           <thead>
             <tr>
@@ -332,7 +338,7 @@ export default function Products() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-popover">
                         <DropdownMenuItem onClick={() => handleEdit(product)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
@@ -358,6 +364,84 @@ export default function Products() {
             <Package className="h-12 w-12 text-muted-foreground/50" />
             <p className="mt-4 font-medium">Nenhum produto cadastrado</p>
           </div>
+        )}
+      </div>
+
+      {/* Mobile cards */}
+      <div className="lg:hidden space-y-3">
+        {filteredProducts?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Package className="h-12 w-12 text-muted-foreground/50" />
+            <p className="mt-4 font-medium">Nenhum produto cadastrado</p>
+          </div>
+        ) : (
+          filteredProducts?.map((product) => {
+            const stock = stockByProduct?.[product.id] ?? 0;
+            const isLowStock = stock < product.min_stock;
+            const isOutOfStock = stock === 0;
+            return (
+              <div key={product.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted flex-shrink-0">
+                      <Package className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground truncate">{product.name}</p>
+                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{product.sku}</code>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-popover">
+                      <DropdownMenuItem onClick={() => handleEdit(product)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setDeleteTarget(product)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{product.category?.name ?? "Sem categoria"}</span>
+                  {isOutOfStock ? (
+                    <span className="badge-danger">Sem estoque</span>
+                  ) : isLowStock ? (
+                    <span className="badge-warning">Baixo</span>
+                  ) : (
+                    <span className="badge-success">OK</span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between border-t border-border pt-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Estoque</p>
+                    <p className={cn(
+                      "font-bold",
+                      isOutOfStock && "text-destructive",
+                      isLowStock && !isOutOfStock && "text-warning"
+                    )}>
+                      {stock} {product.unit}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Preço</p>
+                    <p className="font-bold">{formatCurrency(product.price)}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
