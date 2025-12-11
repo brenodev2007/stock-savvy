@@ -16,6 +16,8 @@ import {
   AlertTriangle,
   Settings2,
   ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useStockBalances, StockBalance } from '@/hooks/useStockBalances';
 import { useWarehouses } from '@/hooks/useWarehouses';
@@ -42,6 +44,8 @@ export default function Inventory() {
 
   const [adjustmentOpen, setAdjustmentOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<StockBalance | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -102,6 +106,16 @@ export default function Inventory() {
 
     return filtered;
   }, [stockBalances, search, warehouseFilter, statusFilter, sortField, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil((filteredAndSortedData?.length || 0) / itemsPerPage);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAndSortedData.slice(start, start + itemsPerPage);
+  }, [filteredAndSortedData, currentPage, itemsPerPage]);
+
+  // Reset page when filters change
+  const resetPage = () => setCurrentPage(1);
 
   const stats = useMemo(() => {
     if (!stockBalances) return { total: 0, lowStock: 0, outOfStock: 0 };
@@ -203,12 +217,12 @@ export default function Inventory() {
           <Input
             placeholder="Buscar por produto, SKU ou depósito..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); resetPage(); }}
             className="pl-9"
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Select value={warehouseFilter} onValueChange={setWarehouseFilter}>
+          <Select value={warehouseFilter} onValueChange={(v) => { setWarehouseFilter(v); resetPage(); }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <Warehouse className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Depósito" />
@@ -223,7 +237,7 @@ export default function Inventory() {
             </SelectContent>
           </Select>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); resetPage(); }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <AlertTriangle className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Status" />
@@ -297,7 +311,7 @@ export default function Inventory() {
                 </tr>
               </thead>
               <tbody>
-                {filteredAndSortedData.map((item) => {
+                {paginatedData.map((item) => {
                   const status = getStockStatus(item);
                   const value = item.quantity * (item.product?.cost ?? 0);
                   return (
@@ -359,7 +373,7 @@ export default function Inventory() {
 
           {/* Mobile Cards */}
           <div className="md:hidden space-y-3">
-            {filteredAndSortedData.map((item) => {
+            {paginatedData.map((item) => {
               const status = getStockStatus(item);
               const value = item.quantity * (item.product?.cost ?? 0);
               return (
@@ -427,6 +441,59 @@ export default function Inventory() {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+              <p className="text-sm text-muted-foreground">
+                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} de {filteredAndSortedData.length} itens
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Anterior</span>
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      if (totalPages <= 5) return true;
+                      if (page === 1 || page === totalPages) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
+                      return false;
+                    })
+                    .map((page, idx, arr) => (
+                      <span key={page} className="flex items-center">
+                        {idx > 0 && arr[idx - 1] !== page - 1 && (
+                          <span className="px-1 text-muted-foreground">...</span>
+                        )}
+                        <Button
+                          variant={currentPage === page ? 'default' : 'outline'}
+                          size="sm"
+                          className="w-8 h-8 p-0"
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      </span>
+                    ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <span className="hidden sm:inline mr-1">Próximo</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
