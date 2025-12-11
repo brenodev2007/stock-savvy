@@ -279,7 +279,7 @@ export default function Products() {
                 <tr key={product.id}>
                   <td>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                      <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
                         <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div>
