@@ -45,7 +45,7 @@ export default function Inventory() {
   const [adjustmentOpen, setAdjustmentOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<StockBalance | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -443,11 +443,26 @@ export default function Inventory() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+            <div className="flex items-center gap-3">
               <p className="text-sm text-muted-foreground">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} de {filteredAndSortedData.length} itens
+                Mostrando {filteredAndSortedData.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} a {Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} de {filteredAndSortedData.length} itens
               </p>
+              <Select 
+                value={itemsPerPage.toString()} 
+                onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}
+              >
+                <SelectTrigger className="w-[80px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {totalPages > 1 && (
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -492,8 +507,8 @@ export default function Inventory() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
 
