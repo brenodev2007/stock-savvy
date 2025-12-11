@@ -254,46 +254,46 @@ export default function Inventory() {
           <div className="hidden md:block rounded-lg border border-border bg-card overflow-hidden">
             <table className="data-table">
               <thead>
-                <tr className="text-center">
-                  <th>
+                <tr>
+                  <th className="text-center">
                     <button
                       onClick={() => handleSort('product')}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
+                      className="inline-flex items-center gap-1 hover:text-foreground mx-auto"
                     >
                       Produto
                       <ArrowUpDown className="h-3 w-3" />
                     </button>
                   </th>
-                  <th>
+                  <th className="text-center">
                     <button
                       onClick={() => handleSort('warehouse')}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
+                      className="inline-flex items-center gap-1 hover:text-foreground mx-auto"
                     >
                       Depósito
                       <ArrowUpDown className="h-3 w-3" />
                     </button>
                   </th>
-                  <th>
+                  <th className="text-center">
                     <button
                       onClick={() => handleSort('quantity')}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
+                      className="inline-flex items-center gap-1 hover:text-foreground mx-auto"
                     >
                       Quantidade
                       <ArrowUpDown className="h-3 w-3" />
                     </button>
                   </th>
-                  <th>Estoque Mínimo</th>
-                  <th>
+                  <th className="text-center">Estoque Mínimo</th>
+                  <th className="text-center">
                     <button
                       onClick={() => handleSort('status')}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
+                      className="inline-flex items-center gap-1 hover:text-foreground mx-auto"
                     >
                       Status
                       <ArrowUpDown className="h-3 w-3" />
                     </button>
                   </th>
-                  <th>Valor</th>
-                  <th>Ações</th>
+                  <th className="text-center">Valor</th>
+                  <th className="text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -301,8 +301,8 @@ export default function Inventory() {
                   const status = getStockStatus(item);
                   const value = item.quantity * (item.product?.cost ?? 0);
                   return (
-                    <tr key={item.id} className="text-center">
-                      <td>
+                    <tr key={item.id}>
+                      <td className="text-center">
                         <div className="flex items-center gap-3 justify-center">
                           <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
                             <Package className="h-5 w-5 text-muted-foreground" />
@@ -317,16 +317,16 @@ export default function Inventory() {
                           </div>
                         </div>
                       </td>
-                      <td className="text-muted-foreground">
+                      <td className="text-center text-muted-foreground">
                         {item.warehouse?.name}
                       </td>
-                      <td className="font-medium">
+                      <td className="text-center font-medium">
                         {item.quantity} {item.product?.unit}
                       </td>
-                      <td className="text-muted-foreground">
+                      <td className="text-center text-muted-foreground">
                         {item.product?.min_stock} {item.product?.unit}
                       </td>
-                      <td>
+                      <td className="text-center">
                         <span
                           className={cn(
                             'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border',
@@ -338,10 +338,10 @@ export default function Inventory() {
                           {status.label}
                         </span>
                       </td>
-                      <td className="font-medium">
+                      <td className="text-center font-medium">
                         R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td>
+                      <td className="text-center">
                         <Button
                           size="sm"
                           variant="ghost"
