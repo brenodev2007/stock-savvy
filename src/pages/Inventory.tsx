@@ -317,15 +317,15 @@ export default function Inventory() {
                   return (
                     <tr key={item.id}>
                       <td className="text-center">
-                        <div className="flex items-center gap-3 justify-center">
-                          <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                            <Package className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex items-center gap-2 lg:gap-3">
+                          <div className="hidden sm:flex h-8 w-8 lg:h-10 lg:w-10 min-h-8 min-w-8 lg:min-h-10 lg:min-w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                            <Package className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
                           </div>
-                          <div className="text-left">
-                            <p className="font-medium text-foreground">
+                          <div className="text-left min-w-0">
+                            <p className="font-medium text-foreground truncate max-w-[120px] lg:max-w-[200px] xl:max-w-none">
                               {item.product?.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               {item.product?.sku}
                             </p>
                           </div>
