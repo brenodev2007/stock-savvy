@@ -32,16 +32,20 @@ import { Warehouse } from '@/hooks/useWarehouses';
 import { MovementType } from '@/hooks/useMovements';
 import { useEffect } from 'react';
 
-const movementSchema = z.object({
+const createMovementSchema = (type: MovementType) => z.object({
   product_id: z.string().min(1, 'Selecione um produto'),
-  warehouse_from_id: z.string().optional(),
-  warehouse_to_id: z.string().optional(),
+  warehouse_from_id: (type === 'OUT' || type === 'TRANSFER') 
+    ? z.string().min(1, 'Selecione o depósito de origem')
+    : z.string().optional(),
+  warehouse_to_id: (type === 'IN' || type === 'TRANSFER' || type === 'ADJUST')
+    ? z.string().min(1, 'Selecione o depósito')
+    : z.string().optional(),
   quantity: z.coerce.number().min(1, 'Quantidade deve ser maior que zero'),
   reason: z.string().max(200, 'Motivo muito longo').optional(),
   reference: z.string().max(100, 'Referência muito longa').optional(),
 });
 
-type MovementFormData = z.infer<typeof movementSchema>;
+type MovementFormData = z.infer<ReturnType<typeof createMovementSchema>>;
 
 interface MovementFormProps {
   open: boolean;
@@ -93,7 +97,7 @@ export function MovementForm({
   const Icon = config.icon;
 
   const form = useForm<MovementFormData>({
-    resolver: zodResolver(movementSchema),
+    resolver: zodResolver(createMovementSchema(type)),
     defaultValues: {
       product_id: '',
       warehouse_from_id: '',
@@ -113,10 +117,24 @@ export function MovementForm({
       reason: '',
       reference: '',
     });
-  }, [open, type, form]);
+  }, [open, type]);
+
+  // Re-create resolver when type changes
+  useEffect(() => {
+    form.clearErrors();
+  }, [type, form]);
 
   const handleSubmit = async (data: MovementFormData) => {
-    await onSubmit({ ...data, type });
+    const submitData = {
+      ...data,
+      type,
+      // Clean up empty strings to undefined for proper handling
+      warehouse_from_id: data.warehouse_from_id || undefined,
+      warehouse_to_id: data.warehouse_to_id || undefined,
+      reason: data.reason || undefined,
+      reference: data.reference || undefined,
+    };
+    await onSubmit(submitData);
   };
 
   const activeWarehouses = warehouses.filter((w) => w.is_active);
