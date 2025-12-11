@@ -150,14 +150,14 @@ export default function Movements() {
           <div className="hidden md:block rounded-lg border border-border bg-card overflow-hidden">
             <table className="data-table">
               <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Produto</th>
-                  <th>Origem</th>
-                  <th>Destino</th>
-                  <th className="text-right">Qtd</th>
-                  <th>Referência</th>
-                  <th>Data</th>
+                <tr className="text-center">
+                  <th className="text-center">Tipo</th>
+                  <th className="text-center">Produto</th>
+                  <th className="text-center">Origem</th>
+                  <th className="text-center">Destino</th>
+                  <th className="text-center">Qtd</th>
+                  <th className="text-center">Referência</th>
+                  <th className="text-center">Data</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,8 +165,8 @@ export default function Movements() {
                   const config = typeConfig[movement.type];
                   const Icon = config.icon;
                   return (
-                    <tr key={movement.id}>
-                      <td>
+                    <tr key={movement.id} className="text-center">
+                      <td className="text-center">
                         <div
                           className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}
                         >
@@ -174,7 +174,7 @@ export default function Movements() {
                           {config.label}
                         </div>
                       </td>
-                      <td>
+                      <td className="text-center">
                         <div>
                           <p className="font-medium">
                             {movement.product?.name}
@@ -184,21 +184,21 @@ export default function Movements() {
                           </p>
                         </div>
                       </td>
-                      <td className="text-muted-foreground">
+                      <td className="text-center text-muted-foreground">
                         {movement.warehouse_from?.name || "-"}
                       </td>
-                      <td className="text-muted-foreground">
+                      <td className="text-center text-muted-foreground">
                         {movement.warehouse_to?.name || "-"}
                       </td>
-                      <td className="text-right font-medium">
+                      <td className="text-center font-medium">
                         {movement.quantity}
                       </td>
-                      <td>
+                      <td className="text-center">
                         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                           {movement.reference || "-"}
                         </code>
                       </td>
-                      <td className="text-muted-foreground text-sm">
+                      <td className="text-center text-muted-foreground text-sm">
                         {format(
                           new Date(movement.created_at),
                           "dd/MM/yy HH:mm",
