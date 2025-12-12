@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '@/types/inventory';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -8,6 +9,8 @@ interface LowStockAlertProps {
 }
 
 export function LowStockAlert({ products }: LowStockAlertProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-4">
@@ -18,7 +21,12 @@ export function LowStockAlert({ products }: LowStockAlertProps) {
             {products.length} itens
           </span>
         </div>
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-muted-foreground"
+          onClick={() => navigate('/inventory')}
+        >
           Ver todos
           <ArrowRight className="ml-1 h-4 w-4" />
         </Button>

@@ -1,4 +1,5 @@
 import { ArrowDownLeft, ArrowRight, ArrowRightLeft, ArrowUpRight, Pencil } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { StockMovement, MovementType } from '@/types/inventory';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,11 +32,18 @@ const movementColors: Record<MovementType, string> = {
 };
 
 export function RecentMovements({ movements }: RecentMovementsProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-4">
         <h3 className="font-semibold text-foreground">Movimentações Recentes</h3>
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-muted-foreground"
+          onClick={() => navigate('/movements')}
+        >
           Ver todas
           <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
