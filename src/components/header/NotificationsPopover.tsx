@@ -23,11 +23,22 @@ interface Notification {
   link?: string;
 }
 
+const STORAGE_KEY = 'notifications_read_ids';
+
 export function NotificationsPopover() {
   const navigate = useNavigate();
   const { data: stockBalances } = useStockBalances();
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [readIds, setReadIds] = useState<Set<string>>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
   const [open, setOpen] = useState(false);
+
+  // Persist read IDs to localStorage
+  const updateReadIds = (newReadIds: Set<string>) => {
+    setReadIds(newReadIds);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...newReadIds]));
+  };
 
   // Generate notifications from stock data
   const notifications = useMemo<Notification[]>(() => {
@@ -71,11 +82,11 @@ export function NotificationsPopover() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsRead = (id: string) => {
-    setReadIds((prev) => new Set([...prev, id]));
+    updateReadIds(new Set([...readIds, id]));
   };
 
   const markAllAsRead = () => {
-    setReadIds(new Set(notifications.map((n) => n.id)));
+    updateReadIds(new Set(notifications.map((n) => n.id)));
   };
 
   const handleNotificationClick = (notification: Notification) => {
