@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -11,27 +11,28 @@ import {
   ChevronRight,
   Box,
   X,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { useSidebar } from '@/hooks/useSidebar';
-import { useEffect } from 'react';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/hooks/useSidebar";
+import { useEffect } from "react";
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Produtos', href: '/products', icon: Package },
-  { name: 'Movimentações', href: '/movements', icon: ArrowLeftRight },
-  { name: 'Depósitos', href: '/warehouses', icon: Warehouse },
-  { name: 'Inventário', href: '/inventory', icon: ClipboardList },
-  { name: 'Relatórios', href: '/reports', icon: FileText },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Produtos", href: "/products", icon: Package },
+  { name: "Movimentações", href: "/movements", icon: ArrowLeftRight },
+  { name: "Depósitos", href: "/warehouses", icon: Warehouse },
+  { name: "Inventário", href: "/inventory", icon: ClipboardList },
+  { name: "Relatórios", href: "/reports", icon: FileText },
 ];
 
 const bottomNavigation = [
-  { name: 'Configurações', href: '/settings', icon: Settings },
+  { name: "Configurações", href: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
-  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } = useSidebar();
+  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } =
+    useSidebar();
   const location = useLocation();
 
   // Close mobile sidebar on route change
@@ -52,7 +53,7 @@ export function AppSidebar() {
           {(!collapsed || isMobile) && (
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-sidebar-foreground">
-                StockControl
+                Estoka
               </span>
               <span className="text-xs text-sidebar-foreground/60">
                 Gestão de Estoque
@@ -80,11 +81,11 @@ export function AppSidebar() {
             to={item.href}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                collapsed && !isMobile ? 'justify-center' : '',
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                collapsed && !isMobile ? "justify-center" : "",
                 isActive
-                  ? 'bg-sidebar-accent text-sidebar-primary'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  ? "bg-sidebar-accent text-sidebar-primary"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )
             }
             title={collapsed && !isMobile ? item.name : undefined}
@@ -103,11 +104,11 @@ export function AppSidebar() {
             to={item.href}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                collapsed && !isMobile ? 'justify-center' : '',
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                collapsed && !isMobile ? "justify-center" : "",
                 isActive
-                  ? 'bg-sidebar-accent text-sidebar-primary'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  ? "bg-sidebar-accent text-sidebar-primary"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )
             }
             title={collapsed && !isMobile ? item.name : undefined}
@@ -151,14 +152,14 @@ export function AppSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-300',
+          "fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-300",
           isMobile
             ? mobileOpen
-              ? 'w-64 translate-x-0'
-              : '-translate-x-full w-64'
+              ? "w-64 translate-x-0"
+              : "-translate-x-full w-64"
             : collapsed
-            ? 'w-16'
-            : 'w-64'
+            ? "w-16"
+            : "w-64"
         )}
       >
         {sidebarContent}
