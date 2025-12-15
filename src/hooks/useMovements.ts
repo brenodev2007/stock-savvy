@@ -32,9 +32,19 @@ export interface StockMovement {
   } | null;
 }
 
-export function useMovements(limit?: number) {
+interface UseMovementsOptions {
+  limit?: number;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export function useMovements(options?: number | UseMovementsOptions) {
+  const limit = typeof options === 'number' ? options : options?.limit;
+  const startDate = typeof options === 'object' ? options.startDate : undefined;
+  const endDate = typeof options === 'object' ? options.endDate : undefined;
+
   return useQuery({
-    queryKey: ['movements', limit],
+    queryKey: ['movements', limit, startDate, endDate],
     queryFn: async () => {
       let query = supabase
         .from('stock_movements')
@@ -48,6 +58,14 @@ export function useMovements(limit?: number) {
       
       if (limit) {
         query = query.limit(limit);
+      }
+
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
+
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
       }
       
       const { data, error } = await query;
