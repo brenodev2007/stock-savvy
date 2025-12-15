@@ -44,7 +44,20 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Edit2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 const roleLabels = {
   admin: 'Administrador',
@@ -77,6 +90,13 @@ export default function Settings() {
   const [profileHasChanges, setProfileHasChanges] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
+
+  // Email Change States
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailStep, setEmailStep] = useState<'input' | 'verify'>('input');
+  const [newEmail, setNewEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -134,6 +154,55 @@ export default function Settings() {
       toast.error('Erro ao fazer upload da imagem: ' + error.message);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleInitiateEmailChange = async () => {
+    if (!newEmail || !newEmail.includes('@')) {
+      toast.error("Por favor, insira um e-mail válido.");
+      return;
+    }
+
+    setIsEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) throw error;
+      
+      toast.success("Código de verificação enviado para o novo e-mail.");
+      setEmailStep('verify');
+    } catch (error: any) {
+      toast.error("Erro ao iniciar troca de e-mail: " + error.message);
+    } finally {
+      setIsEmailLoading(false);
+    }
+  };
+
+  const handleVerifyEmailChange = async () => {
+    if (otpCode.length !== 6) {
+      toast.error("O código deve ter 6 dígitos.");
+      return;
+    }
+
+    setIsEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: newEmail,
+        token: otpCode,
+        type: 'email_change',
+      });
+
+      if (error) throw error;
+
+      toast.success("E-mail atualizado com sucesso!");
+      setIsEmailModalOpen(false);
+      setNewEmail('');
+      setOtpCode('');
+      setEmailStep('input');
+      // Auth state listener in AuthProvider will likely pick up the change
+    } catch (error: any) {
+      toast.error("Erro ao verificar código: " + error.message);
+    } finally {
+      setIsEmailLoading(false);
     }
   };
 
@@ -239,12 +308,12 @@ export default function Settings() {
                 <h3 className="text-sm font-medium text-foreground">Informações Pessoais</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="name">Nome Completo</Label>
+                    <Label htmlFor="name">Razão Social</Label>
                     <Input
                       id="name"
-                      value={editingName}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      className="mt-1.5"
+                      value={profile?.name || ''}
+                      disabled
+                      className="mt-1.5 bg-muted"
                     />
                   </div>
                   <div>
@@ -255,8 +324,83 @@ export default function Settings() {
                       disabled
                       className="mt-1.5 bg-muted"
                     />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setIsEmailModalOpen(true)}
+                      className="mt-2 h-8 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <Edit2 className="h-3 w-3 mr-1.5" />
+                      Alterar E-mail
+                    </Button>
                   </div>
                 </div>
+
+                <Dialog open={isEmailModalOpen} onOpenChange={setIsEmailModalOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Alterar E-mail</DialogTitle>
+                      <DialogDescription>
+                        {emailStep === 'input' 
+                          ? "Informe o novo endereço de e-mail. Enviaremos um código de verificação."
+                          : `Digite o código enviado para ${newEmail} para confirmar a alteração.`
+                        }
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                      {emailStep === 'input' ? (
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Novo E-mail</Label>
+                            <Input 
+                              value={newEmail} 
+                              onChange={(e) => setNewEmail(e.target.value)}
+                              placeholder="novo@email.com"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex justify-center py-4">
+                          <InputOTP
+                            maxLength={6}
+                            value={otpCode}
+                            onChange={(value) => setOtpCode(value)}
+                          >
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
+                      )}
+                    </div>
+
+                    <DialogFooter>
+                      {emailStep === 'input' ? (
+                        <Button onClick={handleInitiateEmailChange} disabled={isEmailLoading}>
+                          {isEmailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Enviar Código
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2 w-full justify-end">
+                          <Button variant="ghost" onClick={() => setEmailStep('input')} disabled={isEmailLoading}>
+                            Voltar
+                          </Button>
+                          <Button onClick={handleVerifyEmailChange} disabled={isEmailLoading}>
+                            {isEmailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Validar e Alterar
+                          </Button>
+                        </div>
+                      )}
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
 
                 {profileHasChanges && (
                   <div className="flex gap-2 pt-2">
