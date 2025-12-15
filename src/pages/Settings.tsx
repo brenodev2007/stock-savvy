@@ -43,6 +43,8 @@ import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { Camera, Loader2 } from 'lucide-react';
 
 const roleLabels = {
   admin: 'Administrador',
@@ -73,6 +75,8 @@ export default function Settings() {
 
   const [editingName, setEditingName] = useState(profile?.name || '');
   const [profileHasChanges, setProfileHasChanges] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     await signOut();
@@ -82,8 +86,55 @@ export default function Settings() {
 
   const handleSaveProfile = async () => {
     if (!user?.id) return;
-    await updateProfile.mutateAsync({ userId: user.id, name: editingName });
+    await updateProfile.mutateAsync({ 
+      userId: user.id, 
+      name: editingName,
+      avatar_url: uploadedAvatarUrl !== null ? uploadedAvatarUrl : undefined
+    });
     setProfileHasChanges(false);
+    setUploadedAvatarUrl(null);
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione uma imagem válida (JPG, PNG)');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB
+      toast.error('A imagem deve ter no máximo 2MB');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setUploadedAvatarUrl(data.publicUrl);
+      setProfileHasChanges(true);
+      toast.success('Imagem carregada. Clique em "Salvar Alterações" para confirmar.');
+    } catch (error: any) {
+      toast.error('Erro ao fazer upload da imagem: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSaveSettings = () => {
@@ -134,12 +185,33 @@ export default function Settings() {
           <TabsContent value="profile" className="space-y-6">
             <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
-                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
-                  <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="text-lg bg-primary/10 text-primary">
-                    {getInitials(profile?.name || 'U')}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative group">
+                  <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer">
+                    <AvatarImage src={uploadedAvatarUrl || profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                      {getInitials(profile?.name || 'U')}
+                    </AvatarFallback>
+                    {isUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                      </div>
+                    )}
+                  </Avatar>
+                  <label 
+                    htmlFor="avatar-upload" 
+                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1.5 rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-sm"
+                  >
+                    <Camera className="h-3 w-3" />
+                  </label>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                    disabled={isUploading}
+                  />
+                </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-semibold text-foreground">{profile?.name}</h2>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">

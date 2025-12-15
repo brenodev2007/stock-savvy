@@ -54,10 +54,19 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, name }: { userId: string; name: string }) => {
+    mutationFn: async ({ userId, name, avatar_url }: { userId: string; name: string; avatar_url?: string | null }) => {
+      const updates: any = { 
+        name, 
+        updated_at: new Date().toISOString() 
+      };
+      
+      if (avatar_url !== undefined) {
+        updates.avatar_url = avatar_url;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({ name, updated_at: new Date().toISOString() })
+        .update(updates)
         .eq('user_id', userId);
 
       if (error) throw error;
