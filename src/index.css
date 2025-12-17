@@ -6,59 +6,61 @@
 
 @layer base {
   :root {
-    /* Professional Industrial Theme */
-    --background: 210 20% 98%;
-    --foreground: 220 25% 10%;
+    /* Professional Industrial Theme - User Defined */
+    --background: 210 20% 98%; /* #f9fafb */
+    --foreground: 220 26% 10%; /* #131720 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 220 26% 10%; /* #131720 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 220 26% 10%; /* #131720 */
 
-    /* Deep Navy Blue - Trust & Reliability */
+    /* Primary - #193366 */
     --primary: 220 60% 25%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 210 40% 98%; /* #f8fafc */
 
-    /* Light Gray-Blue for secondary surfaces */
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 220 25% 20%;
+    /* Secondary - #e9edf2 */
+    --secondary: 213 27% 93%;
+    --secondary-foreground: 219 25% 20%; /* #262f40 */
 
-    /* Muted tones */
-    --muted: 210 20% 95%;
-    --muted-foreground: 215 15% 45%;
+    /* Muted - #f0f2f5 */
+    --muted: 216 20% 95%;
+    --muted-foreground: 215 16% 45%; /* #627084 */
 
-    /* Accent - Amber for alerts/actions */
+    /* Accent - #f59f0a */
     --accent: 38 92% 50%;
-    --accent-foreground: 220 25% 10%;
+    --accent-foreground: 220 26% 10%; /* #131720 */
 
-    /* Status colors */
+    /* Destructive - #dc2828 */
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 210 40% 98%; /* #f8fafc */
 
+    /* Status colors - Keeping existing valid ones or deriving if needed */
     --success: 142 70% 35%;
     --success-foreground: 210 40% 98%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 220 25% 10%;
+    --warning: 38 92% 50%; /* Matches Accent */
+    --warning-foreground: 220 26% 10%;
 
-    --info: 200 80% 50%;
+    --info: 220 60% 25%; /* Matches Primary for consistency if not specified */
     --info-foreground: 210 40% 98%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 220 60% 25%;
+    --border: 214 20% 88%; /* #dae0e7 */
+    --input: 214 20% 88%; /* #dae0e7 */
+    --ring: 220 60% 25%; /* #193366 */
 
     --radius: 0.5rem;
 
-    /* Sidebar - Darker for contrast */
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 220 25% 10%;
-    --sidebar-accent: 220 25% 18%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 220 20% 20%;
+    /* Sidebar - keeping consistent with primary/dark or adjusting to new palette?
+       Usually sidebar is dark in technical apps, but let's make it match the primary dark blue for consistency */
+    --sidebar-background: 220 60% 25%; /* Primary color */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 38 92% 50%; /* Accent */
+    --sidebar-primary-foreground: 220 26% 10%;
+    --sidebar-accent: 220 50% 35%; /* Slightly lighter primary */
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 50% 35%;
     --sidebar-ring: 38 92% 50%;
 
     /* Custom gradients */
@@ -70,7 +72,7 @@
     --gradient-accent: linear-gradient(
       135deg,
       hsl(38 92% 50%),
-      hsl(28 90% 55%)
+      hsl(38 92% 60%)
     );
     --gradient-success: linear-gradient(
       135deg,
@@ -80,14 +82,15 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 25% 10% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 25% 10% / 0.1),
-      0 2px 4px -2px hsl(220 25% 10% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(220 25% 10% / 0.1),
-      0 4px 6px -4px hsl(220 25% 10% / 0.1);
-    --shadow-card: 0 1px 3px hsl(220 25% 10% / 0.08),
-      0 1px 2px hsl(220 25% 10% / 0.06);
+    --shadow-sm: 0 1px 2px 0 hsl(220 60% 25% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 60% 25% / 0.1),
+      0 2px 4px -2px hsl(220 60% 25% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(220 60% 25% / 0.1),
+      0 4px 6px -4px hsl(220 60% 25% / 0.1);
+    --shadow-card: 0 1px 3px hsl(220 60% 25% / 0.08),
+      0 1px 2px hsl(220 60% 25% / 0.06);
   }
+
 
   .dark {
     --background: 220 25% 8%;
