@@ -26,11 +26,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, ArrowDownLeft, ArrowUpRight, ArrowRightLeft } from 'lucide-react';
+import { Loader2, ArrowDownLeft, ArrowUpRight, ArrowRightLeft, CalendarIcon } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import { Warehouse } from '@/hooks/useWarehouses';
-import { MovementType } from '@/hooks/useMovements';
+import { MovementType, StockMovement } from '@/hooks/useMovements';
 import { useEffect } from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const createMovementSchema = (type: MovementType) => z.object({
   product_id: z.string().min(1, 'Selecione um produto'),
@@ -43,6 +48,7 @@ const createMovementSchema = (type: MovementType) => z.object({
   quantity: z.coerce.number().min(1, 'Quantidade deve ser maior que zero'),
   reason: z.string().max(200, 'Motivo muito longo').optional(),
   reference: z.string().max(100, 'Referência muito longa').optional(),
+  created_at: z.date().optional(),
 });
 
 type MovementFormData = z.infer<ReturnType<typeof createMovementSchema>>;
@@ -53,8 +59,9 @@ interface MovementFormProps {
   type: MovementType;
   products: Product[];
   warehouses: Warehouse[];
-  onSubmit: (data: MovementFormData & { type: MovementType }) => Promise<void>;
+  onSubmit: (data: MovementFormData & { type: MovementType } & { id?: string }) => Promise<void>;
   isLoading?: boolean;
+  initialData?: StockMovement | null;
 }
 
 const movementConfig = {
@@ -92,6 +99,7 @@ export function MovementForm({
   warehouses,
   onSubmit,
   isLoading,
+  initialData,
 }: MovementFormProps) {
   const config = movementConfig[type];
   const Icon = config.icon;
@@ -105,19 +113,35 @@ export function MovementForm({
       quantity: 1,
       reason: '',
       reference: '',
+      created_at: new Date(),
     },
   });
 
   useEffect(() => {
-    form.reset({
-      product_id: '',
-      warehouse_from_id: '',
-      warehouse_to_id: '',
-      quantity: 1,
-      reason: '',
-      reference: '',
-    });
-  }, [open, type]);
+    if (open) {
+      if (initialData) {
+        form.reset({
+          product_id: initialData.product_id,
+          warehouse_from_id: initialData.warehouse_from_id || '',
+          warehouse_to_id: initialData.warehouse_to_id || '',
+          quantity: initialData.quantity,
+          reason: initialData.reason || '',
+          reference: initialData.reference || '',
+          created_at: new Date(initialData.created_at),
+        });
+      } else {
+        form.reset({
+          product_id: '',
+          warehouse_from_id: '',
+          warehouse_to_id: '',
+          quantity: 1,
+          reason: '',
+          reference: '',
+          created_at: new Date(),
+        });
+      }
+    }
+  }, [open, type, initialData, form]);
 
   // Re-create resolver when type changes
   useEffect(() => {
@@ -133,6 +157,8 @@ export function MovementForm({
       warehouse_to_id: data.warehouse_to_id || undefined,
       reason: data.reason || undefined,
       reference: data.reference || undefined,
+      created_at: data.created_at || new Date(),
+      id: initialData?.id
     };
     await onSubmit(submitData);
   };
@@ -141,15 +167,15 @@ export function MovementForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-muted ${config.color}`}>
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle>{config.title}</DialogTitle>
-              <DialogDescription>{config.description}</DialogDescription>
+              <DialogTitle>{initialData ? 'Editar Movimentação' : config.title}</DialogTitle>
+              <DialogDescription>{initialData ? 'Edite os dados da movimentação' : config.description}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -237,33 +263,35 @@ export function MovementForm({
               />
             )}
 
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quantidade</FormLabel>
-                  <FormControl>
-                    <Input type="number" min="1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantidade</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="reference"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Referência (opcional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: NF-123456, PED-789" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="reference"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Referência (opcional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: NF-123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -279,7 +307,64 @@ export function MovementForm({
               )}
             />
 
-            <DialogFooter className="pt-4">
+            <FormField
+              control={form.control}
+              name="created_at"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Data da Movimentação</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PP HH:mm", { locale: ptBR })
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                      />
+                      <div className="p-3 border-t border-border">
+                         <Input 
+                            type="time" 
+                            value={field.value ? format(field.value, 'HH:mm') : ''}
+                            onChange={(e) => {
+                                const [hours, minutes] = e.target.value.split(':');
+                                if (hours && minutes) {
+                                    const newDate = new Date(field.value || new Date());
+                                    newDate.setHours(parseInt(hours));
+                                    newDate.setMinutes(parseInt(minutes));
+                                    field.onChange(newDate);
+                                }
+                            }}
+                         />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="pt-4 sticky bottom-0 bg-background pb-2">
               <Button
                 type="button"
                 variant="outline"
@@ -289,7 +374,7 @@ export function MovementForm({
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Registrar
+                {initialData ? 'Salvar' : 'Registrar'}
               </Button>
             </DialogFooter>
           </form>

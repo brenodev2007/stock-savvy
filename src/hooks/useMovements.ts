@@ -137,6 +137,34 @@ export function useCreateMovement() {
   });
 }
 
+export function useUpdateMovement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<StockMovement> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from('stock_movements')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return updated;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['stock_balances'] });
+      queryClient.invalidateQueries({ queryKey: ['stock_by_product'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
+      toast.success('Movimentação atualizada com sucesso');
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar movimentação: ' + error.message);
+    },
+  });
+}
+
 async function updateStock(productId: string, warehouseId: string, quantityDelta: number) {
   // Get current stock
   const { data: current } = await supabase

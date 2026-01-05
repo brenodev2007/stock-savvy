@@ -7,12 +7,15 @@ import {
   ArrowUpRight,
   ArrowRightLeft,
   Search,
+  Pencil,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   useMovements,
   useCreateMovement,
+  useUpdateMovement,
   MovementType,
+  StockMovement,
 } from "@/hooks/useMovements";
 import { useProducts } from "@/hooks/useProducts";
 import { useWarehouses } from "@/hooks/useWarehouses";
@@ -49,19 +52,33 @@ export default function Movements() {
   const { data: products } = useProducts();
   const { data: warehouses } = useWarehouses();
   const createMovement = useCreateMovement();
+  const updateMovement = useUpdateMovement();
 
   const [formOpen, setFormOpen] = useState(false);
   const [movementType, setMovementType] = useState<MovementType>("IN");
   const [search, setSearch] = useState("");
+  const [editingMovement, setEditingMovement] = useState<StockMovement | null>(null);
 
   const openForm = (type: MovementType) => {
     setMovementType(type);
+    setEditingMovement(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = (movement: StockMovement) => {
+    setEditingMovement(movement);
+    setMovementType(movement.type);
     setFormOpen(true);
   };
 
   const handleSubmit = async (data: any) => {
-    await createMovement.mutateAsync(data);
+    if (editingMovement) {
+      await updateMovement.mutateAsync({ ...data, id: editingMovement.id });
+    } else {
+      await createMovement.mutateAsync(data);
+    }
     setFormOpen(false);
+    setEditingMovement(null);
   };
 
   const filteredMovements = movements?.filter(
@@ -158,6 +175,7 @@ export default function Movements() {
                   <th className="text-center">Qtd</th>
                   <th className="text-center">Referência</th>
                   <th className="text-center">Data</th>
+                  <th className="text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,8 +183,8 @@ export default function Movements() {
                   const config = typeConfig[movement.type];
                   const Icon = config.icon;
                   return (
-                    <tr key={movement.id} className="text-center">
-                      <td className="text-center">
+                    <tr key={movement.id} className="text-center hover:bg-muted/50 transition-colors">
+                      <td className="text-center align-middle">
                         <div
                           className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}
                         >
@@ -174,8 +192,8 @@ export default function Movements() {
                           {config.label}
                         </div>
                       </td>
-                      <td className="text-center">
-                        <div>
+                      <td className="text-center align-middle">
+                        <div className="flex flex-col items-center justify-center">
                           <p className="font-medium">
                             {movement.product?.name}
                           </p>
@@ -184,26 +202,35 @@ export default function Movements() {
                           </p>
                         </div>
                       </td>
-                      <td className="text-center text-muted-foreground">
+                      <td className="text-center text-muted-foreground align-middle">
                         {movement.warehouse_from?.name || "-"}
                       </td>
-                      <td className="text-center text-muted-foreground">
+                      <td className="text-center text-muted-foreground align-middle">
                         {movement.warehouse_to?.name || "-"}
                       </td>
-                      <td className="text-center font-medium">
+                      <td className="text-center font-medium align-middle">
                         {movement.quantity}
                       </td>
-                      <td className="text-center">
+                      <td className="text-center align-middle">
                         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                           {movement.reference || "-"}
                         </code>
                       </td>
-                      <td className="text-center text-muted-foreground text-sm">
+                      <td className="text-center text-muted-foreground text-sm align-middle">
                         {format(
                           new Date(movement.created_at),
                           "dd/MM/yy HH:mm",
                           { locale: ptBR }
                         )}
+                      </td>
+                      <td className="text-center align-middle">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(movement)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -267,6 +294,14 @@ export default function Movements() {
                           {movement.reference}
                         </code>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => handleEdit(movement)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -276,14 +311,19 @@ export default function Movements() {
         </>
       )}
 
+
       <MovementForm
         open={formOpen}
-        onOpenChange={setFormOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) setEditingMovement(null);
+        }}
         type={movementType}
         products={products || []}
         warehouses={warehouses || []}
         onSubmit={handleSubmit}
-        isLoading={createMovement.isPending}
+        isLoading={createMovement.isPending || updateMovement.isPending}
+        initialData={editingMovement}
       />
     </AppLayout>
   );
