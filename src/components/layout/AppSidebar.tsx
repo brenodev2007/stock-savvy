@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Box,
   X,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Movimentações", href: "/movements", icon: ArrowLeftRight },
   { name: "Depósitos", href: "/warehouses", icon: Warehouse },
   { name: "Inventário", href: "/inventory", icon: ClipboardList },
+  { name: "Envios Shopee", href: "/shopee", icon: Truck },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
 
