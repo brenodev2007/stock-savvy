@@ -1,0 +1,219 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import type { ShopeeAccount, ShopeeOrder, ShopeeOrderStatusHistory, ShopeeSyncLog, ShopeeShipmentStatus } from '@/types/shopee';
+
+// Accounts
+export function useShopeeAccounts() {
+  return useQuery({
+    queryKey: ['shopee-accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shopee_accounts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as ShopeeAccount[];
+    },
+  });
+}
+
+export function useCreateShopeeAccount() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (account: { shop_name: string; shop_id: number; is_active: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data, error } = await supabase
+        .from('shopee_accounts')
+        .insert({
+          shop_name: account.shop_name,
+          shop_id: account.shop_id,
+          is_active: account.is_active,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
+      toast({ title: 'Conta Shopee adicionada com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao adicionar conta', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
+// Orders
+export function useShopeeOrders(filters?: {
+  status?: ShopeeShipmentStatus;
+  startDate?: Date;
+  endDate?: Date;
+  carrier?: string;
+  search?: string;
+  accountId?: string;
+}) {
+  return useQuery({
+    queryKey: ['shopee-orders', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('shopee_orders')
+        .select(`
+          *,
+          account:shopee_accounts(id, shop_name)
+        `)
+        .order('purchase_date', { ascending: false });
+
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters?.startDate) {
+        query = query.gte('purchase_date', filters.startDate.toISOString());
+      }
+      if (filters?.endDate) {
+        query = query.lte('purchase_date', filters.endDate.toISOString());
+      }
+      if (filters?.carrier) {
+        query = query.eq('carrier', filters.carrier);
+      }
+      if (filters?.accountId) {
+        query = query.eq('account_id', filters.accountId);
+      }
+      if (filters?.search) {
+        query = query.or(`order_sn.ilike.%${filters.search}%,product_name.ilike.%${filters.search}%,sku.ilike.%${filters.search}%,tracking_code.ilike.%${filters.search}%`);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data as ShopeeOrder[];
+    },
+  });
+}
+
+export function useShopeeOrder(orderId: string) {
+  return useQuery({
+    queryKey: ['shopee-order', orderId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shopee_orders')
+        .select(`
+          *,
+          account:shopee_accounts(id, shop_name),
+          status_history:shopee_order_status_history(*)
+        `)
+        .eq('id', orderId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data as ShopeeOrder | null;
+    },
+    enabled: !!orderId,
+  });
+}
+
+// Sync Logs
+export function useShopeeSyncLogs(accountId?: string) {
+  return useQuery({
+    queryKey: ['shopee-sync-logs', accountId],
+    queryFn: async () => {
+      let query = supabase
+        .from('shopee_sync_logs')
+        .select('*')
+        .order('started_at', { ascending: false })
+        .limit(20);
+
+      if (accountId) {
+        query = query.eq('account_id', accountId);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data as ShopeeSyncLog[];
+    },
+  });
+}
+
+export function useCreateSyncLog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (log: { account_id: string; sync_type: string; status: string; orders_synced?: number; error_message?: string }) => {
+      const { data, error } = await supabase
+        .from('shopee_sync_logs')
+        .insert({
+          account_id: log.account_id,
+          sync_type: log.sync_type,
+          status: log.status,
+          orders_synced: log.orders_synced ?? 0,
+          error_message: log.error_message,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-sync-logs'] });
+    },
+  });
+}
+
+// Sync action (placeholder - will connect to edge function)
+export function useSyncShopeeOrders() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      // TODO: Call edge function for Shopee sync
+      // For now, just simulate a sync
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      return { success: true, ordersCount: 0 };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-sync-logs'] });
+      toast({ title: 'Sincronização concluída!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro na sincronização', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
+// Get order stats
+export function useShopeeOrderStats() {
+  return useQuery({
+    queryKey: ['shopee-order-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shopee_orders')
+        .select('status');
+      
+      if (error) throw error;
+
+      const stats = {
+        total: data.length,
+        aguardandoEnvio: data.filter(o => o.status === 'AGUARDANDO_ENVIO').length,
+        enviado: data.filter(o => o.status === 'ENVIADO').length,
+        emTransporte: data.filter(o => o.status === 'EM_TRANSPORTE').length,
+        entregue: data.filter(o => o.status === 'ENTREGUE').length,
+        cancelado: data.filter(o => o.status === 'CANCELADO' || o.status === 'DEVOLVIDO').length,
+      };
+
+      return stats;
+    },
+  });
+}

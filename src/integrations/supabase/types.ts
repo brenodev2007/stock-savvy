@@ -170,6 +170,198 @@ export type Database = {
         }
         Relationships: []
       }
+      shopee_accounts: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          refresh_token: string | null
+          shop_id: number
+          shop_name: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          refresh_token?: string | null
+          shop_id: number
+          shop_name: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          refresh_token?: string | null
+          shop_id?: number
+          shop_name?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopee_order_status_history: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          occurred_at: string
+          order_id: string | null
+          status: Database["public"]["Enums"]["shopee_shipment_status"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          order_id?: string | null
+          status: Database["public"]["Enums"]["shopee_shipment_status"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          order_id?: string | null
+          status?: Database["public"]["Enums"]["shopee_shipment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopee_order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "shopee_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopee_orders: {
+        Row: {
+          account_id: string | null
+          actual_delivery: string | null
+          carrier: string | null
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          estimated_delivery: string | null
+          id: string
+          order_sn: string
+          order_total: number | null
+          product_name: string
+          purchase_date: string
+          shipping_address: string | null
+          shopee_data: Json | null
+          sku: string | null
+          status: Database["public"]["Enums"]["shopee_shipment_status"]
+          tracking_code: string | null
+          tracking_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          actual_delivery?: string | null
+          carrier?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          order_sn: string
+          order_total?: number | null
+          product_name: string
+          purchase_date: string
+          shipping_address?: string | null
+          shopee_data?: Json | null
+          sku?: string | null
+          status?: Database["public"]["Enums"]["shopee_shipment_status"]
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          actual_delivery?: string | null
+          carrier?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          order_sn?: string
+          order_total?: number | null
+          product_name?: string
+          purchase_date?: string
+          shipping_address?: string | null
+          shopee_data?: Json | null
+          sku?: string | null
+          status?: Database["public"]["Enums"]["shopee_shipment_status"]
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopee_orders_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "shopee_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopee_sync_logs: {
+        Row: {
+          account_id: string | null
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          orders_synced: number | null
+          started_at: string
+          status: string
+          sync_type: string
+        }
+        Insert: {
+          account_id?: string | null
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          orders_synced?: number | null
+          started_at?: string
+          status: string
+          sync_type: string
+        }
+        Update: {
+          account_id?: string | null
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          orders_synced?: number | null
+          started_at?: string
+          status?: string
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopee_sync_logs_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "shopee_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_balances: {
         Row: {
           id: string
@@ -339,6 +531,13 @@ export type Database = {
     Enums: {
       app_role: "admin" | "manager" | "operator"
       movement_type: "IN" | "OUT" | "TRANSFER" | "ADJUST"
+      shopee_shipment_status:
+        | "AGUARDANDO_ENVIO"
+        | "ENVIADO"
+        | "EM_TRANSPORTE"
+        | "ENTREGUE"
+        | "CANCELADO"
+        | "DEVOLVIDO"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -468,6 +667,14 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "manager", "operator"],
       movement_type: ["IN", "OUT", "TRANSFER", "ADJUST"],
+      shopee_shipment_status: [
+        "AGUARDANDO_ENVIO",
+        "ENVIADO",
+        "EM_TRANSPORTE",
+        "ENTREGUE",
+        "CANCELADO",
+        "DEVOLVIDO",
+      ],
     },
   },
 } as const
