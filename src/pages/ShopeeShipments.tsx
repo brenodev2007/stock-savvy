@@ -6,6 +6,7 @@ import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/Shop
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
 import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager';
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
+import { ShopeeManualOrderForm } from '@/components/shopee/ShopeeManualOrderForm';
 import { useShopeeOrders, useShopeeOrderStats } from '@/hooks/useShopee';
 import {
   Pagination,
@@ -77,7 +78,10 @@ export default function ShopeeShipments() {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
-            {/* Filters */}
+            {/* Filters and Manual Order */}
+            <div className="flex flex-wrap items-center gap-4">
+              <ShopeeManualOrderForm />
+            </div>
             <ShopeeFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}

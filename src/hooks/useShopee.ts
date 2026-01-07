@@ -169,26 +169,77 @@ export function useCreateSyncLog() {
   });
 }
 
-// Sync action (placeholder - will connect to edge function)
+// Sync action - calls edge function
 export function useSyncShopeeOrders() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (accountId: string) => {
-      // TODO: Call edge function for Shopee sync
-      // For now, just simulate a sync
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data, error } = await supabase.functions.invoke('shopee-sync-orders', {
+        body: { account_id: accountId },
+      });
       
-      return { success: true, ordersCount: 0 };
+      if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-sync-logs'] });
-      toast({ title: 'Sincronização concluída!' });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      toast({ title: 'Sincronização concluída!', description: `${data?.orders_synced || 0} pedidos sincronizados` });
     },
     onError: (error: Error) => {
       toast({ title: 'Erro na sincronização', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
+// Create manual order
+export function useCreateManualOrder() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (order: {
+      order_sn: string;
+      product_name: string;
+      customer_name?: string;
+      shipping_address?: string;
+      order_total: number;
+      status: ShopeeShipmentStatus;
+      carrier?: string;
+      tracking_code?: string;
+      purchase_date: string;
+      estimated_delivery?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('shopee_orders')
+        .insert({
+          order_sn: order.order_sn,
+          product_name: order.product_name,
+          customer_name: order.customer_name || null,
+          shipping_address: order.shipping_address || null,
+          order_total: order.order_total,
+          status: order.status,
+          carrier: order.carrier || null,
+          tracking_code: order.tracking_code || null,
+          purchase_date: order.purchase_date,
+          estimated_delivery: order.estimated_delivery || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      toast({ title: 'Pedido cadastrado com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao cadastrar pedido', description: error.message, variant: 'destructive' });
     },
   });
 }

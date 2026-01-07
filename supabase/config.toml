@@ -1,1 +1,7 @@
 project_id = "jyatwpdsiparjklkrzcu"
+
+[functions.shopee-oauth]
+verify_jwt = false
+
+[functions.shopee-sync-orders]
+verify_jwt = false
