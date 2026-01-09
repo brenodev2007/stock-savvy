@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Form,
@@ -27,13 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import { useCreateManualOrder } from '@/hooks/useShopee';
-import type { ShopeeShipmentStatus } from '@/types/shopee';
+import { useCreateManualOrder, useUpdateShopeeOrder } from '@/hooks/useShopee';
+import type { ShopeeOrder, ShopeeShipmentStatus } from '@/types/shopee';
 
 const formSchema = z.object({
   order_sn: z.string().min(1, 'Número do pedido é obrigatório'),
   product_name: z.string().min(1, 'Nome do produto é obrigatório'),
+  sku: z.string().optional(),
   customer_name: z.string().optional(),
   shipping_address: z.string().optional(),
   order_total: z.coerce.number().min(0, 'Valor deve ser positivo'),
@@ -55,15 +54,23 @@ const statusOptions = [
   { value: 'DEVOLVIDO', label: 'Devolvido' },
 ];
 
-export function ShopeeManualOrderForm() {
-  const [open, setOpen] = useState(false);
+interface ShopeeOrderFormProps {
+  order?: ShopeeOrder | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ShopeeOrderForm({ order, open, onOpenChange }: ShopeeOrderFormProps) {
   const createOrder = useCreateManualOrder();
+  const updateOrder = useUpdateShopeeOrder();
+  const isEditing = !!order;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       order_sn: '',
       product_name: '',
+      sku: '',
       customer_name: '',
       shipping_address: '',
       order_total: 0,
@@ -75,34 +82,69 @@ export function ShopeeManualOrderForm() {
     },
   });
 
+  useEffect(() => {
+    if (order) {
+      form.reset({
+        order_sn: order.order_sn,
+        product_name: order.product_name,
+        sku: order.sku || '',
+        customer_name: order.customer_name || '',
+        shipping_address: order.shipping_address || '',
+        order_total: order.order_total || 0,
+        status: order.status,
+        carrier: order.carrier || '',
+        tracking_code: order.tracking_code || '',
+        purchase_date: order.purchase_date ? new Date(order.purchase_date).toISOString().split('T')[0] : '',
+        estimated_delivery: order.estimated_delivery ? new Date(order.estimated_delivery).toISOString().split('T')[0] : '',
+      });
+    } else {
+      form.reset({
+        order_sn: '',
+        product_name: '',
+        sku: '',
+        customer_name: '',
+        shipping_address: '',
+        order_total: 0,
+        status: 'AGUARDANDO_ENVIO',
+        carrier: '',
+        tracking_code: '',
+        purchase_date: new Date().toISOString().split('T')[0],
+        estimated_delivery: '',
+      });
+    }
+  }, [order, form]);
+
   const onSubmit = async (data: FormData) => {
-    await createOrder.mutateAsync({
+    const orderData = {
       order_sn: data.order_sn,
       product_name: data.product_name,
-      customer_name: data.customer_name,
-      shipping_address: data.shipping_address,
+      sku: data.sku || null,
+      customer_name: data.customer_name || null,
+      shipping_address: data.shipping_address || null,
       order_total: data.order_total,
       status: data.status as ShopeeShipmentStatus,
-      carrier: data.carrier,
-      tracking_code: data.tracking_code,
+      carrier: data.carrier || null,
+      tracking_code: data.tracking_code || null,
       purchase_date: new Date(data.purchase_date).toISOString(),
       estimated_delivery: data.estimated_delivery ? new Date(data.estimated_delivery).toISOString() : null,
-    });
-    form.reset();
-    setOpen(false);
+    };
+
+    if (isEditing && order) {
+      await updateOrder.mutateAsync({ id: order.id, ...orderData });
+    } else {
+      await createOrder.mutateAsync(orderData);
+    }
+    
+    onOpenChange(false);
   };
 
+  const isPending = createOrder.isPending || updateOrder.isPending;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
-          Cadastrar Pedido Manual
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cadastrar Pedido Manual</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar Pedido' : 'Cadastrar Pedido Manual'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -135,19 +177,34 @@ export function ShopeeManualOrderForm() {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="product_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome do Produto *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Descrição do produto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="product_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome do Produto *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Descrição do produto" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sku"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SKU</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Código SKU" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -197,7 +254,7 @@ export function ShopeeManualOrderForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione" />
@@ -259,9 +316,9 @@ export function ShopeeManualOrderForm() {
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={createOrder.isPending}>
-                {createOrder.isPending ? 'Salvando...' : 'Salvar Pedido'}
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Salvar Pedido'}
               </Button>
             </div>
           </form>
