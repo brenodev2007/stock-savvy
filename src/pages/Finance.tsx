@@ -1,11 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Calculator, LayoutDashboard, Upload, Briefcase } from "lucide-react";
-import { FinancialDashboard } from "@/components/finance/FinancialDashboard";
+
 import { PricingCalculator } from "@/components/finance/PricingCalculator";
 import { ShopeeImport } from "../components/finance/ShopeeImport";
 import { EmployeeManager } from "@/components/finance/EmployeeManager";
 import { FinanceProvider } from "@/contexts/FinanceContext";
+import { FinancialDashboard } from "@/components/finance/FinancialDashboard";
 
 export default function Finance() {
   return (
