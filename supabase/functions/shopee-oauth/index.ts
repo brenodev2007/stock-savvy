@@ -31,7 +31,20 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const action = url.searchParams.get('action')
+    let action = url.searchParams.get('action')
+    let body: Record<string, unknown> = {}
+
+    // Parse body for POST requests
+    if (req.method === 'POST') {
+      try {
+        body = await req.json()
+        if (body.action) {
+          action = body.action as string
+        }
+      } catch {
+        // No body or invalid JSON
+      }
+    }
 
     // Check for required credentials
     if (!PARTNER_ID || !PARTNER_KEY) {
@@ -78,9 +91,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'callback') {
-      // Handle OAuth callback from Shopee
-      const code = url.searchParams.get('code')
-      const shopId = url.searchParams.get('shop_id')
+      // Handle OAuth callback from Shopee - support both query params and body
+      const code = url.searchParams.get('code') || (body.code as string)
+      const shopId = url.searchParams.get('shop_id') || (body.shopId as string | number)
 
       if (!code || !shopId) {
         return new Response(
@@ -88,6 +101,8 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+
+      const shopIdNum = typeof shopId === 'number' ? shopId : parseInt(shopId as string)
 
       // Exchange code for access token
       const path = '/api/v2/auth/token/get'
@@ -101,7 +116,7 @@ Deno.serve(async (req) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code,
-            shop_id: parseInt(shopId),
+            shop_id: shopIdNum,
             partner_id: parseInt(PARTNER_ID!)
           })
         }
@@ -120,23 +135,23 @@ Deno.serve(async (req) => {
       // Get shop info
       const shopPath = '/api/v2/shop/get_shop_info'
       const shopTimestamp = Math.floor(Date.now() / 1000)
-      const shopSign = generateSignature(shopPath, shopTimestamp, tokenData.access_token, parseInt(shopId))
+      const shopSign = generateSignature(shopPath, shopTimestamp, tokenData.access_token, shopIdNum)
 
       const shopResponse = await fetch(
-        `${SHOPEE_API_HOST}${shopPath}?partner_id=${PARTNER_ID}&timestamp=${shopTimestamp}&sign=${shopSign}&shop_id=${shopId}&access_token=${tokenData.access_token}`,
+        `${SHOPEE_API_HOST}${shopPath}?partner_id=${PARTNER_ID}&timestamp=${shopTimestamp}&sign=${shopSign}&shop_id=${shopIdNum}&access_token=${tokenData.access_token}`,
         { method: 'GET' }
       )
 
       const shopData = await shopResponse.json()
       console.log('Shop info:', JSON.stringify(shopData))
 
-      const shopName = shopData.response?.shop_name || `Loja ${shopId}`
+      const shopName = shopData.response?.shop_name || `Loja ${shopIdNum}`
 
       // Save or update account in database
       const { data: existingAccount } = await supabase
         .from('shopee_accounts')
         .select('id')
-        .eq('shop_id', shopId)
+        .eq('shop_id', shopIdNum)
         .single()
 
       if (existingAccount) {
@@ -147,7 +162,7 @@ Deno.serve(async (req) => {
             refresh_token: tokenData.refresh_token,
             token_expires_at: new Date(Date.now() + tokenData.expire_in * 1000).toISOString(),
             shop_name: shopName,
-            status: 'active',
+            is_active: true,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingAccount.id)
@@ -155,12 +170,12 @@ Deno.serve(async (req) => {
         await supabase
           .from('shopee_accounts')
           .insert({
-            shop_id: shopId,
+            shop_id: shopIdNum,
             shop_name: shopName,
             access_token: tokenData.access_token,
             refresh_token: tokenData.refresh_token,
             token_expires_at: new Date(Date.now() + tokenData.expire_in * 1000).toISOString(),
-            status: 'active',
+            is_active: true,
             user_id: userId
           })
       }
