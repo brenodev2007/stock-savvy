@@ -9,19 +9,20 @@ import { Calculator } from "lucide-react";
 export function PricingCalculator() {
   const [cost, setCost] = useState<number>(0);
   const [fixedCost, setFixedCost] = useState<number>(0);
+  const [platformFixedFee, setPlatformFixedFee] = useState<number>(4); // Taxa fixa da plataforma (ex: Shopee R$ 3/4)
   const [variableRate, setVariableRate] = useState<number>(20); // %
   const [marginMultiplier, setMarginMultiplier] = useState<number>(1.15); // Multiplier
   const [sellingPrice, setSellingPrice] = useState<number>(0);
 
   const calculatePrice = () => {
-    // Formula: x = M * (C + F + (V% * x))
-    // x = M(C + F) + M * V% * x
-    // x - M * V% * x = M(C + F)
-    // x (1 - M * V%) = M(C + F)
-    // x = (M * (C + F)) / (1 - M * V%)
+    // Formula: x = M * (C + F + PlatformFixed + (V% * x))
+    // x = M(C + F + Pf) + M * V% * x
+    // x - M * V% * x = M(C + F + Pf)
+    // x (1 - M * V%) = M(C + F + Pf)
+    // x = (M * (C + F + Pf)) / (1 - M * V%)
     
     const vDecimal = variableRate / 100;
-    const numerator = marginMultiplier * (cost + fixedCost);
+    const numerator = marginMultiplier * (cost + fixedCost + platformFixedFee);
     const denominator = 1 - (marginMultiplier * vDecimal);
 
     if (denominator <= 0) {
@@ -36,7 +37,7 @@ export function PricingCalculator() {
 
   useEffect(() => {
     calculatePrice();
-  }, [cost, fixedCost, variableRate, marginMultiplier]);
+  }, [cost, fixedCost, platformFixedFee, variableRate, marginMultiplier]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -45,7 +46,7 @@ export function PricingCalculator() {
     }).format(value);
   };
 
-  const profit = sellingPrice - (cost + fixedCost + (sellingPrice * (variableRate / 100)));
+  const profit = sellingPrice - (cost + fixedCost + platformFixedFee + (sellingPrice * (variableRate / 100)));
   const marginPercent = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0;
 
   return (
@@ -93,6 +94,21 @@ export function PricingCalculator() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="platformFixed">Taxa Fixa (Shopee)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-muted-foreground">R$</span>
+                <Input
+                  id="platformFixed"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="pl-9"
+                  value={platformFixedFee || ""}
+                  onChange={(e) => setPlatformFixedFee(Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="variable">Taxa Variável (Comissão + Imposto)</Label>
               <div className="relative">
                 <Input
@@ -125,7 +141,7 @@ export function PricingCalculator() {
           <div className="rounded-lg bg-muted p-4 mt-6">
             <h3 className="font-semibold mb-2">Entenda o Cálculo</h3>
             <p className="text-sm font-mono break-all text-muted-foreground">
-              {`x = ${marginMultiplier} × (${cost} + ${fixedCost} + (${variableRate}% × x))`}
+              {`x = ${marginMultiplier} × (${cost} + ${fixedCost} + ${platformFixedFee} + (${variableRate}% × x))`}
             </p>
             {sellingPrice > 0 && (
                  <p className="text-sm font-mono mt-2 text-primary">
@@ -155,6 +171,10 @@ export function PricingCalculator() {
             <div className="flex justify-between text-sm">
                 <span>Custo Total do Produto:</span>
                 <span>{formatCurrency(cost + fixedCost)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+                <span>Taxa Fixa da Plataforma:</span>
+                <span className="text-orange-600">- {formatCurrency(platformFixedFee)}</span>
             </div>
             <div className="flex justify-between text-sm">
                 <span>Taxas Variáveis ({variableRate}%):</span>
