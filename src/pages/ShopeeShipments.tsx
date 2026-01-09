@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { ShopeeOrdersTable } from '@/components/shopee/ShopeeOrdersTable';
 import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/ShopeeFilters';
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
 import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager';
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
-import { ShopeeManualOrderForm } from '@/components/shopee/ShopeeManualOrderForm';
+import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
 import { useShopeeOrders, useShopeeOrderStats } from '@/hooks/useShopee';
 import {
   Pagination,
@@ -28,6 +30,7 @@ export default function ShopeeShipments() {
     carrier: undefined,
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
@@ -80,8 +83,15 @@ export default function ShopeeShipments() {
           <TabsContent value="orders" className="space-y-4">
             {/* Filters and Manual Order */}
             <div className="flex flex-wrap items-center gap-4">
-              <ShopeeManualOrderForm />
+              <Button variant="outline" onClick={() => setIsFormOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Cadastrar Pedido Manual
+              </Button>
             </div>
+            <ShopeeOrderForm
+              open={isFormOpen}
+              onOpenChange={setIsFormOpen}
+            />
             <ShopeeFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}

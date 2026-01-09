@@ -244,6 +244,48 @@ export function useCreateManualOrder() {
   });
 }
 
+// Update order
+export function useUpdateShopeeOrder() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, ...order }: {
+      id: string;
+      order_sn?: string;
+      product_name?: string;
+      customer_name?: string | null;
+      shipping_address?: string | null;
+      order_total?: number;
+      status?: ShopeeShipmentStatus;
+      carrier?: string | null;
+      tracking_code?: string | null;
+      purchase_date?: string;
+      estimated_delivery?: string | null;
+      sku?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('shopee_orders')
+        .update(order)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order'] });
+      toast({ title: 'Pedido atualizado com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao atualizar pedido', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
 // Get order stats
 export function useShopeeOrderStats() {
   return useQuery({
