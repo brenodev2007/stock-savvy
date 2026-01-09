@@ -67,8 +67,8 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 gap-0">
-        <DialogHeader className="p-4 pb-2">
-          <DialogTitle className="sr-only">Busca Global</DialogTitle>
+        <div className="p-4 pt-12 pb-2 relative">
+          <div className="sr-only">Busca Global</div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -77,20 +77,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               placeholder="Buscar produtos, depósitos, movimentações..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-9"
+              className="pl-9"
             />
-            {search && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
-                onClick={() => setSearch('')}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
           </div>
-        </DialogHeader>
+        </div>
 
         <div className="max-h-[400px] overflow-y-auto p-2">
           {search.length === 0 && (

@@ -12,6 +12,7 @@ import {
   Box,
   X,
   Truck,
+  LineChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Depósitos", href: "/warehouses", icon: Warehouse },
   { name: "Inventário", href: "/inventory", icon: ClipboardList },
   { name: "Envios Shopee", href: "/shopee", icon: Truck },
+  { name: "Financeiro", href: "/finance", icon: LineChart },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
 
