@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, ExternalLink } from 'lucide-react';
+import { Eye, ExternalLink, Pencil } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ShopeeStatusBadge } from './ShopeeStatusBadge';
 import { ShopeeOrderDetails } from './ShopeeOrderDetails';
+import { ShopeeOrderForm } from './ShopeeOrderForm';
 import type { ShopeeOrder } from '@/types/shopee';
 
 interface ShopeeOrdersTableProps {
@@ -23,6 +24,7 @@ interface ShopeeOrdersTableProps {
 
 export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [editingOrder, setEditingOrder] = useState<ShopeeOrder | null>(null);
 
   if (isLoading) {
     return (
@@ -116,14 +118,22 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
                       : '-'}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedOrderId(order.id)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Detalhes</span>
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingOrder(order)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedOrderId(order.id)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -136,6 +146,12 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
         orderId={selectedOrderId}
         open={!!selectedOrderId}
         onOpenChange={(open) => !open && setSelectedOrderId(null)}
+      />
+
+      <ShopeeOrderForm
+        order={editingOrder}
+        open={!!editingOrder}
+        onOpenChange={(open) => !open && setEditingOrder(null)}
       />
     </>
   );

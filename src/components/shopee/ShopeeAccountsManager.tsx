@@ -1,43 +1,14 @@
-import { useState } from 'react';
-import { Plus, Store, RefreshCw, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Store, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useShopeeAccounts, useCreateShopeeAccount, useSyncShopeeOrders } from '@/hooks/useShopee';
+import { useShopeeAccounts, useSyncShopeeOrders } from '@/hooks/useShopee';
+import { ShopeeConnectButton } from './ShopeeConnectButton';
 import { cn } from '@/lib/utils';
 
 export function ShopeeAccountsManager() {
   const { data: accounts, isLoading } = useShopeeAccounts();
-  const createAccount = useCreateShopeeAccount();
   const syncOrders = useSyncShopeeOrders();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [shopName, setShopName] = useState('');
-  const [shopId, setShopId] = useState('');
-
-  const handleAddAccount = async () => {
-    if (!shopName || !shopId) return;
-    
-    await createAccount.mutateAsync({
-      shop_name: shopName,
-      shop_id: parseInt(shopId, 10),
-      is_active: true,
-    });
-    
-    setDialogOpen(false);
-    setShopName('');
-    setShopId('');
-  };
 
   if (isLoading) {
     return (
@@ -52,57 +23,7 @@ export function ShopeeAccountsManager() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Contas Shopee</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Adicionar Conta
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Conta Shopee</DialogTitle>
-              <DialogDescription>
-                Conecte sua loja Shopee para sincronizar pedidos automaticamente.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="shopName">Nome da Loja</Label>
-                <Input
-                  id="shopName"
-                  value={shopName}
-                  onChange={(e) => setShopName(e.target.value)}
-                  placeholder="Minha Loja Shopee"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="shopId">Shop ID</Label>
-                <Input
-                  id="shopId"
-                  value={shopId}
-                  onChange={(e) => setShopId(e.target.value)}
-                  placeholder="123456789"
-                  type="number"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Encontre seu Shop ID no painel de vendedor da Shopee.
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleAddAccount}
-                disabled={!shopName || !shopId || createAccount.isPending}
-              >
-                {createAccount.isPending ? 'Adicionando...' : 'Adicionar'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ShopeeConnectButton />
       </div>
 
       {accounts?.length === 0 ? (

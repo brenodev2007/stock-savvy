@@ -20,6 +20,7 @@ const Reports = lazy(() => import("./pages/Reports"));
 const Finance = lazy(() => import("./pages/Finance"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ShopeeShipments = lazy(() => import("./pages/ShopeeShipments"));
+const ShopeeCallback = lazy(() => import("./pages/ShopeeCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
               <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
               <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
+              <Route path="/shopee/callback" element={<ShopeeCallback />} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
