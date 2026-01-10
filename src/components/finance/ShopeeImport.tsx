@@ -103,7 +103,7 @@ export function ShopeeImport() {
         <CardContent>
           <div className="grid w-full max-w-sm items-center gap-1.5 mb-4">
             <Label htmlFor="shopee-file">Arquivo de Transações</Label>
-            <Input id="shopee-file" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
+            <Input id="shopee-file" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} className="w-full" />
           </div>
 
           {error && (
@@ -133,7 +133,7 @@ export function ShopeeImport() {
           )}
 
           {transactions.length > 0 && (
-            <div className="border rounded-md mt-4">
+            <div className="border rounded-md mt-4 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

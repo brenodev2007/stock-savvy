@@ -16,7 +16,7 @@ export default function Finance() {
         subtitle="Controle financeiro, precificação e gestão de equipes"
       >
         <Tabs defaultValue="dashboard" className="space-y-4">
-          <TabsList>
+          <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               Dashboard

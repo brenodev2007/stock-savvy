@@ -72,7 +72,7 @@ export function PricingCalculator() {
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9"
+                  className="pl-9 w-full"
                   value={cost || ""}
                   onChange={(e) => setCost(Number(e.target.value))}
                 />
@@ -87,7 +87,7 @@ export function PricingCalculator() {
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9"
+                  className="pl-9 w-full"
                   value={fixedCost || ""}
                   onChange={(e) => setFixedCost(Number(e.target.value))}
                 />
@@ -102,7 +102,7 @@ export function PricingCalculator() {
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9"
+                  className="pl-9 w-full"
                   value={platformFixedFee || ""}
                   onChange={(e) => setPlatformFixedFee(Number(e.target.value))}
                 />
@@ -117,7 +117,7 @@ export function PricingCalculator() {
                   min="0"
                   max="100"
                   step="0.1"
-                  className="pr-8"
+                  className="pr-8 w-full"
                   value={variableRate}
                   onChange={(e) => setVariableRate(Number(e.target.value))}
                 />

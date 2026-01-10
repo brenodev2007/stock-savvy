@@ -148,7 +148,7 @@ export function FinancialDashboard() {
             <CardTitle>Evolução Financeira</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <div className="h-[300px]">
+            <div className="h-[250px] sm:h-[300px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>
@@ -158,8 +158,8 @@ export function FinancialDashboard() {
                         <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tick={{fontSize: 10}} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} tick={{fontSize: 10}} />
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                     <Area type="monotone" dataKey="vendas" name="Vendas" stroke="#8884d8" fillOpacity={1} fill="url(#colorVendas)" />

@@ -102,7 +102,7 @@ export function EmployeeManager() {
                       required
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid sm:grid-cols-2 gap-4">
                    <div className="grid gap-2">
                       <Label htmlFor="role">Cargo / Função</Label>
                       <Input 
@@ -149,37 +149,39 @@ export function EmployeeManager() {
                 <p>Nenhum funcionário cadastrado.</p>
              </div>
           ) : (
-             <Table>
-                <TableHeader>
-                  <TableRow>
-                     <TableHead>Nome</TableHead>
-                     <TableHead>Cargo</TableHead>
-                     <TableHead>Data Admissão</TableHead>
-                     <TableHead className="text-right">Salário</TableHead>
-                     <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                   {employees.map((emp) => (
-                      <TableRow key={emp.id}>
-                         <TableCell className="font-medium">{emp.name}</TableCell>
-                         <TableCell>{emp.role}</TableCell>
-                         <TableCell>{new Date(emp.hireDate).toLocaleDateString('pt-BR')}</TableCell>
-                         <TableCell className="text-right">{formatCurrency(emp.salary)}</TableCell>
-                         <TableCell>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => removeEmployee(emp.id)}
-                            >
-                               <Trash className="h-4 w-4" />
-                            </Button>
-                         </TableCell>
-                      </TableRow>
-                   ))}
-                </TableBody>
-             </Table>
+             <div className="overflow-x-auto">
+               <Table>
+                  <TableHeader>
+                    <TableRow>
+                       <TableHead>Nome</TableHead>
+                       <TableHead>Cargo</TableHead>
+                       <TableHead>Data Admissão</TableHead>
+                       <TableHead className="text-right">Salário</TableHead>
+                       <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {employees.map((emp) => (
+                        <TableRow key={emp.id}>
+                           <TableCell className="font-medium">{emp.name}</TableCell>
+                           <TableCell>{emp.role}</TableCell>
+                           <TableCell>{new Date(emp.hireDate).toLocaleDateString('pt-BR')}</TableCell>
+                           <TableCell className="text-right">{formatCurrency(emp.salary)}</TableCell>
+                           <TableCell>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => removeEmployee(emp.id)}
+                              >
+                                 <Trash className="h-4 w-4" />
+                              </Button>
+                           </TableCell>
+                        </TableRow>
+                     ))}
+                  </TableBody>
+               </Table>
+             </div>
           )}
         </CardContent>
       </Card>
