@@ -176,8 +176,14 @@ export default function Landing() {
                 title="Starter" 
                 price="R$ 0" 
                 period="/mês"
-                description="Perfeito para pequenos negócios e testes."
-                features={["Até 50 produtos", "1 Usuário", "Suporte básico", "Relatórios simples"]}
+                description="Ideal para quem está começando."
+                features={[
+                  "Até 50 Produtos", 
+                  "1 Usuário (Operador)", 
+                  "Gestão de Estoque Básica", 
+                  "Integração Shopee (Leitura)",
+                  "Calculadora de Markup"
+                ]}
                 buttonText="Começar Grátis"
                 variant="outline"
               />
@@ -185,18 +191,33 @@ export default function Landing() {
                 title="Pro" 
                 price="R$ 97" 
                 period="/mês"
-                description="Para empresas em crescimento acelerado."
-                features={["Produtos ilimitados", "Até 5 Usuários", "Suporte prioritário", "Analytics avançado", "Múltiplos armazéns"]}
+                description="Para operações que precisam de agilidade."
+                features={[
+                  "Produtos Ilimitados", 
+                  "Até 3 Usuários", 
+                  "Dashboard Financeiro Completo", 
+                  "Sincronização Shopee Automática", 
+                  "Simulador de Preços Avançado",
+                  "Relatórios PDF/Excel"
+                ]}
                 buttonText="Assinar Pro"
                 variant="primary"
                 popular
               />
               <PricingCard 
                 title="Business" 
-                price="R$ 297" 
+                price="R$ 197" 
                 period="/mês"
-                description="Controle total para grandes operações."
-                features={["Tudo do Pro", "Usuários ilimitados", "API de integração", "Gerente de conta", "SLA 99.9%"]}
+                description="Controle total e automação para escala."
+                features={[
+                  "Tudo do Pro", 
+                  "Usuários Ilimitados", 
+                  "Múltiplas Contas Shopee", 
+                  "Gestão de Funcionários/Comissões", 
+                  "DRE e Fluxo de Caixa",
+                  "API de Integração",
+                  "Suporte Prioritário WhatsApp"
+                ]}
                 buttonText="Falar com Vendas"
                 variant="outline"
               />
