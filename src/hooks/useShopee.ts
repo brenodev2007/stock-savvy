@@ -286,6 +286,31 @@ export function useUpdateShopeeOrder() {
   });
 }
 
+// Delete order
+export function useDeleteShopeeOrder() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const { error } = await supabase
+        .from('shopee_orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      toast({ title: 'Pedido excluído com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao excluir pedido', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
 // Get order stats
 export function useShopeeOrderStats() {
   return useQuery({

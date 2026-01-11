@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, ExternalLink, Pencil } from 'lucide-react';
+import { Eye, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -12,9 +12,20 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ShopeeStatusBadge } from './ShopeeStatusBadge';
 import { ShopeeOrderDetails } from './ShopeeOrderDetails';
 import { ShopeeOrderForm } from './ShopeeOrderForm';
+import { useDeleteShopeeOrder } from '@/hooks/useShopee';
 import type { ShopeeOrder } from '@/types/shopee';
 
 interface ShopeeOrdersTableProps {
@@ -25,6 +36,16 @@ interface ShopeeOrdersTableProps {
 export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<ShopeeOrder | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<ShopeeOrder | null>(null);
+  const deleteOrder = useDeleteShopeeOrder();
+
+  const handleDeleteConfirm = () => {
+    if (deletingOrder) {
+      deleteOrder.mutate(deletingOrder.id, {
+        onSettled: () => setDeletingOrder(null),
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -133,6 +154,14 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingOrder(order)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -153,6 +182,28 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
         open={!!editingOrder}
         onOpenChange={(open) => !open && setEditingOrder(null)}
       />
+
+      <AlertDialog open={!!deletingOrder} onOpenChange={(open) => !open && setDeletingOrder(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pedido</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pedido <strong>{deletingOrder?.order_sn}</strong>? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteOrder.isPending}
+            >
+              {deleteOrder.isPending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
