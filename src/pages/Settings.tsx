@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles, useUpdateProfile, useUpdateUserRole } from '@/hooks/useProfiles';
+import { formatCpfCnpj } from '@/lib/formatters';
 import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -315,6 +316,18 @@ export default function Settings() {
                       disabled
                       className="mt-1.5 bg-muted"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="cpf-cnpj">CNPJ / CPF</Label>
+                    <Input
+                      id="cpf-cnpj"
+                      value={profile?.cpf_cnpj || ''}
+                      disabled
+                      className="mt-1.5 bg-muted"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Para alterar o CNPJ/CPF, entre em contato com o suporte.
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="email">E-mail</Label>

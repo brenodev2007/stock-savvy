@@ -8,6 +8,7 @@ interface Profile {
   name: string;
   email: string | null;
   avatar_url: string | null;
+  cpf_cnpj?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -54,9 +55,10 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, name, avatar_url }: { userId: string; name: string; avatar_url?: string | null }) => {
+    mutationFn: async ({ userId, name, avatar_url, cpf_cnpj }: { userId: string; name: string; avatar_url?: string | null; cpf_cnpj?: string | null }) => {
       const updates: any = { 
-        name, 
+        name,
+        cpf_cnpj,
         updated_at: new Date().toISOString() 
       };
       

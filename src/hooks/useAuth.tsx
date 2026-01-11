@@ -8,6 +8,7 @@ interface Profile {
   name: string;
   email: string | null;
   avatar_url: string | null;
+  cpf_cnpj?: string | null;
 }
 
 interface UserRole {
@@ -23,7 +24,7 @@ interface AuthContextType {
   roles: UserRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string, cpfCnpj?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   hasRole: (role: 'admin' | 'manager' | 'operator') => boolean;
   isAdmin: boolean;
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, cpfCnpj?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -121,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: redirectUrl,
         data: {
           name,
+          cpf_cnpj: cpfCnpj,
         },
       },
     });

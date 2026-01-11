@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { formatCpfCnpj, isValidCpfCnpj } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Box, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -28,6 +30,9 @@ const signupSchema = z
     email: z.string().email("E-mail inválido"),
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z.string(),
+    cpfCnpj: z.string().optional().refine((val) => !val || isValidCpfCnpj(val), {
+      message: "CPF ou CNPJ inválido",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Senhas não conferem",
@@ -49,6 +54,7 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [signupCpfCnpj, setSignupCpfCnpj] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -60,28 +66,49 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
 
-    const validation = loginSchema.safeParse({
-      email: loginEmail,
-      password: loginPassword,
-    });
-    if (!validation.success) {
-      const fieldErrors: Record<string, string> = {};
-      validation.error.errors.forEach((err) => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as string] = err.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
+    // Simple email validation regex for initial check
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail);
+    
+    let emailToUse = loginEmail;
 
     setIsLoading(true);
-    const { error } = await signIn(loginEmail, loginPassword);
+
+    if (!isEmail) {
+      // Try to find email by CPF/CNPJ using RPC
+      try {
+        const { data, error } = await supabase.rpc('get_email_by_cpf_cnpj' as any, {
+          p_cpf_cnpj: loginEmail
+        });
+
+        if (error) {
+          console.error('Error fetching email by CPF/CNPJ:', error);
+          toast.error("Erro ao verificar credenciais");
+          setIsLoading(false);
+          return;
+        }
+
+        if (data) {
+          emailToUse = data as string;
+        } else {
+          // No email found for this CPF/CNPJ
+          toast.error("CPF/CNPJ não encontrado ou não cadastrado");
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        toast.error("Erro inesperado ao realizar login");
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    const { error } = await signIn(emailToUse, loginPassword);
     setIsLoading(false);
 
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
-        toast.error("E-mail ou senha incorretos");
+        toast.error("Usuário ou senha incorretos");
       } else {
         toast.error(error.message);
       }
@@ -99,6 +126,7 @@ export default function Auth() {
       email: signupEmail,
       password: signupPassword,
       confirmPassword: signupConfirmPassword,
+      cpfCnpj: signupCpfCnpj,
     });
 
     if (!validation.success) {
@@ -113,7 +141,7 @@ export default function Auth() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(signupEmail, signupPassword, signupName);
+    const { error } = await signUp(signupEmail, signupPassword, signupName, signupCpfCnpj);
     setIsLoading(false);
 
     if (error) {
@@ -164,13 +192,22 @@ export default function Auth() {
               <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">E-mail</Label>
+                    <Label htmlFor="login-email">E-mail ou CNPJ / CPF</Label>
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="seu@email.com"
+                      placeholder="seu@email.com ou 00.000.000/0000-00"
                       value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        // Determine if user is typing numbers (CPF/CNPJ) or letters (Email)
+                        // If it starts with a number, apply mask
+                        if (/^\d/.test(val) || val === '') {
+                          setLoginEmail(formatCpfCnpj(val));
+                        } else {
+                          setLoginEmail(val);
+                        }
+                      }}
                       disabled={isLoading}
                     />
                     {errors.email && (
@@ -226,6 +263,24 @@ export default function Auth() {
                       <p className="text-sm text-destructive flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
                         {errors.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-cpf-cnpj">CNPJ / CPF</Label>
+                    <Input
+                      id="signup-cpf-cnpj"
+                      type="text"
+                      placeholder="00.000.000/0000-00"
+                      value={signupCpfCnpj}
+                      onChange={(e) => setSignupCpfCnpj(formatCpfCnpj(e.target.value))}
+                      disabled={isLoading}
+                      maxLength={18}
+                    />
+                    {errors.cpfCnpj && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.cpfCnpj}
                       </p>
                     )}
                   </div>
