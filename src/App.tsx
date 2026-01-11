@@ -19,6 +19,7 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Finance = lazy(() => import("./pages/Finance"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Plans = lazy(() => import("./pages/Plans"));
 const ShopeeShipments = lazy(() => import("./pages/ShopeeShipments"));
 const ShopeeCallback = lazy(() => import("./pages/ShopeeCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

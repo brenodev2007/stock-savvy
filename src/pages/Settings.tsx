@@ -332,9 +332,9 @@ export default function Settings() {
                     Você está utilizando o plano <span className="font-bold uppercase text-primary">{profile?.plan || 'Starter'}</span>
                   </p>
                 </div>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open('https://wa.me/5511999999999', '_blank')}>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/plans')}>
                   <Zap className="h-4 w-4" />
-                  Fazer Upgrade
+                  Ver Planos
                 </Button>
               </div>
 
