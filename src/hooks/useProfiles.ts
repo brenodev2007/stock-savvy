@@ -9,7 +9,7 @@ interface Profile {
   email: string | null;
   avatar_url: string | null;
   cpf_cnpj?: string | null;
-  plan?: 'starter' | 'pro' | 'business';
+  plan?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +44,8 @@ export function useProfiles() {
       // Combine profiles with their roles
       const usersWithRoles: UserWithRoles[] = profiles.map((profile) => ({
         ...profile,
+        cpf_cnpj: profile.cpf_cnpj ?? null,
+        plan: profile.plan ?? null,
         roles: (roles || []).filter((r) => r.user_id === profile.user_id) as UserRole[],
       }));
 
