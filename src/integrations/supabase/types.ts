@@ -209,6 +209,41 @@ export type Database = {
         }
         Relationships: []
       }
+      shopee_order_edit_history: {
+        Row: {
+          changed_at: string
+          changes: Json
+          id: string
+          order_id: string
+          previous_values: Json
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changes: Json
+          id?: string
+          order_id: string
+          previous_values: Json
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changes?: Json
+          id?: string
+          order_id?: string
+          previous_values?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopee_order_edit_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "shopee_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shopee_order_status_history: {
         Row: {
           created_at: string

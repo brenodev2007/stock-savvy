@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, ExternalLink, Pencil } from 'lucide-react';
+import { Eye, ExternalLink, Pencil, Trash2, History } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -12,19 +12,64 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ShopeeStatusBadge } from './ShopeeStatusBadge';
 import { ShopeeOrderDetails } from './ShopeeOrderDetails';
 import { ShopeeOrderForm } from './ShopeeOrderForm';
+import { ShopeeOrderEditHistory } from './ShopeeOrderEditHistory';
+import { useDeleteShopeeOrder } from '@/hooks/useShopee';
 import type { ShopeeOrder } from '@/types/shopee';
 
 interface ShopeeOrdersTableProps {
   orders: ShopeeOrder[];
   isLoading?: boolean;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
 }
 
-export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps) {
+export function ShopeeOrdersTable({ orders, isLoading, selectedIds = [], onSelectionChange }: ShopeeOrdersTableProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<ShopeeOrder | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<ShopeeOrder | null>(null);
+  const [historyOrder, setHistoryOrder] = useState<ShopeeOrder | null>(null);
+  const deleteOrder = useDeleteShopeeOrder();
+
+  const handleDeleteConfirm = () => {
+    if (deletingOrder) {
+      deleteOrder.mutate(deletingOrder.id, {
+        onSettled: () => setDeletingOrder(null),
+      });
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (onSelectionChange) {
+      onSelectionChange(checked ? orders.map(o => o.id) : []);
+    }
+  };
+
+  const handleSelectOne = (orderId: string, checked: boolean) => {
+    if (onSelectionChange) {
+      if (checked) {
+        onSelectionChange([...selectedIds, orderId]);
+      } else {
+        onSelectionChange(selectedIds.filter(id => id !== orderId));
+      }
+    }
+  };
+
+  const isAllSelected = orders.length > 0 && selectedIds.length === orders.length;
+  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < orders.length;
 
   if (isLoading) {
     return (
@@ -57,6 +102,14 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Selecionar todos"
+                    className={isSomeSelected ? 'data-[state=checked]:bg-primary/50' : ''}
+                  />
+                </TableHead>
                 <TableHead className="font-semibold">Pedido</TableHead>
                 <TableHead className="font-semibold">Produto</TableHead>
                 <TableHead className="font-semibold hidden md:table-cell">SKU</TableHead>
@@ -72,6 +125,13 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id} className="hover:bg-muted/30">
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.includes(order.id)}
+                      onCheckedChange={(checked) => handleSelectOne(order.id, !!checked)}
+                      aria-label={`Selecionar pedido ${order.order_sn}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-mono text-sm">{order.order_sn}</TableCell>
                   <TableCell>
                     <div className="max-w-[200px] truncate" title={order.product_name}>
@@ -122,7 +182,16 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => setHistoryOrder(order)}
+                        title="Histórico de edições"
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setEditingOrder(order)}
+                        title="Editar"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -130,8 +199,18 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedOrderId(order.id)}
+                        title="Ver detalhes"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingOrder(order)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -153,6 +232,35 @@ export function ShopeeOrdersTable({ orders, isLoading }: ShopeeOrdersTableProps)
         open={!!editingOrder}
         onOpenChange={(open) => !open && setEditingOrder(null)}
       />
+
+      <ShopeeOrderEditHistory
+        orderId={historyOrder?.id || null}
+        orderSn={historyOrder?.order_sn}
+        open={!!historyOrder}
+        onOpenChange={(open) => !open && setHistoryOrder(null)}
+      />
+
+      <AlertDialog open={!!deletingOrder} onOpenChange={(open) => !open && setDeletingOrder(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pedido</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pedido <strong>{deletingOrder?.order_sn}</strong>? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteOrder.isPending}
+            >
+              {deleteOrder.isPending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
