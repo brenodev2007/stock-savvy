@@ -143,28 +143,34 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          cpf_cnpj: string | null
           created_at: string
           email: string | null
           id: string
           name: string
+          plan: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          cpf_cnpj?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name: string
+          plan?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          cpf_cnpj?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string
+          plan?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -554,6 +560,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_email_by_cpf_cnpj: { Args: { p_cpf_cnpj: string }; Returns: string }
       has_any_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {

@@ -88,6 +88,7 @@ export default function Settings() {
   } = useSettings();
 
   const [editingName, setEditingName] = useState(profile?.name || '');
+  const [editingCpfCnpj, setEditingCpfCnpj] = useState(profile?.cpf_cnpj || '');
   const [profileHasChanges, setProfileHasChanges] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
@@ -98,6 +99,14 @@ export default function Settings() {
   const [newEmail, setNewEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [isEmailLoading, setIsEmailLoading] = useState(false);
+
+  // Sync profile data when it changes
+  useState(() => {
+    if (profile) {
+      setEditingName(profile.name || '');
+      setEditingCpfCnpj(profile.cpf_cnpj || '');
+    }
+  });
 
   const handleSignOut = async () => {
     await signOut();
@@ -110,6 +119,7 @@ export default function Settings() {
     await updateProfile.mutateAsync({ 
       userId: user.id, 
       name: editingName,
+      cpf_cnpj: editingCpfCnpj || null,
       avatar_url: uploadedAvatarUrl !== null ? uploadedAvatarUrl : undefined
     });
     setProfileHasChanges(false);
@@ -214,7 +224,19 @@ export default function Settings() {
 
   const handleNameChange = (value: string) => {
     setEditingName(value);
-    setProfileHasChanges(value !== profile?.name);
+    checkProfileChanges(value, editingCpfCnpj);
+  };
+
+  const handleCpfCnpjChange = (value: string) => {
+    const formatted = formatCpfCnpj(value);
+    setEditingCpfCnpj(formatted);
+    checkProfileChanges(editingName, formatted);
+  };
+
+  const checkProfileChanges = (name: string, cpfCnpj: string) => {
+    const hasNameChange = name !== profile?.name;
+    const hasCpfCnpjChange = cpfCnpj !== (profile?.cpf_cnpj || '');
+    setProfileHasChanges(hasNameChange || hasCpfCnpjChange || uploadedAvatarUrl !== null);
   };
 
   const handleRoleChange = async (userId: string, role: 'admin' | 'manager' | 'operator') => {
@@ -325,22 +347,22 @@ export default function Settings() {
                     <Label htmlFor="name">Razão Social</Label>
                     <Input
                       id="name"
-                      value={profile?.name || ''}
-                      disabled
-                      className="mt-1.5 bg-muted"
+                      value={editingName}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      className="mt-1.5"
+                      placeholder="Nome da empresa"
                     />
                   </div>
                   <div>
                     <Label htmlFor="cpf-cnpj">CNPJ / CPF</Label>
                     <Input
                       id="cpf-cnpj"
-                      value={profile?.cpf_cnpj || ''}
-                      disabled
-                      className="mt-1.5 bg-muted"
+                      value={editingCpfCnpj}
+                      onChange={(e) => handleCpfCnpjChange(e.target.value)}
+                      className="mt-1.5"
+                      placeholder="00.000.000/0000-00"
+                      maxLength={18}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Para alterar o CNPJ/CPF, entre em contato com o suporte.
-                    </p>
                   </div>
                   <div>
                     <Label htmlFor="email">E-mail</Label>
@@ -441,6 +463,8 @@ export default function Settings() {
                       variant="outline"
                       onClick={() => {
                         setEditingName(profile?.name || '');
+                        setEditingCpfCnpj(profile?.cpf_cnpj || '');
+                        setUploadedAvatarUrl(null);
                         setProfileHasChanges(false);
                       }}
                     >
