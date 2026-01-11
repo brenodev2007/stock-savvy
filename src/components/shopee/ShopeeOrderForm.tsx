@@ -130,7 +130,21 @@ export function ShopeeOrderForm({ order, open, onOpenChange }: ShopeeOrderFormPr
     };
 
     if (isEditing && order) {
-      await updateOrder.mutateAsync({ id: order.id, ...orderData });
+      // Include previous values for edit history
+      const previousValues = {
+        order_sn: order.order_sn,
+        product_name: order.product_name,
+        sku: order.sku,
+        customer_name: order.customer_name,
+        shipping_address: order.shipping_address,
+        order_total: order.order_total,
+        status: order.status,
+        carrier: order.carrier,
+        tracking_code: order.tracking_code,
+        purchase_date: order.purchase_date,
+        estimated_delivery: order.estimated_delivery,
+      };
+      await updateOrder.mutateAsync({ id: order.id, previousValues, ...orderData });
     } else {
       await createOrder.mutateAsync(orderData);
     }

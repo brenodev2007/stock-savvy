@@ -53,6 +53,15 @@ export interface ShopeeOrderStatusHistory {
   created_at: string;
 }
 
+export interface ShopeeOrderEditHistory {
+  id: string;
+  order_id: string;
+  user_id: string;
+  changed_at: string;
+  changes: Record<string, unknown>;
+  previous_values: Record<string, unknown>;
+}
+
 export interface ShopeeSyncLog {
   id: string;
   account_id: string;

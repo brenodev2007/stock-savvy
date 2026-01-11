@@ -2,14 +2,24 @@ import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { ShopeeOrdersTable } from '@/components/shopee/ShopeeOrdersTable';
 import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/ShopeeFilters';
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
 import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager';
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
-import { useShopeeOrders, useShopeeOrderStats } from '@/hooks/useShopee';
+import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders } from '@/hooks/useShopee';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Pagination,
   PaginationContent,
@@ -31,6 +41,8 @@ export default function ShopeeShipments() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
@@ -41,7 +53,7 @@ export default function ShopeeShipments() {
   });
 
   const { data: stats, isLoading: statsLoading } = useShopeeOrderStats();
-
+  const deleteMultiple = useDeleteMultipleShopeeOrders();
   // Get unique carriers for filter
   const carriers = useMemo(() => {
     if (!orders) return [];
@@ -61,6 +73,16 @@ export default function ShopeeShipments() {
   const handleFiltersChange = (newFilters: ShopeeFiltersState) => {
     setFilters(newFilters);
     setCurrentPage(1);
+    setSelectedIds([]);
+  };
+
+  const handleBulkDeleteConfirm = () => {
+    deleteMultiple.mutate(selectedIds, {
+      onSettled: () => {
+        setShowBulkDeleteDialog(false);
+        setSelectedIds([]);
+      },
+    });
   };
 
   return (
@@ -81,12 +103,21 @@ export default function ShopeeShipments() {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
-            {/* Filters and Manual Order */}
+            {/* Filters and Actions */}
             <div className="flex flex-wrap items-center gap-4">
               <Button variant="outline" onClick={() => setIsFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Cadastrar Pedido Manual
               </Button>
+              {selectedIds.length > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowBulkDeleteDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir {selectedIds.length} selecionado(s)
+                </Button>
+              )}
             </div>
             <ShopeeOrderForm
               open={isFormOpen}
@@ -99,7 +130,12 @@ export default function ShopeeShipments() {
             />
 
             {/* Orders Table */}
-            <ShopeeOrdersTable orders={paginatedOrders} isLoading={ordersLoading} />
+            <ShopeeOrdersTable 
+              orders={paginatedOrders} 
+              isLoading={ordersLoading}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+            />
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -162,6 +198,29 @@ export default function ShopeeShipments() {
             <ShopeeSyncStatus />
           </TabsContent>
         </Tabs>
+
+        {/* Bulk Delete Dialog */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir pedidos selecionados</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir <strong>{selectedIds.length}</strong> pedido(s)? 
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleteMultiple.isPending}
+              >
+                {deleteMultiple.isPending ? 'Excluindo...' : `Excluir ${selectedIds.length} pedido(s)`}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
