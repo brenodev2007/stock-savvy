@@ -1,10 +1,14 @@
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Zap, Crown, Building2, MessageCircle } from 'lucide-react';
+import { Check, X, Zap, Crown, Building2, Loader2, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const plans = [
   {
@@ -74,13 +78,39 @@ const plans = [
 
 export default function Plans() {
   const { profile } = useAuth();
-  const currentPlan = profile?.plan || 'starter';
+  const [searchParams] = useSearchParams();
+  const { 
+    plan: currentPlan, 
+    subscribed, 
+    subscriptionEnd,
+    isCheckoutLoading,
+    isPortalLoading,
+    checkSubscription,
+    createCheckout,
+    openCustomerPortal,
+  } = useSubscription();
+
+  const displayPlan = profile?.plan || currentPlan || 'starter';
+
+  // Check for success/cancel URL params
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      toast.success('Assinatura realizada com sucesso! Atualizando seu plano...');
+      checkSubscription();
+    } else if (searchParams.get('canceled') === 'true') {
+      toast.info('Checkout cancelado');
+    }
+  }, [searchParams, checkSubscription]);
+
+  // Check subscription on mount
+  useEffect(() => {
+    checkSubscription();
+  }, [checkSubscription]);
 
   const handleUpgrade = (planId: string) => {
-    const message = encodeURIComponent(
-      `Olá! Tenho interesse em fazer upgrade para o plano ${planId.toUpperCase()}. Meu e-mail cadastrado é: ${profile?.email || 'não informado'}`
-    );
-    window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
+    if (planId === 'pro' || planId === 'business') {
+      createCheckout(planId);
+    }
   };
 
   const getPlanIndex = (planId: string) => {
@@ -102,20 +132,42 @@ export default function Plans() {
         </div>
 
         {/* Current Plan Badge */}
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           <Badge variant="outline" className="px-4 py-2 text-sm bg-primary/5 border-primary/20">
             <Zap className="h-4 w-4 mr-2 text-primary" />
-            Seu plano atual: <span className="font-bold ml-1 uppercase">{currentPlan}</span>
+            Seu plano atual: <span className="font-bold ml-1 uppercase">{displayPlan}</span>
           </Badge>
+          
+          {subscribed && subscriptionEnd && (
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              Próxima cobrança: {new Date(subscriptionEnd).toLocaleDateString('pt-BR')}
+            </Badge>
+          )}
+
+          {subscribed && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={openCustomerPortal}
+              disabled={isPortalLoading}
+              className="gap-2"
+            >
+              {isPortalLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Settings className="h-4 w-4" />
+              )}
+              Gerenciar Assinatura
+            </Button>
+          )}
         </div>
 
         {/* Plans Grid */}
         <div className="grid md:grid-cols-3 gap-6">
           {plans.map((plan) => {
             const Icon = plan.icon;
-            const isCurrentPlan = currentPlan === plan.id;
-            const canUpgrade = getPlanIndex(plan.id) > getPlanIndex(currentPlan);
-            const canDowngrade = getPlanIndex(plan.id) < getPlanIndex(currentPlan);
+            const isCurrentPlan = displayPlan === plan.id;
+            const canUpgrade = getPlanIndex(plan.id) > getPlanIndex(displayPlan);
 
             return (
               <Card
@@ -130,6 +182,14 @@ export default function Plans() {
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground shadow-sm">
                       Mais Popular
+                    </Badge>
+                  </div>
+                )}
+
+                {isCurrentPlan && (
+                  <div className="absolute -top-3 right-4">
+                    <Badge variant="secondary" className="shadow-sm">
+                      Seu Plano
                     </Badge>
                   </div>
                 )}
@@ -186,15 +246,20 @@ export default function Plans() {
                       className="w-full gap-2" 
                       variant={plan.popular ? 'default' : 'outline'}
                       onClick={() => handleUpgrade(plan.id)}
+                      disabled={isCheckoutLoading}
                     >
-                      <MessageCircle className="h-4 w-4" />
+                      {isCheckoutLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Zap className="h-4 w-4" />
+                      )}
                       Fazer Upgrade
                     </Button>
-                  ) : canDowngrade ? (
+                  ) : (
                     <Button variant="ghost" className="w-full text-muted-foreground" disabled>
-                      Downgrade não disponível
+                      —
                     </Button>
-                  ) : null}
+                  )}
                 </CardFooter>
               </Card>
             );
@@ -222,8 +287,8 @@ export default function Plans() {
             <div className="p-4 rounded-lg bg-muted/50">
               <h4 className="font-medium mb-2">Como funciona o pagamento?</h4>
               <p className="text-sm text-muted-foreground">
-                Aceitamos cartão de crédito, PIX e boleto bancário. O pagamento é 
-                processado de forma segura.
+                O pagamento é processado de forma segura pelo Stripe. Aceitamos 
+                cartão de crédito e débito.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
@@ -234,22 +299,6 @@ export default function Plans() {
               </p>
             </div>
           </div>
-        </div>
-
-        {/* CTA */}
-        <div className="mt-12 text-center p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
-          <h3 className="text-xl font-semibold mb-2">Precisa de ajuda para escolher?</h3>
-          <p className="text-muted-foreground mb-4">
-            Nossa equipe está pronta para ajudar você a encontrar o plano ideal.
-          </p>
-          <Button 
-            size="lg" 
-            className="gap-2"
-            onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
-          >
-            <MessageCircle className="h-5 w-5" />
-            Falar com um Consultor
-          </Button>
         </div>
       </div>
     </AppLayout>
