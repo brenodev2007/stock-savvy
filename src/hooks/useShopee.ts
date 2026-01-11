@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { ShopeeAccount, ShopeeOrder, ShopeeOrderStatusHistory, ShopeeSyncLog, ShopeeShipmentStatus } from '@/types/shopee';
+import type { ShopeeAccount, ShopeeOrder, ShopeeOrderStatusHistory, ShopeeSyncLog, ShopeeShipmentStatus, ShopeeOrderEditHistory } from '@/types/shopee';
 
 // Accounts
 export function useShopeeAccounts() {
@@ -244,14 +244,15 @@ export function useCreateManualOrder() {
   });
 }
 
-// Update order
+// Update order with edit history
 export function useUpdateShopeeOrder() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...order }: {
+    mutationFn: async ({ id, previousValues, ...order }: {
       id: string;
+      previousValues?: Record<string, unknown>;
       order_sn?: string;
       product_name?: string;
       customer_name?: string | null;
@@ -264,6 +265,10 @@ export function useUpdateShopeeOrder() {
       estimated_delivery?: string | null;
       sku?: string | null;
     }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Update the order
       const { data, error } = await supabase
         .from('shopee_orders')
         .update(order)
@@ -272,12 +277,35 @@ export function useUpdateShopeeOrder() {
         .single();
 
       if (error) throw error;
+
+      // Save edit history if we have previous values
+      if (previousValues && Object.keys(order).length > 0) {
+        const changes: Record<string, unknown> = {};
+        for (const key of Object.keys(order)) {
+          if (order[key as keyof typeof order] !== previousValues[key]) {
+            changes[key] = order[key as keyof typeof order];
+          }
+        }
+        
+        if (Object.keys(changes).length > 0) {
+          await supabase
+            .from('shopee_order_edit_history')
+            .insert([{
+              order_id: id,
+              user_id: user.id,
+              changes: changes as unknown as import('@/integrations/supabase/types').Json,
+              previous_values: previousValues as unknown as import('@/integrations/supabase/types').Json,
+            }]);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-edit-history'] });
       toast({ title: 'Pedido atualizado com sucesso!' });
     },
     onError: (error: Error) => {
@@ -333,5 +361,48 @@ export function useShopeeOrderStats() {
 
       return stats;
     },
+  });
+}
+
+// Delete multiple orders
+export function useDeleteMultipleShopeeOrders() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (orderIds: string[]) => {
+      const { error } = await supabase
+        .from('shopee_orders')
+        .delete()
+        .in('id', orderIds);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, orderIds) => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      toast({ title: `${orderIds.length} pedido(s) excluído(s) com sucesso!` });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao excluir pedidos', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
+// Get order edit history
+export function useShopeeOrderEditHistory(orderId: string) {
+  return useQuery({
+    queryKey: ['shopee-order-edit-history', orderId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shopee_order_edit_history')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('changed_at', { ascending: false });
+
+      if (error) throw error;
+      return data as ShopeeOrderEditHistory[];
+    },
+    enabled: !!orderId,
   });
 }
