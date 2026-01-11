@@ -73,6 +73,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useCanCreate } from "@/hooks/usePlanLimits";
+import { PlanLimitBanner } from "@/components/plans/PlanLimitBanner";
 
 const productSchema = z.object({
   sku: z.string().min(1, "SKU é obrigatório").max(50),
@@ -102,6 +104,7 @@ export default function Products() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
+  const { canCreate, message: limitMessage, usage: productUsage } = useCanCreate('products');
 
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -197,6 +200,8 @@ export default function Products() {
 
   return (
     <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
+      <PlanLimitBanner usage={productUsage} resourceName="produtos" className="mb-6" />
+      
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -228,7 +233,13 @@ export default function Products() {
           <Button
             size="sm"
             className="flex-1 sm:flex-none"
+            disabled={!canCreate}
+            title={limitMessage || undefined}
             onClick={() => {
+              if (!canCreate) {
+                toast.error(limitMessage);
+                return;
+              }
               setEditingProduct(null);
               form.reset();
               setFormOpen(true);
