@@ -68,79 +68,83 @@ export function FinancialDashboard() {
   return (
     <div className="space-y-4">
       {/* Header with action */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Visão Geral Financeira</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-base sm:text-lg font-semibold">Visão Geral Financeira</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Integrado com vendas Shopee e movimentações de estoque
           </p>
         </div>
-        <Button onClick={() => setShowTransactionForm(true)} className="gap-2">
+        <Button onClick={() => setShowTransactionForm(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Nova Transação
         </Button>
       </div>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento (Mês)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Faturamento</CardTitle>
+            <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics.revenue)}</div>
-            <p className="text-xs text-muted-foreground flex items-center text-green-600">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              Receita de Vendas
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold">{formatCurrency(metrics.revenue)}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center text-green-600">
+              <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
+              <span className="hidden sm:inline">Receita de Vendas</span>
+              <span className="sm:hidden">Receita</span>
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lucro Líquido (Mês)</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Lucro Líquido</CardTitle>
+            <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${metrics.profit < 0 ? 'text-red-500' : 'text-green-600'}`}>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className={`text-lg sm:text-2xl font-bold ${metrics.profit < 0 ? 'text-red-500' : 'text-green-600'}`}>
               {formatCurrency(metrics.profit)}
             </div>
-            <p className="text-xs text-muted-foreground flex items-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center">
               {metrics.profit < 0 ? (
-                <ArrowDownRight className="h-4 w-4 mr-1 text-red-500" />
+                <ArrowDownRight className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 text-red-500" />
               ) : (
-                <ArrowUpRight className="h-4 w-4 mr-1 text-green-600" />
+                <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 text-green-600" />
               )}
-              Após custos e despesas
+              <span className="hidden sm:inline">Após custos</span>
+              <span className="sm:hidden">Líquido</span>
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Margem de Lucro</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Margem</CardTitle>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${metrics.margin < 0 ? 'text-red-500' : ''}`}>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className={`text-lg sm:text-2xl font-bold ${metrics.margin < 0 ? 'text-red-500' : ''}`}>
               {metrics.margin.toFixed(1)}%
             </div>
-            <p className="text-xs text-muted-foreground">
-              Retorno sobre faturamento
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              <span className="hidden sm:inline">Retorno sobre faturamento</span>
+              <span className="sm:hidden">Retorno</span>
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Caixa Estimado</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Caixa</CardTitle>
+            <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics.cashBalance)}</div>
-            <p className="text-xs text-muted-foreground">
-              Histórico acumulado
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold">{formatCurrency(metrics.cashBalance)}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              <span className="hidden sm:inline">Histórico acumulado</span>
+              <span className="sm:hidden">Acumulado</span>
             </p>
           </CardContent>
         </Card>
@@ -148,21 +152,21 @@ export function FinancialDashboard() {
 
       {/* Integration Stats */}
       {shopeeStats && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
           <Card className="border-orange-200 bg-orange-50/50 dark:bg-orange-950/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-orange-600" />
+            <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
                 Pedidos Shopee
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{shopeeStats.total}</div>
-              <div className="flex gap-2 mt-2">
-                <Badge variant="outline" className="text-xs">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{shopeeStats.total}</div>
+              <div className="flex flex-wrap gap-1 sm:gap-2 mt-2">
+                <Badge variant="outline" className="text-[10px] sm:text-xs">
                   {shopeeStats.entregue} entregues
                 </Badge>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-[10px] sm:text-xs">
                   {shopeeStats.aguardandoEnvio} pendentes
                 </Badge>
               </div>
@@ -170,30 +174,30 @@ export function FinancialDashboard() {
           </Card>
 
           <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Package className="h-4 w-4 text-blue-600" />
+            <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                 Custos (CMV)
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(summary?.costs || 0)}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{formatCurrency(summary?.costs || 0)}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 Custo da mercadoria vendida
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-950/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-purple-600" />
+            <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
                 Folha de Pagamento
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(totalPayroll)}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{formatCurrency(totalPayroll)}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 {employees.length} colaborador(es)
               </p>
             </CardContent>
@@ -202,14 +206,14 @@ export function FinancialDashboard() {
       )}
 
       {/* Charts and Transactions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Evolução Financeira</CardTitle>
-            <CardDescription>Vendas vs Lucro nos últimos meses</CardDescription>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-sm sm:text-base">Evolução Financeira</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Vendas vs Lucro nos últimos meses</CardDescription>
           </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[250px] sm:h-[300px]">
+          <CardContent className="p-2 sm:pl-2 sm:p-6 sm:pt-0">
+            <div className="h-[200px] sm:h-[300px]">
               {summary?.chartData && summary.chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={summary.chartData}>
@@ -223,8 +227,8 @@ export function FinancialDashboard() {
                         <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tick={{fontSize: 10}} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} tick={{fontSize: 10}} />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} tick={{fontSize: 9}} />
+                    <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} tick={{fontSize: 9}} width={45} />
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                     <Area type="monotone" dataKey="vendas" name="Vendas" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorVendas)" />
@@ -233,32 +237,32 @@ export function FinancialDashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex h-full items-center justify-center text-muted-foreground flex-col gap-2">
-                  <Package className="h-12 w-12 opacity-20" />
-                  <p>Cadastre pedidos para ver os gráficos</p>
+                  <Package className="h-10 w-10 sm:h-12 sm:w-12 opacity-20" />
+                  <p className="text-xs sm:text-sm text-center">Cadastre pedidos para ver os gráficos</p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
         
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Transações Recentes</CardTitle>
-            <CardDescription>Últimas movimentações financeiras</CardDescription>
+        <Card className="lg:col-span-3">
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-sm sm:text-base">Transações Recentes</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Últimas movimentações financeiras</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[280px]">
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <ScrollArea className="h-[220px] sm:h-[280px]">
               {summary?.recentTransactions && summary.recentTransactions.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {summary.recentTransactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium truncate">{tx.description || tx.category}</p>
-                        <p className="text-xs text-muted-foreground">
+                    <div key={tx.id} className="flex items-center justify-between py-1.5 sm:py-2 border-b last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-medium truncate">{tx.description || tx.category}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">
                           {format(new Date(tx.transaction_date), "dd MMM yyyy", { locale: ptBR })}
                         </p>
                       </div>
-                      <div className={`text-sm font-semibold ${
+                      <div className={`text-xs sm:text-sm font-semibold ml-2 whitespace-nowrap ${
                         tx.type === 'income' ? 'text-green-600' : 'text-red-500'
                       }`}>
                         {tx.type === 'income' ? '+' : '-'} {formatCurrency(Number(tx.amount))}
@@ -268,8 +272,8 @@ export function FinancialDashboard() {
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center text-muted-foreground flex-col gap-2 py-8">
-                  <Wallet className="h-8 w-8 opacity-20" />
-                  <p className="text-sm">Nenhuma transação registrada</p>
+                  <Wallet className="h-6 w-6 sm:h-8 sm:w-8 opacity-20" />
+                  <p className="text-xs sm:text-sm">Nenhuma transação registrada</p>
                 </div>
               )}
             </ScrollArea>
@@ -279,47 +283,50 @@ export function FinancialDashboard() {
 
       {/* Breakdown */}
       <Card>
-        <CardHeader>
-          <CardTitle>Resumo de Custos do Mês</CardTitle>
-          <CardDescription>Detalhamento das despesas e custos</CardDescription>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">Resumo de Custos do Mês</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Detalhamento das despesas e custos</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm font-medium flex items-center gap-2">
-                <ArrowUpRight className="h-4 w-4 text-green-600" />
+        <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center justify-between py-1.5 sm:py-2">
+              <span className="text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                 Faturamento Total
               </span>
-              <span className="font-semibold text-green-600">{formatCurrency(metrics.revenue)}</span>
+              <span className="text-sm sm:text-base font-semibold text-green-600">{formatCurrency(metrics.revenue)}</span>
             </div>
             
-            <div className="flex items-center justify-between py-2 text-destructive">
-              <span className="text-sm font-medium flex items-center gap-2">
-                <ArrowDownRight className="h-4 w-4" />
-                CMV (Custo Mercadoria)
+            <div className="flex items-center justify-between py-1.5 sm:py-2 text-destructive">
+              <span className="text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                <ArrowDownRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">CMV (Custo Mercadoria)</span>
+                <span className="sm:hidden">CMV</span>
               </span>
-              <span>- {formatCurrency(summary?.costs || 0)}</span>
+              <span className="text-sm sm:text-base">- {formatCurrency(summary?.costs || 0)}</span>
             </div>
             
-            <div className="flex items-center justify-between py-2 text-destructive">
-              <span className="text-sm font-medium flex items-center gap-2">
-                <ArrowDownRight className="h-4 w-4" />
-                Despesas Operacionais
+            <div className="flex items-center justify-between py-1.5 sm:py-2 text-destructive">
+              <span className="text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                <ArrowDownRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Despesas Operacionais</span>
+                <span className="sm:hidden">Despesas</span>
               </span>
-              <span>- {formatCurrency(summary?.expenses || 0)}</span>
+              <span className="text-sm sm:text-base">- {formatCurrency(summary?.expenses || 0)}</span>
             </div>
             
-            <div className="flex items-center justify-between py-2 text-destructive">
-              <span className="text-sm font-medium flex items-center gap-2">
-                <ArrowDownRight className="h-4 w-4" />
-                Folha de Pagamento
+            <div className="flex items-center justify-between py-1.5 sm:py-2 text-destructive">
+              <span className="text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                <ArrowDownRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Folha de Pagamento</span>
+                <span className="sm:hidden">Folha</span>
               </span>
-              <span>- {formatCurrency(totalPayroll)}</span>
+              <span className="text-sm sm:text-base">- {formatCurrency(totalPayroll)}</span>
             </div>
             
-            <div className="flex items-center justify-between font-bold pt-4 border-t">
-              <span className="text-sm">Resultado Operacional</span>
-              <span className={metrics.profit > 0 ? "text-green-600" : "text-red-500"}>
+            <div className="flex items-center justify-between font-bold pt-3 sm:pt-4 border-t">
+              <span className="text-xs sm:text-sm">Resultado Operacional</span>
+              <span className={`text-sm sm:text-base ${metrics.profit > 0 ? "text-green-600" : "text-red-500"}`}>
                 {formatCurrency(metrics.profit)}
               </span>
             </div>

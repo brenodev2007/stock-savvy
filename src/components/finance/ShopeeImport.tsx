@@ -89,44 +89,45 @@ export function ShopeeImport() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Importar Relatórios da Shopee
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">Importar Relatórios da Shopee</span>
+            <span className="sm:hidden">Importar Relatório</span>
           </CardTitle>
-          <CardDescription>
-            Faça upload dos arquivos .xlsx ou .csv exportados da Central do Vendedor para conciliação.
+          <CardDescription className="text-xs sm:text-sm">
+            Faça upload dos arquivos .xlsx ou .csv exportados da Central do Vendedor.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid w-full max-w-sm items-center gap-1.5 mb-4">
-            <Label htmlFor="shopee-file">Arquivo de Transações</Label>
-            <Input id="shopee-file" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} className="w-full" />
+        <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+          <div className="grid w-full items-center gap-1.5 mb-4">
+            <Label htmlFor="shopee-file" className="text-xs sm:text-sm">Arquivo de Transações</Label>
+            <Input id="shopee-file" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} className="w-full text-sm" />
           </div>
 
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertTitle className="text-sm">Erro</AlertTitle>
+              <AlertDescription className="text-xs sm:text-sm">{error}</AlertDescription>
             </Alert>
           )}
 
           {fileName && !error && (
             <Alert className="mb-4 bg-green-50 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <div className="flex justify-between items-center w-full">
+              <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-2">
                 <div>
-                    <AlertTitle className="text-green-800">Arquivo Carregado</AlertTitle>
-                    <AlertDescription className="text-green-700">
+                    <AlertTitle className="text-green-800 text-sm">Arquivo Carregado</AlertTitle>
+                    <AlertDescription className="text-green-700 text-xs sm:text-sm">
                     Leitura de {transactions.length} registros com sucesso.
                     </AlertDescription>
                 </div>
-                <Button onClick={handleSaveToDashboard} size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-2">
+                <Button onClick={handleSaveToDashboard} size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-2 w-full sm:w-auto">
                     <Save className="h-4 w-4" />
-                    Confirmar Importação
+                    Confirmar
                 </Button>
               </div>
             </Alert>
@@ -137,23 +138,23 @@ export function ShopeeImport() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID Pedido</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Valor Venda</TableHead>
-                    <TableHead className="text-right">Comissão</TableHead>
-                    <TableHead className="text-right">Líquido</TableHead>
+                    <TableHead className="text-xs sm:text-sm">ID Pedido</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Data</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden md:table-cell">Status</TableHead>
+                    <TableHead className="text-right text-xs sm:text-sm hidden sm:table-cell">Valor</TableHead>
+                    <TableHead className="text-right text-xs sm:text-sm hidden md:table-cell">Comissão</TableHead>
+                    <TableHead className="text-right text-xs sm:text-sm">Líquido</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {transactions.map((tx, i) => (
                     <TableRow key={i}>
-                      <TableCell className="font-medium">{tx.orderId}</TableCell>
-                      <TableCell>{tx.date}</TableCell>
-                      <TableCell>{tx.status}</TableCell>
-                      <TableCell className="text-right">R$ {tx.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-red-600">- R$ {tx.commission.toFixed(2)}</TableCell>
-                      <TableCell className="text-right font-bold text-green-600">R$ {tx.netAmount.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium text-xs sm:text-sm">{tx.orderId}</TableCell>
+                      <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{tx.date}</TableCell>
+                      <TableCell className="text-xs sm:text-sm hidden md:table-cell">{tx.status}</TableCell>
+                      <TableCell className="text-right text-xs sm:text-sm hidden sm:table-cell">R$ {tx.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-red-600 text-xs sm:text-sm hidden md:table-cell">- R$ {tx.commission.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-green-600 text-xs sm:text-sm">R$ {tx.netAmount.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -162,9 +163,9 @@ export function ShopeeImport() {
           )}
 
           {transactions.length === 0 && !fileName && (
-             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg text-muted-foreground bg-muted/20">
-                <FileSpreadsheet className="h-12 w-12 mb-2 opacity-50" />
-                <p>Nenhum dado importado ainda</p>
+             <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-dashed rounded-lg text-muted-foreground bg-muted/20">
+                <FileSpreadsheet className="h-10 w-10 sm:h-12 sm:w-12 mb-2 opacity-50" />
+                <p className="text-xs sm:text-sm">Nenhum dado importado ainda</p>
              </div>
           )}
         </CardContent>

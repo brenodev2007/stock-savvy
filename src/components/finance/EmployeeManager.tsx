@@ -47,73 +47,76 @@ export function EmployeeManager() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-             <CardTitle className="text-sm font-medium">Equipe Ativa</CardTitle>
-             <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 space-y-0 p-3 sm:p-6">
+             <CardTitle className="text-xs sm:text-sm font-medium">Equipe Ativa</CardTitle>
+             <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-             <div className="text-2xl font-bold">{employees.length}</div>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+             <div className="text-xl sm:text-2xl font-bold">{employees.length}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-             <CardTitle className="text-sm font-medium">Folha de Pagamento Mensal</CardTitle>
-             <Badge variant="secondary" className="font-mono">Custo Fixo</Badge>
+          <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 space-y-0 p-3 sm:p-6">
+             <CardTitle className="text-xs sm:text-sm font-medium">Folha Mensal</CardTitle>
+             <Badge variant="secondary" className="font-mono text-[10px] sm:text-xs hidden sm:inline-flex">Custo Fixo</Badge>
           </CardHeader>
-          <CardContent>
-             <div className="text-2xl font-bold text-red-600">
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+             <div className="text-lg sm:text-2xl font-bold text-red-600">
                - {formatCurrency(totalPayroll)}
              </div>
-             <p className="text-xs text-muted-foreground">Impacta diretamente o lucro líquido</p>
+             <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Impacta diretamente o lucro líquido</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-6">
           <div>
-            <CardTitle>Gestão de Funcionários & Comissões</CardTitle>
-            <CardDescription>Gerencie sua equipe e salários para cálculo preciso de lucro.</CardDescription>
+            <CardTitle className="text-sm sm:text-base">Gestão de Funcionários</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Gerencie sua equipe e salários.</CardDescription>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 w-full sm:w-auto">
                 <UserPlus className="h-4 w-4" />
-                Novo Funcionário
+                <span className="hidden sm:inline">Novo Funcionário</span>
+                <span className="sm:hidden">Adicionar</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[95vw] sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Adicionar Membro da Equipe</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados do funcionário. O salário será deduzido como custo fixo no dashboard.
+                <DialogTitle className="text-base sm:text-lg">Adicionar Membro da Equipe</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
+                  Preencha os dados do funcionário. O salário será deduzido como custo fixo.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                 <div className="grid gap-2">
-                    <Label htmlFor="name">Nome Completo</Label>
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 py-2 sm:py-4">
+                 <div className="grid gap-1.5 sm:gap-2">
+                    <Label htmlFor="name" className="text-xs sm:text-sm">Nome Completo</Label>
                     <Input 
                       id="name" 
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       required
+                      className="text-sm"
                     />
                  </div>
-                 <div className="grid sm:grid-cols-2 gap-4">
-                   <div className="grid gap-2">
-                      <Label htmlFor="role">Cargo / Função</Label>
+                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                   <div className="grid gap-1.5 sm:gap-2">
+                      <Label htmlFor="role" className="text-xs sm:text-sm">Cargo</Label>
                       <Input 
                         id="role" 
                         value={formData.role}
                         onChange={(e) => setFormData({...formData, role: e.target.value})}
                         placeholder="Ex: Vendedor"
+                        className="text-sm"
                       />
                    </div>
-                   <div className="grid gap-2">
-                      <Label htmlFor="salary">Salário Mensal (R$)</Label>
+                   <div className="grid gap-1.5 sm:gap-2">
+                      <Label htmlFor="salary" className="text-xs sm:text-sm">Salário (R$)</Label>
                       <Input 
                         id="salary" 
                         type="number"
@@ -122,59 +125,64 @@ export function EmployeeManager() {
                         value={formData.salary}
                         onChange={(e) => setFormData({...formData, salary: e.target.value})}
                         required
+                        className="text-sm"
                       />
                    </div>
                  </div>
-                 <div className="grid gap-2">
-                    <Label htmlFor="date">Data de Admissão</Label>
+                 <div className="grid gap-1.5 sm:gap-2">
+                    <Label htmlFor="date" className="text-xs sm:text-sm">Data de Admissão</Label>
                     <Input 
                         id="date" 
                         type="date"
                         value={formData.hireDate}
                         onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
+                        className="text-sm"
                       />
                  </div>
-                 <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-                    <Button type="submit">Salvar</Button>
+                 <DialogFooter className="gap-2 sm:gap-0">
+                    <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="flex-1 sm:flex-none">Cancelar</Button>
+                    <Button type="submit" className="flex-1 sm:flex-none">Salvar</Button>
                  </DialogFooter>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
           {employees.length === 0 ? (
-             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg text-muted-foreground bg-muted/20">
-                <Users className="h-12 w-12 mb-2 opacity-50" />
-                <p>Nenhum funcionário cadastrado.</p>
+             <div className="flex flex-col items-center justify-center p-6 sm:p-8 border-2 border-dashed rounded-lg text-muted-foreground bg-muted/20">
+                <Users className="h-10 w-10 sm:h-12 sm:w-12 mb-2 opacity-50" />
+                <p className="text-xs sm:text-sm">Nenhum funcionário cadastrado.</p>
              </div>
           ) : (
-             <div className="overflow-x-auto">
+             <div className="overflow-x-auto -mx-3 sm:mx-0">
                <Table>
                   <TableHeader>
                     <TableRow>
-                       <TableHead>Nome</TableHead>
-                       <TableHead>Cargo</TableHead>
-                       <TableHead>Data Admissão</TableHead>
-                       <TableHead className="text-right">Salário</TableHead>
-                       <TableHead className="w-[50px]"></TableHead>
+                       <TableHead className="text-xs sm:text-sm">Nome</TableHead>
+                       <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Cargo</TableHead>
+                       <TableHead className="text-xs sm:text-sm hidden md:table-cell">Admissão</TableHead>
+                       <TableHead className="text-right text-xs sm:text-sm">Salário</TableHead>
+                       <TableHead className="w-[40px] sm:w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                      {employees.map((emp) => (
                         <TableRow key={emp.id}>
-                           <TableCell className="font-medium">{emp.name}</TableCell>
-                           <TableCell>{emp.role}</TableCell>
-                           <TableCell>{new Date(emp.hireDate).toLocaleDateString('pt-BR')}</TableCell>
-                           <TableCell className="text-right">{formatCurrency(emp.salary)}</TableCell>
+                           <TableCell className="font-medium text-xs sm:text-sm">
+                             <div>{emp.name}</div>
+                             <div className="text-[10px] text-muted-foreground sm:hidden">{emp.role}</div>
+                           </TableCell>
+                           <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{emp.role}</TableCell>
+                           <TableCell className="text-xs sm:text-sm hidden md:table-cell">{new Date(emp.hireDate).toLocaleDateString('pt-BR')}</TableCell>
+                           <TableCell className="text-right text-xs sm:text-sm">{formatCurrency(emp.salary)}</TableCell>
                            <TableCell>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                                 onClick={() => removeEmployee(emp.id)}
                               >
-                                 <Trash className="h-4 w-4" />
+                                 <Trash className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               </Button>
                            </TableCell>
                         </TableRow>
