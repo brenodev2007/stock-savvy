@@ -149,7 +149,6 @@ export type Database = {
           id: string
           name: string
           plan: string | null
-          phone: string | null
           updated_at: string
           user_id: string
         }
@@ -161,7 +160,6 @@ export type Database = {
           id?: string
           name: string
           plan?: string | null
-          phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -173,7 +171,6 @@ export type Database = {
           id?: string
           name?: string
           plan?: string | null
-          phone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -246,44 +243,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "shopee_order_edit_history_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "shopee_orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      shopee_order_items: {
-        Row: {
-          created_at: string
-          id: string
-          order_id: string
-          product_name: string
-          quantity: number
-          sku: string | null
-          unit_price: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          order_id: string
-          product_name: string
-          quantity?: number
-          sku?: string | null
-          unit_price?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          order_id?: string
-          product_name?: string
-          quantity?: number
-          sku?: string | null
-          unit_price?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shopee_order_items_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "shopee_orders"
@@ -616,8 +575,6 @@ export type Database = {
       movement_type: "IN" | "OUT" | "TRANSFER" | "ADJUST"
       shopee_shipment_status:
         | "AGUARDANDO_ENVIO"
-        | "EMPACOTADO"
-        | "ETIQUETADO"
         | "ENVIADO"
         | "EM_TRANSPORTE"
         | "ENTREGUE"
@@ -754,8 +711,6 @@ export const Constants = {
       movement_type: ["IN", "OUT", "TRANSFER", "ADJUST"],
       shopee_shipment_status: [
         "AGUARDANDO_ENVIO",
-        "EMPACOTADO",
-        "ETIQUETADO",
         "ENVIADO",
         "EM_TRANSPORTE",
         "ENTREGUE",
