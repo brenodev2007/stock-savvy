@@ -46,7 +46,7 @@ export function useProfiles() {
       const usersWithRoles: UserWithRoles[] = profiles.map((profile) => ({
         ...profile,
         cpf_cnpj: profile.cpf_cnpj ?? null,
-        phone: profile.phone ?? null,
+        phone: (profile as any).phone ?? null,
         plan: profile.plan ?? null,
         roles: (roles || []).filter((r) => r.user_id === profile.user_id) as UserRole[],
       }));

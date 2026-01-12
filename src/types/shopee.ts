@@ -33,7 +33,7 @@ export interface ShopeeOrderItem {
 
 export interface ShopeeOrder {
   id: string;
-  account_id: string;
+  account_id: string | null;
   order_sn: string;
   // Legacy field, now optional as items are in sub-table
   product_name?: string;
@@ -52,7 +52,7 @@ export interface ShopeeOrder {
   shopee_data?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
-  account?: ShopeeAccount;
+  account?: Partial<ShopeeAccount> | null;
   items?: ShopeeOrderItem[];
   status_history?: ShopeeOrderStatusHistory[];
 }
