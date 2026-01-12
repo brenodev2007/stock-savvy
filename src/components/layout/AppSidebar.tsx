@@ -22,10 +22,10 @@ import { useEffect } from "react";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Produtos", href: "/products", icon: Package },
-  { name: "Movimentações", href: "/movements", icon: ArrowLeftRight },
-  { name: "Depósitos", href: "/warehouses", icon: Warehouse },
-  { name: "Inventário", href: "/inventory", icon: ClipboardList },
-  { name: "Envios Shopee", href: "/shopee", icon: Truck },
+  { name: "Entrada e Saída", href: "/movements", icon: ArrowLeftRight },
+  { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
+  { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
+  { name: "Vendas", href: "/shopee", icon: Truck },
   { name: "Financeiro", href: "/finance", icon: LineChart },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];

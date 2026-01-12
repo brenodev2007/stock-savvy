@@ -105,8 +105,8 @@ export default function Movements() {
 
   return (
     <AppLayout
-      title="Movimentações"
-      subtitle="Registre entradas, saídas e transferências"
+      title="Entrada e Saída"
+      subtitle="Registre o que entra e sai do estoque"
     >
       <div className="mb-6 flex flex-col gap-4">
         <div className="relative w-full">

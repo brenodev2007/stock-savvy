@@ -77,7 +77,7 @@ import { useCanCreate } from "@/hooks/usePlanLimits";
 import { PlanLimitBanner } from "@/components/plans/PlanLimitBanner";
 
 const productSchema = z.object({
-  sku: z.string().min(1, "SKU é obrigatório").max(50),
+  sku: z.string().min(1, "Código é obrigatório").max(50),
   name: z.string().min(1, "Nome é obrigatório").max(200),
   description: z.string().max(500).optional(),
   unit: z.string().min(1, "Unidade é obrigatória"),
@@ -272,7 +272,7 @@ export default function Products() {
           <thead>
             <tr>
               <th>Produto</th>
-              <th>SKU</th>
+              <th>Código (Ref.)</th>
               <th>Categoria</th>
               <th className="text-right">Estoque</th>
               <th className="text-right">Custo</th>
@@ -488,9 +488,9 @@ export default function Products() {
                   name="sku"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>SKU</FormLabel>
+                      <FormLabel>Código (Referência)</FormLabel>
                       <FormControl>
-                        <Input placeholder="PROD-001" {...field} />
+                        <Input placeholder="Ex: 123456" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -532,7 +532,7 @@ export default function Products() {
                     <FormLabel>Nome do Produto</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Nome completo do produto"
+                        placeholder="Ex: Camiseta de Algodão"
                         {...field}
                       />
                     </FormControl>
@@ -548,7 +548,7 @@ export default function Products() {
                     <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Descrição opcional"
+                        placeholder="Ex: Tamanho M, Cor Azul (Opcional)"
                         rows={2}
                         {...field}
                       />

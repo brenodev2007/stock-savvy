@@ -213,11 +213,11 @@ export function MovementForm({
                 name="warehouse_from_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Depósito de Origem</FormLabel>
+                    <FormLabel>De onde vai sair?</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o depósito" />
+                          <SelectValue placeholder="Selecione o local" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -241,12 +241,12 @@ export function MovementForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {type === 'TRANSFER' ? 'Depósito de Destino' : 'Depósito'}
+                      {type === 'TRANSFER' ? 'Para onde vai?' : 'Em qual local?'}
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o depósito" />
+                          <SelectValue placeholder="Selecione o local" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

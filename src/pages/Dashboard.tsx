@@ -2,7 +2,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { LowStockAlert } from '@/components/dashboard/LowStockAlert';
 import { RecentMovements } from '@/components/dashboard/RecentMovements';
-import { Package, DollarSign, AlertTriangle, ArrowLeftRight, Warehouse, Calendar } from 'lucide-react';
+import { Package, DollarSign, AlertTriangle, ArrowLeftRight, Warehouse } from 'lucide-react';
 import { useDashboardStats, useLowStockProducts } from '@/hooks/useDashboard';
 import { useMovements } from '@/hooks/useMovements';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,8 +19,8 @@ export default function Dashboard() {
   if (statsLoading) {
     return (
       <AppLayout title="Dashboard" subtitle="Visão geral do estoque">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-32 rounded-lg" />)}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-32 rounded-lg" />)}
         </div>
       </AppLayout>
     );
@@ -41,13 +41,12 @@ export default function Dashboard() {
 
   return (
     <AppLayout title="Dashboard" subtitle="Visão geral do estoque">
-      <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
         <StatCard title="Total de Produtos" value={stats?.totalProducts || 0} icon={Package} />
-        <StatCard title="Valor em Estoque" value={formatCurrency(stats?.totalValue || 0)} icon={DollarSign} variant="primary" />
+        <StatCard title="Total em Dinheiro" value={formatCurrency(stats?.totalValue || 0)} icon={DollarSign} variant="primary" />
         <StatCard title="Estoque Baixo" value={stats?.lowStockCount || 0} subtitle="itens abaixo do mínimo" icon={AlertTriangle} variant="warning" />
-        <StatCard title="Vencendo" value={stats?.expiringCount || 0} subtitle="próximos 30 dias" icon={Calendar} variant="warning" />
-        <StatCard title="Mov. Hoje" value={stats?.movementsToday || 0} icon={ArrowLeftRight} />
-        <StatCard title="Depósitos" value={stats?.warehousesCount || 0} icon={Warehouse} />
+        <StatCard title="Mudanças Hoje" value={stats?.movementsToday || 0} icon={ArrowLeftRight} />
+        <StatCard title="Locais" value={stats?.warehousesCount || 0} icon={Warehouse} />
       </div>
 
       <div className="mt-4 md:mt-6 grid gap-4 md:gap-6 lg:grid-cols-2">
