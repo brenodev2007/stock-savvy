@@ -483,19 +483,21 @@ export function ShopeeOrderForm({ order, open, onOpenChange }: ShopeeOrderFormPr
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="estimated_delivery"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Previsão de Entrega</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {form.watch('status') !== 'ENTREGUE' && (
+              <FormField
+                control={form.control}
+                name="estimated_delivery"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Previsão de Entrega</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>

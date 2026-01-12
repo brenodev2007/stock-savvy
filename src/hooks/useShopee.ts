@@ -214,12 +214,24 @@ export function useCreateManualOrder() {
       purchase_date: string;
       estimated_delivery?: string | null;
     }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       // Calculate a display name for the order (e.g. first product + count)
       const displayProductName = order.items.length > 0 
         ? order.items.length > 1 
           ? `${order.items[0].product_name} + ${order.items.length - 1} item(s)`
           : order.items[0].product_name
         : 'Pedido sem itens';
+
+      // Fetch default account (first one) if available, but don't enforce it
+      const { data: accounts } = await supabase
+        .from('shopee_accounts')
+        .select('id')
+        .eq('user_id', user.id) // Ensure we get accounts for this user
+        .limit(1);
+      
+      const accountId = accounts?.[0]?.id || null;
 
       const { data: createdOrder, error: orderError } = await supabase
         .from('shopee_orders')
@@ -234,6 +246,8 @@ export function useCreateManualOrder() {
           tracking_code: order.tracking_code || null,
           purchase_date: order.purchase_date,
           estimated_delivery: order.estimated_delivery || null,
+          account_id: accountId,
+          user_id: user.id, // Link to user
         })
         .select()
         .single();
