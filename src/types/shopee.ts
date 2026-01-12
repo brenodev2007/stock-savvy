@@ -1,5 +1,7 @@
 export type ShopeeShipmentStatus = 
   | 'AGUARDANDO_ENVIO'
+  | 'EMPACOTADO'
+  | 'ETIQUETADO'
   | 'ENVIADO'
   | 'EM_TRANSPORTE'
   | 'ENTREGUE'
@@ -19,11 +21,22 @@ export interface ShopeeAccount {
   updated_at: string;
 }
 
+export interface ShopeeOrderItem {
+  id: string;
+  order_id: string;
+  product_name: string;
+  sku?: string;
+  quantity: number;
+  unit_price: number;
+  created_at: string;
+}
+
 export interface ShopeeOrder {
   id: string;
   account_id: string;
   order_sn: string;
-  product_name: string;
+  // Legacy field, now optional as items are in sub-table
+  product_name?: string;
   sku?: string;
   customer_name?: string;
   customer_phone?: string;
@@ -40,6 +53,7 @@ export interface ShopeeOrder {
   created_at: string;
   updated_at: string;
   account?: ShopeeAccount;
+  items?: ShopeeOrderItem[];
   status_history?: ShopeeOrderStatusHistory[];
 }
 
@@ -75,6 +89,8 @@ export interface ShopeeSyncLog {
 
 export const SHIPMENT_STATUS_CONFIG: Record<ShopeeShipmentStatus, { label: string; color: string; bgColor: string }> = {
   AGUARDANDO_ENVIO: { label: 'Aguardando Envio', color: 'text-yellow-700', bgColor: 'bg-yellow-100' },
+  EMPACOTADO: { label: 'Empacotado', color: 'text-cyan-700', bgColor: 'bg-cyan-100' },
+  ETIQUETADO: { label: 'Etiquetado', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
   ENVIADO: { label: 'Enviado', color: 'text-blue-700', bgColor: 'bg-blue-100' },
   EM_TRANSPORTE: { label: 'Em Transporte', color: 'text-purple-700', bgColor: 'bg-purple-100' },
   ENTREGUE: { label: 'Entregue', color: 'text-green-700', bgColor: 'bg-green-100' },

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus } from '@/types/shopee';
-import { Package, Truck, CheckCircle, XCircle, Clock, RotateCcw } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, RotateCcw, Box, Tag } from 'lucide-react';
 
 interface ShopeeStatusBadgeProps {
   status: ShopeeShipmentStatus;
@@ -9,6 +9,8 @@ interface ShopeeStatusBadgeProps {
 
 const statusIcons: Record<ShopeeShipmentStatus, React.ReactNode> = {
   AGUARDANDO_ENVIO: <Clock className="h-3 w-3" />,
+  EMPACOTADO: <Box className="h-3 w-3" />,
+  ETIQUETADO: <Tag className="h-3 w-3" />,
   ENVIADO: <Package className="h-3 w-3" />,
   EM_TRANSPORTE: <Truck className="h-3 w-3" />,
   ENTREGUE: <CheckCircle className="h-3 w-3" />,
