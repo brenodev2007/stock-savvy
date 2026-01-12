@@ -149,6 +149,7 @@ export type Database = {
           id: string
           name: string
           plan: string | null
+          phone: string | null
           updated_at: string
           user_id: string
         }
@@ -160,6 +161,7 @@ export type Database = {
           id?: string
           name: string
           plan?: string | null
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -171,6 +173,7 @@ export type Database = {
           id?: string
           name?: string
           plan?: string | null
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -9,6 +9,7 @@ interface Profile {
   email: string | null;
   avatar_url: string | null;
   cpf_cnpj?: string | null;
+  phone?: string | null;
   plan?: string | null;
 }
 

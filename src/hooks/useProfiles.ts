@@ -9,6 +9,7 @@ interface Profile {
   email: string | null;
   avatar_url: string | null;
   cpf_cnpj?: string | null;
+  phone?: string | null;
   plan?: string | null;
   created_at: string;
   updated_at: string;
@@ -45,6 +46,7 @@ export function useProfiles() {
       const usersWithRoles: UserWithRoles[] = profiles.map((profile) => ({
         ...profile,
         cpf_cnpj: profile.cpf_cnpj ?? null,
+        phone: profile.phone ?? null,
         plan: profile.plan ?? null,
         roles: (roles || []).filter((r) => r.user_id === profile.user_id) as UserRole[],
       }));
@@ -58,10 +60,11 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, name, avatar_url, cpf_cnpj }: { userId: string; name: string; avatar_url?: string | null; cpf_cnpj?: string | null }) => {
+    mutationFn: async ({ userId, name, avatar_url, cpf_cnpj, phone }: { userId: string; name: string; avatar_url?: string | null; cpf_cnpj?: string | null; phone?: string | null }) => {
       const updates: any = { 
         name,
         cpf_cnpj,
+        phone,
         updated_at: new Date().toISOString() 
       };
       

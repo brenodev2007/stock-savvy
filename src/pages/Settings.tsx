@@ -89,6 +89,7 @@ export default function Settings() {
 
   const [editingName, setEditingName] = useState(profile?.name || '');
   const [editingCpfCnpj, setEditingCpfCnpj] = useState(profile?.cpf_cnpj || '');
+  const [editingPhone, setEditingPhone] = useState(profile?.phone || '');
   const [profileHasChanges, setProfileHasChanges] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
@@ -105,6 +106,7 @@ export default function Settings() {
     if (profile) {
       setEditingName(profile.name || '');
       setEditingCpfCnpj(profile.cpf_cnpj || '');
+      setEditingPhone(profile.phone || '');
     }
   });
 
@@ -120,6 +122,7 @@ export default function Settings() {
       userId: user.id, 
       name: editingName,
       cpf_cnpj: editingCpfCnpj || null,
+      phone: editingPhone || null,
       avatar_url: uploadedAvatarUrl !== null ? uploadedAvatarUrl : undefined
     });
     setProfileHasChanges(false);
@@ -224,19 +227,37 @@ export default function Settings() {
 
   const handleNameChange = (value: string) => {
     setEditingName(value);
-    checkProfileChanges(value, editingCpfCnpj);
+    checkProfileChanges(value, editingCpfCnpj, editingPhone);
   };
 
   const handleCpfCnpjChange = (value: string) => {
     const formatted = formatCpfCnpj(value);
     setEditingCpfCnpj(formatted);
-    checkProfileChanges(editingName, formatted);
+    checkProfileChanges(editingName, formatted, editingPhone);
   };
 
-  const checkProfileChanges = (name: string, cpfCnpj: string) => {
+  const handlePhoneChange = (value: string) => {
+    // Simple phone formatting
+    let formatted = value.replace(/\D/g, '');
+    if (formatted.length > 11) formatted = formatted.slice(0, 11);
+    
+    // (XX) XXXXX-XXXX
+    if (formatted.length > 2) {
+      formatted = `(${formatted.slice(0, 2)}) ${formatted.slice(2)}`;
+    }
+    if (formatted.length > 10) {
+      formatted = `${formatted.slice(0, 10)}-${formatted.slice(10)}`;
+    }
+
+    setEditingPhone(formatted);
+    checkProfileChanges(editingName, editingCpfCnpj, formatted);
+  };
+
+  const checkProfileChanges = (name: string, cpfCnpj: string, phone: string) => {
     const hasNameChange = name !== profile?.name;
     const hasCpfCnpjChange = cpfCnpj !== (profile?.cpf_cnpj || '');
-    setProfileHasChanges(hasNameChange || hasCpfCnpjChange || uploadedAvatarUrl !== null);
+    const hasPhoneChange = phone !== (profile?.phone || '');
+    setProfileHasChanges(hasNameChange || hasCpfCnpjChange || hasPhoneChange || uploadedAvatarUrl !== null);
   };
 
   const handleRoleChange = async (userId: string, role: 'admin' | 'manager' | 'operator') => {
@@ -365,6 +386,16 @@ export default function Settings() {
                     />
                   </div>
                   <div>
+                    <Label htmlFor="phone">Telefone / WhatsApp</Label>
+                    <Input
+                      id="phone"
+                      value={editingPhone}
+                      onChange={(e) => handlePhoneChange(e.target.value)}
+                      className="mt-1.5"
+                      placeholder="(00) 00000-0000"
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="email">E-mail</Label>
                     <Input
                       id="email"
@@ -464,6 +495,7 @@ export default function Settings() {
                       onClick={() => {
                         setEditingName(profile?.name || '');
                         setEditingCpfCnpj(profile?.cpf_cnpj || '');
+                        setEditingPhone(profile?.phone || '');
                         setUploadedAvatarUrl(null);
                         setProfileHasChanges(false);
                       }}

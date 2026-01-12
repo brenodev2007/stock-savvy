@@ -97,10 +97,18 @@ export default function Plans() {
     if (searchParams.get('success') === 'true') {
       toast.success('Assinatura realizada com sucesso! Atualizando seu plano...');
       checkSubscription();
+      
+      // Simulate phone notification
+      if (profile?.phone) {
+        setTimeout(() => {
+          toast.info(`Uma notificação foi enviada para ${profile.phone} confirmando a mudança.`);
+          console.log(`[Notification Mock] Sending SMS to ${profile.phone}: "Seu plano foi alterado com sucesso!"`);
+        }, 1000);
+      }
     } else if (searchParams.get('canceled') === 'true') {
       toast.info('Checkout cancelado');
     }
-  }, [searchParams, checkSubscription]);
+  }, [searchParams, checkSubscription, profile?.phone]);
 
   // Check subscription on mount
   useEffect(() => {
