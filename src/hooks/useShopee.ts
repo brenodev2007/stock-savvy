@@ -73,7 +73,7 @@ export function useShopeeOrders(filters?: {
         .order('purchase_date', { ascending: false });
 
       if (filters?.status) {
-        query = query.eq('status', filters.status);
+        query = query.eq('status', filters.status as any);
       }
       if (filters?.startDate) {
         query = query.gte('purchase_date', filters.startDate.toISOString());
@@ -103,7 +103,7 @@ export function useShopeeOrder(orderId: string) {
   return useQuery({
     queryKey: ['shopee-order', orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('shopee_orders')
         .select(`
           *,
@@ -244,21 +244,21 @@ export function useCreateManualOrder() {
           customer_name: order.customer_name || null,
           shipping_address: order.shipping_address || null,
           order_total: order.order_total,
-          status: order.status,
+          status: order.status as any,
           carrier: order.carrier || null,
           tracking_code: order.tracking_code || null,
           purchase_date: order.purchase_date,
           estimated_delivery: order.estimated_delivery || null,
           actual_delivery: actualDelivery,
           account_id: accountId,
-        })
+        } as any)
         .select()
         .single();
 
       if (orderError) throw orderError;
 
       if (order.items.length > 0) {
-        const { error: itemsError } = await supabase
+        const { error: itemsError } = await (supabase as any)
           .from('shopee_order_items')
           .insert(
             order.items.map(item => ({
@@ -413,7 +413,7 @@ export function useUpdateShopeeOrder() {
       // Handle items update if provided
       if (order.items) {
         // Delete existing items
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await (supabase as any)
           .from('shopee_order_items')
           .delete()
           .eq('order_id', id);
@@ -422,7 +422,7 @@ export function useUpdateShopeeOrder() {
 
         // Insert new items
         if (order.items.length > 0) {
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase as any)
             .from('shopee_order_items')
             .insert(
               order.items.map(item => ({
