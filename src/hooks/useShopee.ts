@@ -196,7 +196,7 @@ export function useSyncShopeeOrders() {
   });
 }
 
-// Create manual order
+// Create manual order with automatic stock movements
 export function useCreateManualOrder() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -204,7 +204,7 @@ export function useCreateManualOrder() {
   return useMutation({
     mutationFn: async (order: {
       order_sn: string;
-      items: { product_name: string; sku?: string; quantity: number; unit_price: number }[];
+      items: { product_id?: string; product_name: string; sku?: string; quantity: number; unit_price: number }[];
       customer_name?: string;
       shipping_address?: string;
       order_total: number;
@@ -224,14 +224,17 @@ export function useCreateManualOrder() {
           : order.items[0].product_name
         : 'Pedido sem itens';
 
-      // Fetch default account (first one) if available, but don't enforce it
+      // Try to fetch default account, but it's optional now
       const { data: accounts } = await supabase
         .from('shopee_accounts')
         .select('id')
-        .eq('user_id', user.id) // Ensure we get accounts for this user
+        .eq('user_id', user.id)
         .limit(1);
       
       const accountId = accounts?.[0]?.id || null;
+
+      // Set actual_delivery if status is ENTREGUE
+      const actualDelivery = order.status === 'ENTREGUE' ? new Date().toISOString() : null;
 
       const { data: createdOrder, error: orderError } = await supabase
         .from('shopee_orders')
@@ -246,8 +249,8 @@ export function useCreateManualOrder() {
           tracking_code: order.tracking_code || null,
           purchase_date: order.purchase_date,
           estimated_delivery: order.estimated_delivery || null,
+          actual_delivery: actualDelivery,
           account_id: accountId,
-          user_id: user.id, // Link to user
         })
         .select()
         .single();
@@ -270,50 +273,72 @@ export function useCreateManualOrder() {
         if (itemsError) throw itemsError;
       }
 
-      // Deduct stock if we have product_id and user is authenticated
-      if (order.items.length > 0) {
-        // Fetch default warehouse (first one)
-        const { data: warehouses } = await supabase
-          .from('warehouses')
-          .select('id')
-          .limit(1);
-        
-        const defaultWarehouseId = warehouses?.[0]?.id;
+      // Automatic stock movements based on status
+      const { data: warehouses } = await supabase
+        .from('warehouses')
+        .select('id')
+        .eq('is_active', true)
+        .limit(1);
+      
+      const defaultWarehouseId = warehouses?.[0]?.id;
 
-        if (defaultWarehouseId) {
-          for (const item of order.items) {
-            // Check if item has product_id (it should if selected from list)
-            // If not, we can't deduct stock
-            const itemAny = item as any;
-            if (itemAny.product_id) {
-               await supabase
-                .from('stock_movements')
-                .insert({
-                  product_id: itemAny.product_id,
-                  warehouse_from_id: defaultWarehouseId, // Deduct from default warehouse
-                  quantity: item.quantity,
-                  type: 'OUT',
-                  reason: 'VENDA_SHOPEE',
-                  reference: order.order_sn,
-                  user_id: (await supabase.auth.getUser()).data.user?.id,
-                });
+      if (defaultWarehouseId && order.items.length > 0) {
+        for (const item of order.items) {
+          if (!item.product_id) continue;
+
+          // For DEVOLVIDO: create OUT (original sale) then IN (return)
+          if (order.status === 'DEVOLVIDO') {
+            // First create the OUT movement (original sale)
+            await supabase.from('stock_movements').insert({
+              product_id: item.product_id,
+              warehouse_from_id: defaultWarehouseId,
+              quantity: item.quantity,
+              type: 'OUT',
+              reason: 'VENDA_SHOPEE',
+              reference: order.order_sn,
+              user_id: user.id,
+            });
+
+            // Then create IN movement (return)
+            await supabase.from('stock_movements').insert({
+              product_id: item.product_id,
+              warehouse_to_id: defaultWarehouseId,
+              quantity: item.quantity,
+              type: 'IN',
+              reason: 'DEVOLUCAO_SHOPEE',
+              reference: order.order_sn,
+              user_id: user.id,
+            });
+            // Stock balance stays the same (OUT then IN cancels out)
+          } else {
+            // For all other statuses (except CANCELADO): create OUT movement
+            if (order.status !== 'CANCELADO') {
+              await supabase.from('stock_movements').insert({
+                product_id: item.product_id,
+                warehouse_from_id: defaultWarehouseId,
+                quantity: item.quantity,
+                type: 'OUT',
+                reason: 'VENDA_SHOPEE',
+                reference: order.order_sn,
+                user_id: user.id,
+              });
+
+              // Update stock balance
+              const { data: currentBalance } = await supabase
+                .from('stock_balances')
+                .select('quantity')
+                .eq('product_id', item.product_id)
+                .eq('warehouse_id', defaultWarehouseId)
+                .maybeSingle();
                 
-                // Update stock balance
-                const { data: currentBalance } = await supabase
-                  .from('stock_balances')
-                  .select('quantity')
-                  .eq('product_id', itemAny.product_id)
-                  .eq('warehouse_id', defaultWarehouseId)
-                  .maybeSingle();
-                  
-                const newQty = Math.max(0, (currentBalance?.quantity || 0) - item.quantity);
-                
-                await supabase
-                  .from('stock_balances')
-                  .upsert(
-                    { product_id: itemAny.product_id, warehouse_id: defaultWarehouseId, quantity: newQty },
-                    { onConflict: 'product_id,warehouse_id' }
-                  );
+              const newQty = Math.max(0, (currentBalance?.quantity || 0) - item.quantity);
+              
+              await supabase
+                .from('stock_balances')
+                .upsert(
+                  { product_id: item.product_id, warehouse_id: defaultWarehouseId, quantity: newQty },
+                  { onConflict: 'product_id,warehouse_id' }
+                );
             }
           }
         }
