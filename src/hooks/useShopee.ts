@@ -344,6 +344,53 @@ export function useCreateManualOrder() {
         }
       }
 
+      // Create financial transaction for the sale (income)
+      if (order.status !== 'CANCELADO' && order.order_total > 0) {
+        await (supabase as any)
+          .from('financial_transactions')
+          .insert({
+            user_id: user.id,
+            type: 'income',
+            category: 'Venda Shopee',
+            amount: order.order_total,
+            description: `Pedido ${order.order_sn} - ${displayProductName}`,
+            reference_type: 'shopee_order',
+            reference_id: createdOrder.id,
+            transaction_date: order.purchase_date,
+          });
+
+        // Calculate and register cost of goods sold (CMV)
+        let totalCost = 0;
+        for (const item of order.items) {
+          if (item.product_id) {
+            const { data: product } = await supabase
+              .from('products')
+              .select('cost')
+              .eq('id', item.product_id)
+              .single();
+            
+            if (product?.cost) {
+              totalCost += Number(product.cost) * item.quantity;
+            }
+          }
+        }
+
+        if (totalCost > 0) {
+          await (supabase as any)
+            .from('financial_transactions')
+            .insert({
+              user_id: user.id,
+              type: 'cost',
+              category: 'CMV - Custo Mercadoria',
+              amount: totalCost,
+              description: `Custo do pedido ${order.order_sn}`,
+              reference_type: 'shopee_order',
+              reference_id: createdOrder.id,
+              transaction_date: order.purchase_date,
+            });
+        }
+      }
+
       return createdOrder;
     },
     onSuccess: () => {
@@ -353,6 +400,8 @@ export function useCreateManualOrder() {
       queryClient.invalidateQueries({ queryKey: ['stock_balances'] });
       queryClient.invalidateQueries({ queryKey: ['stock_by_product'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
       toast({ title: 'Pedido cadastrado com sucesso!' });
     },
     onError: (error: Error) => {
