@@ -35,53 +35,54 @@ export function PricingCalculator() {
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="md:col-span-1 lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            Calculadora de Lucro (Simulador Shopee)
+    <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+      <Card className="lg:col-span-2">
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">Calculadora de Lucro (Simulador Shopee)</span>
+            <span className="sm:hidden">Simulador de Lucro</span>
           </CardTitle>
-          <CardDescription>
-            Simule o lucro líquido baseado nos custos e preço de venda, conforme sua tabela.
+          <CardDescription className="text-xs sm:text-sm">
+            Simule o lucro líquido baseado nos custos e preço de venda.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="cost">Custo Produto</Label>
+        <CardContent className="space-y-4 p-3 pt-0 sm:p-6 sm:pt-0">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="cost" className="text-xs sm:text-sm">Custo Produto</Label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-muted-foreground">R$</span>
+                <span className="absolute left-2 sm:left-3 top-2 sm:top-2.5 text-muted-foreground text-xs sm:text-sm">R$</span>
                 <Input
                   id="cost"
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9 w-full"
+                  className="pl-7 sm:pl-9 w-full text-sm"
                   value={cost || ""}
                   onChange={(e) => setCost(Number(e.target.value))}
                 />
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="sellingPrice">Preço de Venda</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="sellingPrice" className="text-xs sm:text-sm">Preço de Venda</Label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-muted-foreground">R$</span>
+                <span className="absolute left-2 sm:left-3 top-2 sm:top-2.5 text-muted-foreground text-xs sm:text-sm">R$</span>
                 <Input
                   id="sellingPrice"
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9 w-full"
+                  className="pl-7 sm:pl-9 w-full text-sm"
                   value={sellingPrice || ""}
                   onChange={(e) => setSellingPrice(Number(e.target.value))}
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="variable">Comissão (%)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="variable" className="text-xs sm:text-sm">Comissão (%)</Label>
               <div className="relative">
                 <Input
                   id="variable"
@@ -89,24 +90,24 @@ export function PricingCalculator() {
                   min="0"
                   max="100"
                   step="0.1"
-                  className="pr-8 w-full"
+                  className="pr-6 sm:pr-8 w-full text-sm"
                   value={variableRate}
                   onChange={(e) => setVariableRate(Number(e.target.value))}
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground">%</span>
+                <span className="absolute right-2 sm:right-3 top-2 sm:top-2.5 text-muted-foreground text-xs sm:text-sm">%</span>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="platformFixed">Taxa Fixa (Shopee)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="platformFixed" className="text-xs sm:text-sm">Taxa Fixa</Label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-muted-foreground">R$</span>
+                <span className="absolute left-2 sm:left-3 top-2 sm:top-2.5 text-muted-foreground text-xs sm:text-sm">R$</span>
                 <Input
                   id="platformFixed"
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-9 w-full"
+                  className="pl-7 sm:pl-9 w-full text-sm"
                   value={platformFixedFee || ""}
                   onChange={(e) => setPlatformFixedFee(Number(e.target.value))}
                 />
@@ -114,35 +115,37 @@ export function PricingCalculator() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-muted p-4 mt-6">
-            <h3 className="font-semibold mb-2">Resumo dos Custos</h3>
-            <div className="space-y-1 text-sm">
+          <div className="rounded-lg bg-muted p-3 sm:p-4 mt-4 sm:mt-6">
+            <h3 className="font-semibold mb-2 text-xs sm:text-sm">Resumo dos Custos</h3>
+            <div className="space-y-1 text-xs sm:text-sm">
                 <div className="flex justify-between">
-                    <span>Custo Shopee (Comissão + Taxa):</span>
+                    <span className="hidden sm:inline">Custo Shopee (Comissão + Taxa):</span>
+                    <span className="sm:hidden">Custo Shopee:</span>
                     <span className="font-medium text-destructive">{formatCurrency(shopeeCost)}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span>Custo Unitário Total:</span>
+                    <span className="hidden sm:inline">Custo Unitário Total:</span>
+                    <span className="sm:hidden">Custo Total:</span>
                     <span className="font-bold">{formatCurrency(unitCost)}</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">
-                    Fórmula: Lucro = Venda - (Custo Produto + Custo Shopee)
+                <div className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+                    Lucro = Venda - (Custo + Shopee)
                 </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-primary/5 md:col-span-1 border-primary/20">
-        <CardHeader>
-          <CardTitle>Resultado</CardTitle>
-          <CardDescription>Análise final</CardDescription>
+      <Card className="bg-primary/5 border-primary/20">
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">Resultado</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Análise final</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 p-3 pt-0 sm:p-6 sm:pt-0">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Lucro Líquido</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">Lucro Líquido</p>
             <div className={cn(
-              "text-4xl font-bold",
+              "text-2xl sm:text-4xl font-bold",
               profit >= 0 ? "text-green-600" : "text-red-600"
             )}>
               {formatCurrency(profit)}
@@ -151,23 +154,23 @@ export function PricingCalculator() {
           
           <Separator className="bg-primary/20" />
           
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="flex justify-between text-xs sm:text-sm">
                 <span>Venda:</span>
                 <span>{formatCurrency(sellingPrice)}</span>
             </div>
-            <div className="flex justify-between text-sm text-destructive">
+            <div className="flex justify-between text-xs sm:text-sm text-destructive">
                 <span>- Custo Produto:</span>
                 <span>{formatCurrency(cost)}</span>
             </div>
-            <div className="flex justify-between text-sm text-destructive">
+            <div className="flex justify-between text-xs sm:text-sm text-destructive">
                 <span>- Custo Shopee:</span>
                 <span>{formatCurrency(shopeeCost)}</span>
             </div>
             
             <Separator className="my-2" />
             
-            <div className="flex justify-between text-sm font-semibold">
+            <div className="flex justify-between text-xs sm:text-sm font-semibold">
                 <span>Margem de Lucro:</span>
                 <span className={profit >= 0 ? "text-green-600" : "text-red-600"}>
                     {marginPercent.toFixed(2)}%
