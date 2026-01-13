@@ -165,6 +165,56 @@ export function useUpdateMovement() {
   });
 }
 
+export function useDeleteMovement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // 1. Fetch movement details first to know what to reverse
+      const { data: movement, error: fetchError } = await supabase
+        .from('stock_movements')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      if (!movement) throw new Error('Movimentação não encontrada');
+
+      // 2. Delete the movement
+      const { error: deleteError } = await supabase
+        .from('stock_movements')
+        .delete()
+        .eq('id', id);
+      
+      if (deleteError) throw deleteError;
+
+      // 3. Reverse stock changes
+      if (movement.type === 'IN' && movement.warehouse_to_id) {
+        // Reverse IN: decrease stock at destination
+        await updateStock(movement.product_id, movement.warehouse_to_id, -movement.quantity);
+      } else if (movement.type === 'OUT' && movement.warehouse_from_id) {
+        // Reverse OUT: increase stock at origin
+        await updateStock(movement.product_id, movement.warehouse_from_id, movement.quantity);
+      } else if (movement.type === 'TRANSFER' && movement.warehouse_from_id && movement.warehouse_to_id) {
+        // Reverse TRANSFER: increase at origin, decrease at destination
+        await updateStock(movement.product_id, movement.warehouse_from_id, movement.quantity);
+        await updateStock(movement.product_id, movement.warehouse_to_id, -movement.quantity);
+      }
+      // For ADJUST, we don't reverse because we don't know the previous state, we just remove the history.
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['stock_balances'] });
+      queryClient.invalidateQueries({ queryKey: ['stock_by_product'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
+      toast.success('Movimentação excluída com sucesso');
+    },
+    onError: (error) => {
+      toast.error('Erro ao excluir movimentação: ' + error.message);
+    },
+  });
+}
+
 async function updateStock(productId: string, warehouseId: string, quantityDelta: number) {
   // Get current stock
   const { data: current } = await supabase

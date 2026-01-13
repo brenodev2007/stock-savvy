@@ -8,12 +8,24 @@ import {
   ArrowRightLeft,
   Search,
   Pencil,
+  Trash2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   useMovements,
   useCreateMovement,
   useUpdateMovement,
+  useDeleteMovement,
   MovementType,
   StockMovement,
 } from "@/hooks/useMovements";
@@ -53,11 +65,15 @@ export default function Movements() {
   const { data: warehouses } = useWarehouses();
   const createMovement = useCreateMovement();
   const updateMovement = useUpdateMovement();
+  const deleteMovement = useDeleteMovement();
 
   const [formOpen, setFormOpen] = useState(false);
   const [movementType, setMovementType] = useState<MovementType>("IN");
   const [search, setSearch] = useState("");
   const [editingMovement, setEditingMovement] = useState<StockMovement | null>(null);
+  const [movementToDelete, setMovementToDelete] = useState<StockMovement | null>(
+    null
+  );
 
   const openForm = (type: MovementType) => {
     setMovementType(type);
@@ -79,6 +95,13 @@ export default function Movements() {
     }
     setFormOpen(false);
     setEditingMovement(null);
+  };
+
+  const handleDelete = async () => {
+    if (movementToDelete) {
+      await deleteMovement.mutateAsync(movementToDelete.id);
+      setMovementToDelete(null);
+    }
   };
 
   const filteredMovements = movements?.filter(
@@ -231,6 +254,13 @@ export default function Movements() {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setMovementToDelete(movement)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -302,6 +332,14 @@ export default function Movements() {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => setMovementToDelete(movement)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -325,6 +363,30 @@ export default function Movements() {
         isLoading={createMovement.isPending || updateMovement.isPending}
         initialData={editingMovement}
       />
+
+      <AlertDialog
+        open={!!movementToDelete}
+        onOpenChange={(open) => !open && setMovementToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir movimentação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta movimentação? Esta ação não pode
+              ser desfeita e o estoque será revertido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
