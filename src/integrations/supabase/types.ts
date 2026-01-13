@@ -46,6 +46,48 @@ export type Database = {
           },
         ]
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_lots: {
         Row: {
           cost: number
@@ -149,7 +191,6 @@ export type Database = {
           id: string
           name: string
           plan: string | null
-          phone: string | null
           updated_at: string
           user_id: string
         }
@@ -161,7 +202,6 @@ export type Database = {
           id?: string
           name: string
           plan?: string | null
-          phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -173,7 +213,6 @@ export type Database = {
           id?: string
           name?: string
           plan?: string | null
-          phone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -258,6 +297,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: string
+          product_id: string | null
           product_name: string
           quantity: number
           sku: string | null
@@ -267,6 +307,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: string
+          product_id?: string | null
           product_name: string
           quantity?: number
           sku?: string | null
@@ -276,6 +317,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: string
+          product_id?: string | null
           product_name?: string
           quantity?: number
           sku?: string | null
@@ -287,6 +329,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "shopee_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopee_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -616,8 +665,6 @@ export type Database = {
       movement_type: "IN" | "OUT" | "TRANSFER" | "ADJUST"
       shopee_shipment_status:
         | "AGUARDANDO_ENVIO"
-        | "EMPACOTADO"
-        | "ETIQUETADO"
         | "ENVIADO"
         | "EM_TRANSPORTE"
         | "ENTREGUE"
@@ -754,8 +801,6 @@ export const Constants = {
       movement_type: ["IN", "OUT", "TRANSFER", "ADJUST"],
       shopee_shipment_status: [
         "AGUARDANDO_ENVIO",
-        "EMPACOTADO",
-        "ETIQUETADO",
         "ENVIADO",
         "EM_TRANSPORTE",
         "ENTREGUE",

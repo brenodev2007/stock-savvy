@@ -455,35 +455,39 @@ export function ShopeeOrderForm({ order, open, onOpenChange }: ShopeeOrderFormPr
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="carrier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Transportadora</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Correios" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tracking_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Código de Rastreio</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Código" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {form.watch('status') !== 'ENTREGUE' && form.watch('status') !== 'CANCELADO' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="carrier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Transportadora</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Correios" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tracking_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Código de Rastreio</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Código" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             </div>
 
-            {form.watch('status') !== 'ENTREGUE' && (
+            {form.watch('status') !== 'ENTREGUE' && form.watch('status') !== 'CANCELADO' && form.watch('status') !== 'DEVOLVIDO' && (
               <FormField
                 control={form.control}
                 name="estimated_delivery"
