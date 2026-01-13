@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus } from '@/types/shopee';
 
@@ -32,11 +32,11 @@ interface ShopeeFiltersProps {
   filters: ShopeeFiltersState;
   onFiltersChange: (filters: ShopeeFiltersState) => void;
   carriers: string[];
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-export function ShopeeFilters({ filters, onFiltersChange, carriers }: ShopeeFiltersProps) {
-  const [showFilters, setShowFilters] = useState(false);
-
+export function ShopeeFilters({ filters, onFiltersChange, carriers, isOpen, onToggle }: ShopeeFiltersProps) {
   const activeFiltersCount = [
     filters.status,
     filters.startDate,
@@ -69,7 +69,7 @@ export function ShopeeFilters({ filters, onFiltersChange, carriers }: ShopeeFilt
         </div>
         <Button
           variant={activeFiltersCount > 0 ? 'secondary' : 'outline'}
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={onToggle}
           className="gap-2"
         >
           <Filter className="h-4 w-4" />
@@ -89,7 +89,7 @@ export function ShopeeFilters({ filters, onFiltersChange, carriers }: ShopeeFilt
       </div>
 
       {/* Filter Options */}
-      {showFilters && (
+      {isOpen && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-lg border bg-card">
           {/* Status */}
           <div className="space-y-1.5">
@@ -147,7 +147,7 @@ export function ShopeeFilters({ filters, onFiltersChange, carriers }: ShopeeFilt
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <Calendar className="mr-2 h-4 w-4" />
-                  {filters.startDate
+                  {filters.startDate && isValid(filters.startDate)
                     ? format(filters.startDate, 'dd/MM/yyyy', { locale: ptBR })
                     : 'Selecionar'}
                 </Button>
@@ -170,7 +170,7 @@ export function ShopeeFilters({ filters, onFiltersChange, carriers }: ShopeeFilt
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <Calendar className="mr-2 h-4 w-4" />
-                  {filters.endDate
+                  {filters.endDate && isValid(filters.endDate)
                     ? format(filters.endDate, 'dd/MM/yyyy', { locale: ptBR })
                     : 'Selecionar'}
                 </Button>

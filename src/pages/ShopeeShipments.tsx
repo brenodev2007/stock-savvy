@@ -47,6 +47,7 @@ export default function ShopeeShipments() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
@@ -147,6 +148,8 @@ export default function ShopeeShipments() {
               filters={filters}
               onFiltersChange={handleFiltersChange}
               carriers={carriers}
+              isOpen={showFilters}
+              onToggle={() => setShowFilters(!showFilters)}
             />
 
             {/* Orders Table */}

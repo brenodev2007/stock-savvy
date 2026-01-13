@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { startOfDay, endOfDay } from 'date-fns';
 import type { ShopeeAccount, ShopeeOrder, ShopeeOrderItem, ShopeeOrderStatusHistory, ShopeeSyncLog, ShopeeShipmentStatus, ShopeeOrderEditHistory } from '@/types/shopee';
 
 // Accounts
@@ -76,10 +77,10 @@ export function useShopeeOrders(filters?: {
         query = query.eq('status', filters.status as any);
       }
       if (filters?.startDate) {
-        query = query.gte('purchase_date', filters.startDate.toISOString());
+        query = query.gte('purchase_date', startOfDay(filters.startDate).toISOString());
       }
       if (filters?.endDate) {
-        query = query.lte('purchase_date', filters.endDate.toISOString());
+        query = query.lte('purchase_date', endOfDay(filters.endDate).toISOString());
       }
       if (filters?.carrier) {
         query = query.eq('carrier', filters.carrier);

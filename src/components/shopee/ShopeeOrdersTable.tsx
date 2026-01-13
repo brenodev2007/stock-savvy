@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Eye, ExternalLink, Pencil, Trash2, History } from 'lucide-react';
 import {
@@ -35,6 +35,30 @@ interface ShopeeOrdersTableProps {
   isLoading?: boolean;
   selectedIds?: string[];
   onSelectionChange?: (ids: string[]) => void;
+}
+
+function formatDateSafe(dateString: string | null | undefined) {
+  if (!dateString) return '-';
+  try {
+    // Check if it's already an ISO string with time
+    if (dateString.includes('T')) {
+      const date = new Date(dateString);
+      if (!isValid(date)) return '-';
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+    }
+    
+    // If it's just a date string (YYYY-MM-DD), append noon to avoid timezone issues
+    const date = new Date(dateString + 'T12:00:00');
+    if (!isValid(date)) {
+      // Try fallback without time if appending failed
+      const fallbackDate = new Date(dateString);
+      if (!isValid(fallbackDate)) return '-';
+      return format(fallbackDate, 'dd/MM/yyyy', { locale: ptBR });
+    }
+    return format(date, 'dd/MM/yyyy', { locale: ptBR });
+  } catch {
+    return '-';
+  }
 }
 
 export function ShopeeOrdersTable({ orders, isLoading, selectedIds = [], onSelectionChange }: ShopeeOrdersTableProps) {
@@ -145,7 +169,7 @@ export function ShopeeOrdersTable({ orders, isLoading, selectedIds = [], onSelec
                     {order.customer_name || '-'}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">
-                    {format(new Date(order.purchase_date), 'dd/MM/yyyy', { locale: ptBR })}
+                    {formatDateSafe(order.purchase_date)}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     {order.carrier || '-'}
@@ -173,9 +197,7 @@ export function ShopeeOrdersTable({ orders, isLoading, selectedIds = [], onSelec
                     <ShopeeStatusBadge status={order.status} />
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
-                    {order.estimated_delivery
-                      ? format(new Date(order.estimated_delivery), 'dd/MM/yyyy', { locale: ptBR })
-                      : '-'}
+                    {formatDateSafe(order.estimated_delivery)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

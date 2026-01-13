@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { History, ArrowRight } from 'lucide-react';
 import {
@@ -54,13 +54,25 @@ function formatValue(key: string, value: unknown): string {
   
   if ((key === 'purchase_date' || key === 'estimated_delivery') && typeof value === 'string') {
     try {
-      return format(new Date(value), 'dd/MM/yyyy', { locale: ptBR });
+      const date = new Date(value);
+      if (!isValid(date)) return value;
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
     } catch {
       return value;
     }
   }
   
   return String(value);
+}
+
+function formatDateSafe(dateString: string) {
+  try {
+    const date = new Date(dateString);
+    if (!isValid(date)) return 'Data desconhecida';
+    return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+  } catch {
+    return 'Data inválida';
+  }
 }
 
 export function ShopeeOrderEditHistory({ orderId, orderSn, open, onOpenChange }: ShopeeOrderEditHistoryProps) {
@@ -99,7 +111,7 @@ export function ShopeeOrderEditHistory({ orderId, orderSn, open, onOpenChange }:
                 <div key={entry.id} className="border rounded-lg p-4 bg-card">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-foreground">
-                      Editado em {format(new Date(entry.changed_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      Editado em {formatDateSafe(entry.changed_at)}
                     </span>
                   </div>
                   

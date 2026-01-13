@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,20 @@ export function ShopeeSyncStatus() {
     const activeAccount = accounts.find(a => a.is_active);
     if (activeAccount) {
       syncOrders.mutate(activeAccount.id);
+    }
+  };
+
+  const getSyncTimeDistance = (dateString: string) => {
+    const date = new Date(dateString);
+    if (!isValid(date)) return 'Data desconhecida';
+    
+    try {
+      return formatDistanceToNow(date, { 
+        addSuffix: true, 
+        locale: ptBR 
+      });
+    } catch {
+      return 'Data inválida';
     }
   };
 
@@ -68,10 +82,7 @@ export function ShopeeSyncStatus() {
                   {lastSync.status === 'in_progress' && 'Sincronização em andamento...'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(lastSync.started_at), { 
-                    addSuffix: true, 
-                    locale: ptBR 
-                  })}
+                  {getSyncTimeDistance(lastSync.started_at)}
                   {lastSync.orders_synced > 0 && ` • ${lastSync.orders_synced} pedidos`}
                 </p>
               </div>
