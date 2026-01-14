@@ -10,6 +10,14 @@ import {
   Package, 
   ShieldCheck, 
   Zap,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Facebook,
+  Mail,
+  MapPin,
+  Phone
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -157,6 +165,61 @@ export default function Landing() {
 
 
 
+        {/* About Us Section */}
+        <section className="py-24 sm:py-32 bg-background relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-8">
+                <div className="inline-flex items-center rounded-full border border-primary/30 px-4 py-1.5 text-sm font-medium bg-primary/5 text-primary">
+                   Quem somos nós
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-foreground">
+                  Transformando logística em vantagem competitiva
+                </h2>
+                <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+                  <p>
+                    A <span className="font-semibold text-foreground">Estoka</span> nasceu da necessidade de simplificar o complexo. Somos um time de engenheiros, designers e especialistas em logística obcecados por eficiência.
+                  </p>
+                  <p>
+                    Acreditamos que o controle de estoque não deve ser uma dor de cabeça, mas sim o coração pulsante de um negócio saudável. Por isso, desenvolvemos uma plataforma que une inteligência artificial com uma interface humana e intuitiva.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6 pt-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="h-10 w-10 text-primary bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <span className="font-bold text-foreground">Inovação Constante</span>
+                  </div>
+                   <div className="flex flex-col gap-2">
+                    <div className="h-10 w-10 text-primary bg-primary/10 rounded-lg flex items-center justify-center">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <span className="font-bold text-foreground">Transparência Total</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative lg:h-[600px] rounded-3xl overflow-hidden bg-muted border border-border/50 shadow-2xl">
+                 {/* Abstract representation of "About Us" using gradients and shapes since we don't have stock photos ready */}
+                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
+                 
+                 {/* Simulated UI or Graphic */}
+                 <div className="absolute inset-10 border border-primary/10 rounded-2xl bg-background/50 backdrop-blur-sm p-6 flex flex-col gap-4">
+                    <div className="h-8 w-1/3 bg-primary/10 rounded animate-pulse" />
+                    <div className="h-4 w-2/3 bg-muted-foreground/10 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-muted-foreground/10 rounded animate-pulse delay-75" />
+                    <div className="flex-1 rounded-xl bg-gradient-to-tr from-primary/5 to-transparent mt-4 border border-primary/5 relative overflow-hidden">
+                       <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl" />
+                       <div className="absolute top-10 left-10 w-20 h-20 bg-accent/20 rounded-full blur-xl" />
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-24 relative overflow-hidden bg-primary text-primary-foreground">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,20 +249,71 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border/40 py-12 bg-muted/30 text-muted-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-6 font-bold text-2xl text-foreground">
-            <Box className="h-8 w-8 text-primary" />
-            <span>Estoka</span>
+      <footer className="border-t border-border/40 bg-muted/30 pt-16 pb-8 text-muted-foreground">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 font-bold text-2xl text-foreground">
+                <Box className="h-8 w-8 text-primary" />
+                <span>Estoka</span>
+              </div>
+              <p className="text-sm leading-relaxed max-w-xs">
+                A plataforma definitiva para gestão de estoque inteligente. Potencialize seu negócio com tecnologia de ponta.
+              </p>
+              <div className="flex gap-4 pt-2">
+                <Link to="#" className="hover:text-primary transition-colors bg-background p-2 rounded-full border border-border/50 hover:border-primary/50 shadow-sm"><Instagram className="h-5 w-5" /></Link>
+                <Link to="#" className="hover:text-primary transition-colors bg-background p-2 rounded-full border border-border/50 hover:border-primary/50 shadow-sm"><Linkedin className="h-5 w-5" /></Link>
+
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-6">Produto</h3>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="#" className="hover:text-primary transition-colors">Funcionalidades</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Integrações</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Atualizações</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Documentação</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-6">Empresa</h3>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="#" className="hover:text-primary transition-colors">Sobre Nós</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Carreiras</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Blog</Link></li>
+                <li><Link to="#" className="hover:text-primary transition-colors">Contato</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-6">Contato</h3>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>codeworkingbr.contact@gmail.com</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>(11) 94051-2636</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>São Paulo, SP - Brasil</span>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="flex justify-center gap-8 mb-8 text-sm font-medium">
-            <Link to="#" className="hover:text-foreground transition-colors duration-200">Sobre</Link>
-            <Link to="#" className="hover:text-foreground transition-colors duration-200">Funcionalidades</Link>
-            <Link to="#" className="hover:text-foreground transition-colors duration-200">Contato</Link>
+
+          <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+            <p>&copy; {new Date().getFullYear()} Estoka Tecnologia. Todos os direitos reservados.</p>
+            <div className="flex gap-6">
+              <Link to="#" className="hover:text-foreground transition-colors">Termos de Uso</Link>
+              <Link to="#" className="hover:text-foreground transition-colors">Privacidade</Link>
+              <Link to="#" className="hover:text-foreground transition-colors">Segurança</Link>
+            </div>
           </div>
-          <p className="text-sm font-light text-muted-foreground/80">
-            &copy; {new Date().getFullYear()} Estoka Tecnologia. Todos os direitos reservados.
-          </p>
         </div>
       </footer>
     </div>

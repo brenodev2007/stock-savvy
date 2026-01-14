@@ -11,7 +11,7 @@ import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
 import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders } from '@/hooks/useShopee';
 import { useFeatureAccess } from '@/hooks/usePlanLimits';
-import { FeatureLocked } from '@/components/plans/PlanLimitBanner';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,21 +89,6 @@ export default function ShopeeShipments() {
     });
   };
 
-  // Check feature access
-  if (!hasShopeeAccess) {
-    return (
-      <AppLayout
-        title="Envios Shopee"
-        subtitle="Controle e acompanhamento de pedidos da Shopee"
-      >
-        <FeatureLocked 
-          featureName="Integração com Shopee" 
-          planRequired={planRequired}
-          className="mt-8"
-        />
-      </AppLayout>
-    );
-  }
 
   return (
     <AppLayout
