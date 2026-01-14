@@ -74,7 +74,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useCanCreate } from "@/hooks/usePlanLimits";
-import { PlanLimitBanner } from "@/components/plans/PlanLimitBanner";
+
 
 const productSchema = z.object({
   sku: z.string().min(1, "Código é obrigatório").max(50),
@@ -200,7 +200,7 @@ export default function Products() {
 
   return (
     <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
-      <PlanLimitBanner usage={productUsage} resourceName="produtos" className="mb-6" />
+     
       
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex items-center gap-2">
