@@ -45,7 +45,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
-import { Camera, Loader2, Edit2, Zap } from 'lucide-react';
+import { Camera, Loader2, Edit2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -346,18 +346,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between p-4 border rounded-lg bg-secondary/50">
-                <div>
-                  <h3 className="font-medium">Seu Plano Atual</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Você está utilizando o plano <span className="font-bold uppercase text-primary">{profile?.plan || 'Starter'}</span>
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/plans')}>
-                  <Zap className="h-4 w-4" />
-                  Ver Planos
-                </Button>
-              </div>
+
 
               <Separator className="my-6" />
 

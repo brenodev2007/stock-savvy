@@ -155,75 +155,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section className="py-24 sm:py-32 bg-background relative overflow-hidden">
-           {/* Decorative gradients for pricing */}
-           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-           <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-20">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl mb-6 text-foreground">
-                Planos para cada estágio
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Comece grátis e escale conforme seu negócio cresce. Sem contratos ocultos.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <PricingCard 
-                title="Starter" 
-                price="R$ 0" 
-                period="/mês"
-                description="Ideal para quem está começando."
-                features={[
-                  "Até 50 Produtos", 
-                  "1 Usuário (Operador)", 
-                  "Gestão de Estoque Básica", 
-                  "Integração Shopee (Leitura)",
-                  "Calculadora de Markup"
-                ]}
-                buttonText="Começar Grátis"
-                variant="outline"
-              />
-              <PricingCard 
-                title="Pro" 
-                price="R$ 97" 
-                period="/mês"
-                description="Para operações que precisam de agilidade."
-                features={[
-                  "Produtos Ilimitados", 
-                  "Até 3 Usuários", 
-                  "Dashboard Financeiro Completo", 
-                  "Sincronização Shopee Automática", 
-                  "Simulador de Preços Avançado",
-                  "Relatórios PDF/Excel"
-                ]}
-                buttonText="Assinar Pro"
-                variant="primary"
-                popular
-              />
-              <PricingCard 
-                title="Business" 
-                price="R$ 197" 
-                period="/mês"
-                description="Controle total e automação para escala."
-                features={[
-                  "Tudo do Pro", 
-                  "Usuários Ilimitados", 
-                  "Múltiplas Contas Shopee", 
-                  "Gestão de Funcionários/Comissões", 
-                  "DRE e Fluxo de Caixa",
-                  "API de Integração",
-                  "Suporte Prioritário WhatsApp"
-                ]}
-                buttonText="Falar com Vendas"
-                variant="outline"
-              />
-            </div>
-          </div>
-        </section>
 
         {/* CTA Section */}
         <section className="py-24 relative overflow-hidden bg-primary text-primary-foreground">
@@ -242,7 +174,7 @@ export default function Landing() {
                   </Button>
                 </Link>
                 <p className="mt-6 text-primary-foreground/60 text-sm">
-                  Teste grátis de 14 dias no plano Pro. Não requer cartão.
+                  Comece agora mesmo.
                 </p>
               </div>
               
@@ -263,7 +195,6 @@ export default function Landing() {
           <div className="flex justify-center gap-8 mb-8 text-sm font-medium">
             <Link to="#" className="hover:text-foreground transition-colors duration-200">Sobre</Link>
             <Link to="#" className="hover:text-foreground transition-colors duration-200">Funcionalidades</Link>
-            <Link to="#" className="hover:text-foreground transition-colors duration-200">Preços</Link>
             <Link to="#" className="hover:text-foreground transition-colors duration-200">Contato</Link>
           </div>
           <p className="text-sm font-light text-muted-foreground/80">
@@ -290,49 +221,4 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
   );
 }
 
-interface PricingCardProps {
-  title: string;
-  price: string;
-  period: string;
-  description: string;
-  features: string[];
-  buttonText: string;
-  variant?: "primary" | "outline";
-  popular?: boolean;
-}
 
-function PricingCard({ title, price, period, description, features, buttonText, variant = "outline", popular }: PricingCardProps) {
-  return (
-    <div className={`relative flex flex-col p-8 bg-card rounded-2xl border ${popular ? 'border-primary shadow-xl shadow-primary/10 scale-105 z-10' : 'border-border shadow-sm hover:border-primary/30'} transition-all duration-500 hover:shadow-md hover:-translate-y-1 group hover:bg-card/50`}>
-      {popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-sm font-bold px-4 py-1 rounded-full shadow-lg shadow-primary/20">
-          Mais Popular
-        </div>
-      )}
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold mb-2 text-foreground">{title}</h3>
-        <p className="text-muted-foreground mb-6">{description}</p>
-        <div className="flex items-baseline">
-          <span className="text-4xl font-extrabold text-foreground">{price}</span>
-          <span className="text-muted-foreground ml-2">{period}</span>
-        </div>
-      </div>
-      <ul className="space-y-4 mb-8 flex-1">
-        {features.map((feature, i) => (
-          <li key={i} className="flex items-center text-sm text-muted-foreground">
-            <Check className="h-4 w-4 text-primary mr-3 flex-shrink-0" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-      <Link to="/auth" className="mt-auto">
-        <Button 
-          className={`w-full h-12 text-lg font-semibold transition-all hover:scale-[1.02] ${variant === 'outline' ? 'bg-transparent border-input text-foreground hover:bg-secondary hover:text-foreground' : ''}`}
-          variant={variant === "primary" ? "default" : "outline"}
-        >
-          {buttonText}
-        </Button>
-      </Link>
-    </div>
-  );
-}

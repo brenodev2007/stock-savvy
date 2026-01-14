@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
-import { Badge } from '@/components/ui/badge';
+
 
 export function UserProfileMenu() {
   const { profile, roles, signOut } = useAuth();
@@ -32,18 +32,7 @@ export function UserProfileMenu() {
       .slice(0, 2);
   };
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return <Badge variant="default" className="text-[10px] px-1.5 py-0">Admin</Badge>;
-      case 'manager':
-        return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Gerente</Badge>;
-      case 'operator':
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0">Operador</Badge>;
-      default:
-        return null;
-    }
-  };
+
 
   return (
     <DropdownMenu>
@@ -71,13 +60,6 @@ export function UserProfileMenu() {
               <p className="text-xs leading-none text-muted-foreground">
                 {profile?.email}
               </p>
-              {roles.length > 0 && (
-                <div className="flex gap-1 mt-1">
-                  {roles.map((roleObj) => (
-                    <span key={roleObj.id}>{getRoleBadge(roleObj.role)}</span>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </DropdownMenuLabel>
@@ -90,12 +72,6 @@ export function UserProfileMenu() {
           <Settings className="mr-2 h-4 w-4" />
           Configurações
         </DropdownMenuItem>
-        {roles.some((r) => r.role === 'admin') && (
-          <DropdownMenuItem onClick={() => navigate('/settings')}>
-            <Shield className="mr-2 h-4 w-4" />
-            Administração
-          </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
