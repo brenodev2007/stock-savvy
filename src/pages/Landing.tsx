@@ -201,20 +201,15 @@ export default function Landing() {
                 </div>
               </div>
 
-              <div className="relative lg:h-[600px] rounded-3xl overflow-hidden bg-muted border border-border/50 shadow-2xl">
-                 {/* Abstract representation of "About Us" using gradients and shapes since we don't have stock photos ready */}
-                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
+              <div className="relative lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl group">
+                 <img 
+                   src="/stock_management_warehouse.png" 
+                   alt="Armazém moderno e tecnológico" 
+                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                  
-                 {/* Simulated UI or Graphic */}
-                 <div className="absolute inset-10 border border-primary/10 rounded-2xl bg-background/50 backdrop-blur-sm p-6 flex flex-col gap-4">
-                    <div className="h-8 w-1/3 bg-primary/10 rounded animate-pulse" />
-                    <div className="h-4 w-2/3 bg-muted-foreground/10 rounded animate-pulse" />
-                    <div className="h-4 w-1/2 bg-muted-foreground/10 rounded animate-pulse delay-75" />
-                    <div className="flex-1 rounded-xl bg-gradient-to-tr from-primary/5 to-transparent mt-4 border border-primary/5 relative overflow-hidden">
-                       <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl" />
-                       <div className="absolute top-10 left-10 w-20 h-20 bg-accent/20 rounded-full blur-xl" />
-                    </div>
-                 </div>
+                
               </div>
             </div>
           </div>
