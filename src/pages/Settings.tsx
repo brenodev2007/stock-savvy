@@ -81,54 +81,6 @@ export default function Settings() {
   const {
     settings,
     hasChanges,
-    updateSettings,
-    updateNotifications,
-    saveSettings,
-    resetSettings,
-  } = useSettings();
-
-  const [editingName, setEditingName] = useState(profile?.name || '');
-  const [editingCpfCnpj, setEditingCpfCnpj] = useState(profile?.cpf_cnpj || '');
-  const [editingPhone, setEditingPhone] = useState(profile?.phone || '');
-  const [profileHasChanges, setProfileHasChanges] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
-
-  // Email Change States
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [emailStep, setEmailStep] = useState<'input' | 'verify'>('input');
-  const [newEmail, setNewEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
-
-  // Sync profile data when it changes
-  useState(() => {
-    if (profile) {
-      setEditingName(profile.name || '');
-      setEditingCpfCnpj(profile.cpf_cnpj || '');
-      setEditingPhone(profile.phone || '');
-    }
-  });
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success('Sessão encerrada');
-    navigate('/auth');
-  };
-
-  const handleSaveProfile = async () => {
-    if (!user?.id) return;
-    await updateProfile.mutateAsync({ 
-      userId: user.id, 
-      name: editingName,
-      cpf_cnpj: editingCpfCnpj || null,
-      phone: editingPhone || null,
-      avatar_url: uploadedAvatarUrl !== null ? uploadedAvatarUrl : undefined
-    });
-    setProfileHasChanges(false);
-    setUploadedAvatarUrl(null);
-  };
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;

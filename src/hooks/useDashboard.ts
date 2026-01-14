@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/api';
 
 export interface DashboardStats {
   totalProducts: number;
   totalValue: number;
   lowStockCount: number;
-  expiringCount: number;
   movementsToday: number;
   warehousesCount: number;
 }
@@ -14,79 +13,54 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard_stats'],
     queryFn: async () => {
-      // Get total products
-      const { count: totalProducts } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
+      // Get products, warehouses, stock, movements
+      const [productsRes, warehousesRes, stockRes, movementsRes] = await Promise.all([
+        api.get('/products'),
+        api.get('/warehouses'),
+        api.get('/stock/balances'),
+        api.get('/stock/movements')
+      ]);
 
-      // Get active warehouses
-      const { count: warehousesCount } = await supabase
-        .from('warehouses')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+      const products = productsRes.data;
+      const warehouses = warehousesRes.data;
+      const stockBalances = stockRes.data;
+      const movements = movementsRes.data;
 
-      // Get stock balances with product info
-      const { data: stockData } = await supabase
-        .from('stock_balances')
-        .select(`
-          quantity,
-          product:products(id, min_stock, cost)
-        `);
+      // Calculate stats
+      const totalValue = stockBalances.reduce((sum: number, balance: any) => {
+        const product = products.find((p: any) => p.id === balance.product_id);
+        return sum + (balance.quantity * (product?.cost || 0));
+      }, 0);
 
-      // Calculate totals
-      let totalValue = 0;
-      let lowStockCount = 0;
+      // Count low stock
       const productStocks: Record<string, { quantity: number; minStock: number }> = {};
-
-      stockData?.forEach((balance: any) => {
-        if (balance.product) {
-          totalValue += balance.quantity * (balance.product.cost || 0);
-          
-          // Aggregate stock by product
-          if (!productStocks[balance.product.id]) {
-            productStocks[balance.product.id] = {
-              quantity: 0,
-              minStock: balance.product.min_stock || 0,
-            };
+      stockBalances.forEach((balance: any) => {
+        const product = products.find((p: any) => p.id === balance.product_id);
+        if (product) {
+          if (!productStocks[product.id]) {
+            productStocks[product.id] = { quantity: 0, minStock: product.min_stock || 0 };
           }
-          productStocks[balance.product.id].quantity += balance.quantity;
+          productStocks[product.id].quantity += balance.quantity;
         }
       });
 
-      // Count low stock products
-      Object.values(productStocks).forEach((stock) => {
-        if (stock.quantity < stock.minStock) {
-          lowStockCount++;
-        }
-      });
+      const lowStockCount = Object.values(productStocks).filter(
+        (stock) => stock.quantity < stock.minStock
+      ).length;
 
-      // Get movements today
+      // Count today's movements
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
-      const { count: movementsToday } = await supabase
-        .from('stock_movements')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', today.toISOString());
-
-      // Get expiring lots (next 30 days)
-      const thirtyDaysFromNow = new Date();
-      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-      
-      const { count: expiringCount } = await supabase
-        .from('product_lots')
-        .select('*', { count: 'exact', head: true })
-        .lte('expiry_date', thirtyDaysFromNow.toISOString())
-        .gte('expiry_date', new Date().toISOString())
-        .gt('quantity', 0);
+      const movementsToday = movements.filter((m: any) => 
+        new Date(m.created_at) >= today
+      ).length;
 
       return {
-        totalProducts: totalProducts || 0,
+        totalProducts: products.length,
         totalValue,
         lowStockCount,
-        expiringCount: expiringCount || 0,
-        movementsToday: movementsToday || 0,
-        warehousesCount: warehousesCount || 0,
+        movementsToday,
+        warehousesCount: warehouses.length,
       } as DashboardStats;
     },
   });
@@ -96,28 +70,24 @@ export function useLowStockProducts() {
   return useQuery({
     queryKey: ['low_stock_products'],
     queryFn: async () => {
-      const { data: stockData } = await supabase
-        .from('stock_balances')
-        .select(`
-          quantity,
-          product:products(id, name, sku, min_stock, unit)
-        `);
+      const [productsRes, stockRes] = await Promise.all([
+        api.get('/products'),
+        api.get('/stock/balances')
+      ]);
+
+      const products = productsRes.data;
+      const stockBalances = stockRes.data;
 
       // Aggregate by product
-      const productStocks: Record<string, { 
-        product: any; 
-        currentStock: number;
-      }> = {};
+      const productStocks: Record<string, { product: any; currentStock: number }> = {};
 
-      stockData?.forEach((balance: any) => {
-        if (balance.product) {
-          if (!productStocks[balance.product.id]) {
-            productStocks[balance.product.id] = {
-              product: balance.product,
-              currentStock: 0,
-            };
+      stockBalances.forEach((balance: any) => {
+        const product = products.find((p: any) => p.id === balance.product_id);
+        if (product) {
+          if (!productStocks[product.id]) {
+            productStocks[product.id] = { product, currentStock: 0 };
           }
-          productStocks[balance.product.id].currentStock += balance.quantity;
+          productStocks[product.id].currentStock += balance.quantity;
         }
       });
 

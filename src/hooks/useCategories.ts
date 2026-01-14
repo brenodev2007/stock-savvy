@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/api';
 import { toast } from 'sonner';
 
 export interface Category {
@@ -14,12 +14,7 @@ export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
+      const { data } = await api.get('/categories');
       return data as Category[];
     },
   });
@@ -30,21 +25,15 @@ export function useCreateCategory() {
 
   return useMutation({
     mutationFn: async (category: { name: string; description?: string; parent_id?: string }) => {
-      const { data, error } = await supabase
-        .from('categories')
-        .insert(category)
-        .select()
-        .single();
-      
-      if (error) throw error;
+      const { data } = await api.post('/categories', category);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Categoria criada com sucesso');
     },
-    onError: (error) => {
-      toast.error('Erro ao criar categoria: ' + error.message);
+    onError: (error: any) => {
+      toast.error('Erro ao criar categoria: ' + (error.response?.data?.error || error.message));
     },
   });
 }
@@ -54,22 +43,15 @@ export function useUpdateCategory() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string }) => {
-      const { data, error } = await supabase
-        .from('categories')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
+      const { data } = await api.put(`/categories/${id}`, updates);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Categoria atualizada com sucesso');
     },
-    onError: (error) => {
-      toast.error('Erro ao atualizar categoria: ' + error.message);
+    onError: (error: any) => {
+      toast.error('Erro ao atualizar categoria: ' + (error.response?.data?.error || error.message));
     },
   });
 }
@@ -79,19 +61,14 @@ export function useDeleteCategory() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      await api.delete(`/categories/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Categoria excluída com sucesso');
     },
-    onError: (error) => {
-      toast.error('Erro ao excluir categoria: ' + error.message);
+    onError: (error: any) => {
+      toast.error('Erro ao excluir categoria: ' + (error.response?.data?.error || error.message));
     },
   });
 }

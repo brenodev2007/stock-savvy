@@ -1,121 +1,33 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/api';
 import { toast } from 'sonner';
 
 interface Profile {
   id: string;
-  user_id: string;
   name: string;
-  email: string | null;
+  email: string;
   avatar_url: string | null;
   cpf_cnpj?: string | null;
-  phone?: string | null;
-  plan?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface UserRole {
-  id: string;
-  user_id: string;
-  role: 'admin' | 'manager' | 'operator';
-  created_at: string;
-}
-
-interface UserWithRoles extends Profile {
-  roles: UserRole[];
-}
-
-export function useProfiles() {
-  return useQuery({
-    queryKey: ['profiles'],
-    queryFn: async () => {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-
-      // Fetch all roles
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('*');
-
-      // Combine profiles with their roles
-      const usersWithRoles: UserWithRoles[] = profiles.map((profile) => ({
-        ...profile,
-        cpf_cnpj: profile.cpf_cnpj ?? null,
-        phone: (profile as any).phone ?? null,
-        plan: profile.plan ?? null,
-        roles: (roles || []).filter((r) => r.user_id === profile.user_id) as UserRole[],
-      }));
-
-      return usersWithRoles;
-    },
-  });
 }
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, name, avatar_url, cpf_cnpj, phone }: { userId: string; name: string; avatar_url?: string | null; cpf_cnpj?: string | null; phone?: string | null }) => {
-      const updates: any = { 
+    mutationFn: async ({ name, avatar_url, cpf_cnpj }: { name: string; avatar_url?: string | null; cpf_cnpj?: string | null }) => {
+      const { data } = await api.put('/auth/me', {
         name,
-        cpf_cnpj,
-        phone,
-        updated_at: new Date().toISOString() 
-      };
-      
-      if (avatar_url !== undefined) {
-        updates.avatar_url = avatar_url;
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('user_id', userId);
-
-      if (error) throw error;
+        avatar_url,
+        cpf_cnpj
+      });
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Perfil atualizado com sucesso');
     },
-    onError: (error) => {
-      toast.error('Erro ao atualizar perfil: ' + error.message);
-    },
-  });
-}
-
-export function useUpdateUserRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      userId,
-      role,
-    }: {
-      userId: string;
-      role: 'admin' | 'manager' | 'operator';
-    }) => {
-      // First delete existing roles
-      await supabase.from('user_roles').delete().eq('user_id', userId);
-
-      // Then insert new role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profiles'] });
-      toast.success('Papel do usuário atualizado');
-    },
-    onError: (error) => {
-      toast.error('Erro ao atualizar papel: ' + error.message);
+    onError: (error: any) => {
+      toast.error('Erro ao atualizar perfil: ' + (error.response?.data?.error || error.message));
     },
   });
 }

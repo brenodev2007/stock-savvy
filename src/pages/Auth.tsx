@@ -17,7 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Box, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -66,54 +65,16 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
 
-    // Simple email validation regex for initial check
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail);
-    
-    let emailToUse = loginEmail;
-
     setIsLoading(true);
 
-    if (!isEmail) {
-      // Try to find email by CPF/CNPJ using RPC
-      try {
-        const { data, error } = await supabase.rpc('get_email_by_cpf_cnpj' as any, {
-          p_cpf_cnpj: loginEmail
-        });
-
-        if (error) {
-          console.error('Error fetching email by CPF/CNPJ:', error);
-          toast.error("Erro ao verificar credenciais");
-          setIsLoading(false);
-          return;
-        }
-
-        if (data) {
-          emailToUse = data as string;
-        } else {
-          // No email found for this CPF/CNPJ
-          toast.error("CPF/CNPJ não encontrado ou não cadastrado");
-          setIsLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        toast.error("Erro inesperado ao realizar login");
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    const { error } = await signIn(emailToUse, loginPassword);
+    const { error } = await signIn(loginEmail, loginPassword);
     setIsLoading(false);
 
     if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-        toast.error("Usuário ou senha incorretos");
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message || "Erro ao fazer login");
     } else {
       toast.success("Login realizado com sucesso!");
+      navigate("/dashboard");
     }
   };
 
@@ -145,13 +106,10 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
-      if (error.message.includes("already registered")) {
-        toast.error("Este e-mail já está cadastrado");
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message || "Erro ao criar conta");
     } else {
-      toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro antes de fazer login.");
+      toast.success("Conta criada com sucesso!");
+      navigate("/dashboard");
     }
   };
 
@@ -192,22 +150,13 @@ export default function Auth() {
               <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">E-mail ou CNPJ / CPF</Label>
+                    <Label htmlFor="login-email">E-mail</Label>
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="seu@email.com ou 00.000.000/0000-00"
+                      placeholder="seu@email.com"
                       value={loginEmail}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        // Determine if user is typing numbers (CPF/CNPJ) or letters (Email)
-                        // If it starts with a number, apply mask
-                        if (/^\d/.test(val) || val === '') {
-                          setLoginEmail(formatCpfCnpj(val));
-                        } else {
-                          setLoginEmail(val);
-                        }
-                      }}
+                      onChange={(e) => setLoginEmail(e.target.value)}
                       disabled={isLoading}
                     />
                     {errors.email && (
