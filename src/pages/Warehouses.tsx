@@ -7,8 +7,6 @@ import { useStockBalances } from '@/hooks/useStockBalances';
 import { WarehouseForm } from '@/components/warehouses/WarehouseForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useCanCreate } from '@/hooks/usePlanLimits';
-import { PlanLimitBanner } from '@/components/plans/PlanLimitBanner';
 import { toast } from 'sonner';
 
 export default function Warehouses() {
@@ -17,7 +15,6 @@ export default function Warehouses() {
   const createWarehouse = useCreateWarehouse();
   const updateWarehouse = useUpdateWarehouse();
   const deleteWarehouse = useDeleteWarehouse();
-  const { canCreate, message: limitMessage, usage: warehouseUsage } = useCanCreate('warehouses');
   
   const [formOpen, setFormOpen] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
@@ -62,18 +59,11 @@ export default function Warehouses() {
 
   return (
     <AppLayout title="Depósitos" subtitle="Gerencie locais de armazenamento">
-      <PlanLimitBanner usage={warehouseUsage} resourceName="depósitos" className="mb-6" />
       
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">{warehouses?.length || 0} depósito(s) cadastrado(s)</p>
         <Button 
-          disabled={!canCreate}
-          title={limitMessage || undefined}
           onClick={() => { 
-            if (!canCreate) {
-              toast.error(limitMessage);
-              return;
-            }
             setEditingWarehouse(null); 
             setFormOpen(true); 
           }} 
