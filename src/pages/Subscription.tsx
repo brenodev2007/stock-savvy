@@ -2,21 +2,22 @@ import { useState } from "react";
 import { Check, Loader2, ShieldCheck, Zap, BarChart3, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function Subscription() {
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleSubscribe = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { } // no back_url needed if we handle it in edge function or use default
+      const { data } = await api.post('/subscription/checkout', {
+        email: user?.email,
+        back_url: `${window.location.origin}/dashboard?success=true`
       });
-
-      if (error) throw error;
 
       if (data?.init_point) {
         window.location.href = data.init_point;

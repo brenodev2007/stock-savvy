@@ -1,36 +1,23 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/api';
 
-interface Profile {
+interface User {
   id: string;
-  user_id: string;
+  email: string;
   name: string;
-  email: string | null;
-  avatar_url: string | null;
   cpf_cnpj?: string | null;
-  phone?: string | null;
+  avatar_url?: string | null;
+  is_pro?: boolean;
   plan?: string | null;
-}
-
-interface UserRole {
-  id: string;
-  user_id: string;
-  role: 'admin' | 'manager' | 'operator';
+  subscription_status?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  roles: UserRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, name: string, cpfCnpj?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  hasRole: (role: 'admin' | 'manager' | 'operator') => boolean;
-  isAdmin: boolean;
-  isManager: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -38,134 +25,85 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [roles, setRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async () => {
     try {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      if (profileData) {
-        setProfile(profileData);
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setLoading(false);
+        return;
       }
 
-      // Fetch roles
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', userId);
-      
-      if (rolesData) {
-        setRoles(rolesData as UserRole[]);
-      }
+      const { data } = await api.get('/auth/me');
+      setUser(data);
     } catch (error) {
       console.error('Error fetching user data:', error);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer fetching additional data
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserData(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-          setRoles([]);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-      
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    fetchUserData();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const { data } = await api.post('/auth/login', { email, password });
+      
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { error: new Error(error.response?.data?.error || 'Erro ao fazer login') };
+    }
   };
 
   const signUp = async (email: string, password: string, name: string, cpfCnpj?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          name,
-          cpf_cnpj: cpfCnpj,
-        },
-      },
-    });
-    return { error };
+    try {
+      const { data } = await api.post('/auth/register', {
+        email,
+        password,
+        name,
+        cpf_cnpj: cpfCnpj
+      });
+      
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      return { error: new Error(error.response?.data?.error || 'Erro ao registrar') };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
     setUser(null);
-    setSession(null);
-    setProfile(null);
-    setRoles([]);
   };
-
-  const hasRole = (role: 'admin' | 'manager' | 'operator') => {
-    return roles.some(r => r.role === role);
-  };
-
-  const isAdmin = hasRole('admin');
-  const isManager = hasRole('manager') || isAdmin;
 
   const refreshProfile = async () => {
-    if (user?.id) {
-      await fetchUserData(user.id);
-    }
+    await fetchUserData();
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        session,
-        profile,
-        roles,
         loading,
         signIn,
         signUp,
         signOut,
-        hasRole,
-        isAdmin,
-        isManager,
         refreshProfile,
       }}
     >
