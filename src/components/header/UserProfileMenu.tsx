@@ -14,12 +14,12 @@ import { useAuth } from '@/hooks/useAuth';
 
 
 export function UserProfileMenu() {
-  const { profile, roles, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-
+  
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate('/');
   };
 
   const getInitials = (name: string | undefined) => {
@@ -39,9 +39,9 @@ export function UserProfileMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.name} />
+            <AvatarImage src={user?.avatar_url || undefined} alt={user?.name} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              {getInitials(profile?.name)}
+              {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -50,15 +50,15 @@ export function UserProfileMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.name} />
+              <AvatarImage src={user?.avatar_url || undefined} alt={user?.name} />
               <AvatarFallback className="bg-primary text-primary-foreground">
-                {getInitials(profile?.name)}
+                {getInitials(user?.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col space-y-1">
-              <p className="font-medium leading-none">{profile?.name || 'Usuário'}</p>
+              <p className="font-medium leading-none">{user?.name || 'Usuário'}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                {profile?.email}
+                {user?.email}
               </p>
             </div>
           </div>
