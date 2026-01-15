@@ -646,6 +646,8 @@ export function useUpdateShopeeOrder() {
       queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order-edit-history'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
       toast({ title: 'Pedido atualizado com sucesso!' });
     },
     onError: (error: Error) => {
@@ -671,6 +673,8 @@ export function useDeleteShopeeOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
       toast({ title: 'Pedido excluído com sucesso!' });
     },
     onError: (error: Error) => {
@@ -744,6 +748,8 @@ export function useDeleteMultipleShopeeOrders() {
     onSuccess: (_, orderIds) => {
       queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
       queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['financial_summary'] });
       toast({ title: `${orderIds.length} pedido(s) excluído(s) com sucesso!` });
     },
     onError: (error: Error) => {
