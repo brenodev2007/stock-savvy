@@ -14,6 +14,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Box, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -45,6 +54,8 @@ export default function Auth() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginErrorDialog, setShowLoginErrorDialog] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -71,7 +82,8 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
-      toast.error(error.message || "Erro ao fazer login");
+     toast.error("E-mail ou senha incorretos. Por favor, verifique suas credenciais e tente novamente.");
+      setShowLoginErrorDialog(true);
     } else {
       toast.success("Login realizado com sucesso!");
       navigate("/dashboard");
@@ -338,6 +350,26 @@ export default function Auth() {
           </Tabs>
         </Card>
       </div>
+
+      {/* Alert Dialog for Login Error */}
+      <AlertDialog open={showLoginErrorDialog} onOpenChange={setShowLoginErrorDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              Erro ao fazer login
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              {loginErrorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowLoginErrorDialog(false)}>
+              Tentar novamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

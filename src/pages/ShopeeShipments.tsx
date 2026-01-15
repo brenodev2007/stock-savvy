@@ -2,14 +2,14 @@ import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Store } from 'lucide-react';
 import { ShopeeOrdersTable } from '@/components/shopee/ShopeeOrdersTable';
 import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/ShopeeFilters';
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
 import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager';
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
-import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders } from '@/hooks/useShopee';
+import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders, useActiveShopeeAccount } from '@/hooks/useShopee';
 
 
 import {
@@ -47,12 +47,16 @@ export default function ShopeeShipments() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
+  // Get active account
+  const { data: activeAccount } = useActiveShopeeAccount();
+
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
     startDate: filters.startDate,
     endDate: filters.endDate,
     carrier: filters.carrier,
     search: filters.search,
+    accountId: activeAccount?.id, // Filter by active account
   });
 
   const { data: stats, isLoading: statsLoading } = useShopeeOrderStats();
@@ -107,6 +111,16 @@ export default function ShopeeShipments() {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
+            {/* Active Account Indicator */}
+            {activeAccount && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <Store className="h-4 w-4 text-amber-700" />
+                <p className="text-sm text-amber-900">
+                  Exibindo pedidos da conta: <strong>{activeAccount.shop_name}</strong>
+                </p>
+              </div>
+            )}
+            
             {/* Filters and Actions */}
             <div className="flex flex-wrap items-center gap-4">
               <Button variant="outline" onClick={() => setIsFormOpen(true)}>

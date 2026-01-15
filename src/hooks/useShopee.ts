@@ -9,13 +9,37 @@ export function useShopeeAccounts() {
   return useQuery({
     queryKey: ['shopee-accounts'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       const { data, error } = await supabase
         .from('shopee_accounts')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as ShopeeAccount[];
+    },
+  });
+}
+
+export function useActiveShopeeAccount() {
+  return useQuery({
+    queryKey: ['shopee-active-account'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('shopee_accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data as ShopeeAccount | null;
     },
   });
 }
@@ -53,6 +77,67 @@ export function useCreateShopeeAccount() {
   });
 }
 
+export function useDeleteShopeeAccount() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const { error } = await supabase
+        .from('shopee_accounts')
+        .delete()
+        .eq('id', accountId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      toast({ title: 'Conta Shopee deletada com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao deletar conta', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
+export function useSetActiveShopeeAccount() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // First, deactivate all accounts for this user
+      const { error: deactivateError } = await supabase
+        .from('shopee_accounts')
+        .update({ is_active: false })
+        .eq('user_id', user.id);
+
+      if (deactivateError) throw deactivateError;
+
+      // Then, activate the selected account
+      const { error: activateError } = await supabase
+        .from('shopee_accounts')
+        .update({ is_active: true })
+        .eq('id', accountId);
+
+      if (activateError) throw activateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-active-account'] });
+      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
+      toast({ title: 'Conta ativa atualizada com sucesso!' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erro ao definir conta ativa', description: error.message, variant: 'destructive' });
+    },
+  });
+}
+
 // Orders
 export function useShopeeOrders(filters?: {
   status?: ShopeeShipmentStatus;
@@ -65,12 +150,29 @@ export function useShopeeOrders(filters?: {
   return useQuery({
     queryKey: ['shopee-orders', filters],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // First get user's accounts to filter orders
+      const { data: userAccounts } = await supabase
+        .from('shopee_accounts')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const accountIds = userAccounts?.map(acc => acc.id) || [];
+      
+      // If user has no accounts, return empty array
+      if (accountIds.length === 0) {
+        return [];
+      }
+
       let query = supabase
         .from('shopee_orders')
         .select(`
           *,
           account:shopee_accounts(id, shop_name)
         `)
+        .in('account_id', accountIds)
         .order('purchase_date', { ascending: false });
 
       if (filters?.status) {
@@ -104,6 +206,17 @@ export function useShopeeOrder(orderId: string) {
   return useQuery({
     queryKey: ['shopee-order', orderId],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Get user's account IDs first
+      const { data: userAccounts } = await supabase
+        .from('shopee_accounts')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const accountIds = userAccounts?.map(acc => acc.id) || [];
+
       const { data, error } = await (supabase as any)
         .from('shopee_orders')
         .select(`
@@ -113,6 +226,7 @@ export function useShopeeOrder(orderId: string) {
           items:shopee_order_items(*)
         `)
         .eq('id', orderId)
+        .in('account_id', accountIds)
         .maybeSingle();
       
       if (error) throw error;
@@ -127,9 +241,25 @@ export function useShopeeSyncLogs(accountId?: string) {
   return useQuery({
     queryKey: ['shopee-sync-logs', accountId],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Get user's account IDs
+      const { data: userAccounts } = await supabase
+        .from('shopee_accounts')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const accountIds = userAccounts?.map(acc => acc.id) || [];
+
+      if (accountIds.length === 0) {
+        return [];
+      }
+
       let query = supabase
         .from('shopee_sync_logs')
         .select('*')
+        .in('account_id', accountIds)
         .order('started_at', { ascending: false })
         .limit(20);
 
@@ -554,9 +684,32 @@ export function useShopeeOrderStats() {
   return useQuery({
     queryKey: ['shopee-order-stats'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Get user's account IDs
+      const { data: userAccounts } = await supabase
+        .from('shopee_accounts')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const accountIds = userAccounts?.map(acc => acc.id) || [];
+
+      if (accountIds.length === 0) {
+        return {
+          total: 0,
+          aguardandoEnvio: 0,
+          enviado: 0,
+          emTransporte: 0,
+          entregue: 0,
+          cancelado: 0,
+        };
+      }
+
       const { data, error } = await supabase
         .from('shopee_orders')
-        .select('status');
+        .select('status')
+        .in('account_id', accountIds);
       
       if (error) throw error;
 
@@ -604,6 +757,21 @@ export function useShopeeOrderEditHistory(orderId: string) {
   return useQuery({
     queryKey: ['shopee-order-edit-history', orderId],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Verify the order belongs to user's account
+      const { data: order } = await supabase
+        .from('shopee_orders')
+        .select('account_id, account:shopee_accounts(user_id)')
+        .eq('id', orderId)
+        .single();
+
+      // Check if order belongs to user
+      if (!order || (order.account as any)?.user_id !== user.id) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('shopee_order_edit_history')
         .select('*')
