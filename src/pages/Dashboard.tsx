@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: lowStockProducts } = useLowStockProducts();
-  const { data: recentMovements } = useMovements(5);
+  const { data: recentMovements } = useMovements();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
@@ -26,17 +26,40 @@ export default function Dashboard() {
     );
   }
 
-  // Transform data for components
+  // lowStockProducts already has the correct type from hook
   const lowStockFormatted = lowStockProducts?.map((p) => ({
-    id: p.id, name: p.name, sku: p.sku, unit: p.unit, minStock: p.min_stock, currentStock: p.currentStock,
-    createdAt: new Date(), updatedAt: new Date(), cost: 0, price: 0,
+    id: p.id,
+    name: p.name,
+    sku: p.sku,
+    unit: p.unit,
+    minStock: p.min_stock,
+    currentStock: p.currentStock,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    cost: p.cost,
+    price: p.price,
   })) || [];
 
   const movementsFormatted = recentMovements?.map((m) => ({
-    id: m.id, productId: m.product_id, quantity: m.quantity, type: m.type,
-    userId: m.user_id, reason: m.reason, reference: m.reference,
+    id: m.id,
+    productId: m.product_id,
+    quantity: m.quantity,
+    type: m.type,
+    userId: m.user_id,
+    reason: m.reason,
+    reference: m.reference,
     timestamp: new Date(m.created_at),
-    product: m.product ? { id: m.product.id, sku: m.product.sku, name: m.product.name, unit: 'un', cost: 0, price: 0, minStock: 0, createdAt: new Date(), updatedAt: new Date() } : undefined,
+    product: m.product ? {
+      id: m.product.id,
+      sku: m.product.sku,
+      name: m.product.name,
+      unit: 'un',
+      cost: 0,
+      price: 0,
+      minStock: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } : undefined,
   })) || [];
 
   return (

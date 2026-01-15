@@ -1,4 +1,0 @@
-ALTER TABLE public.profiles 
-ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT false,
-ADD COLUMN IF NOT EXISTS subscription_id TEXT,
-ADD COLUMN IF NOT EXISTS subscription_status TEXT;

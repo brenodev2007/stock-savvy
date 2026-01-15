@@ -29,6 +29,29 @@ export function useFinancialTransactions() {
   });
 }
 
+export interface FinancialSummary {
+  revenue: number;
+  costs: number;
+  expenses: number;
+  cashBalance: number;
+  chartData: Array<{
+    name: string;
+    vendas: number;
+    lucro: number;
+  }>;
+  recentTransactions: FinancialTransaction[];
+}
+
+export function useFinancialSummary() {
+  return useQuery({
+    queryKey: ['financial_summary'],
+    queryFn: async () => {
+      const { data } = await api.get('/finance/summary');
+      return data as FinancialSummary;
+    },
+  });
+}
+
 export function useCreateFinancialTransaction() {
   const queryClient = useQueryClient();
 

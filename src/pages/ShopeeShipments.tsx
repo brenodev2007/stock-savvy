@@ -10,7 +10,7 @@ import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
 import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders } from '@/hooks/useShopee';
-import { useFeatureAccess } from '@/hooks/usePlanLimits';
+
 
 import {
   AlertDialog,
@@ -34,7 +34,6 @@ import {
 const ITEMS_PER_PAGE = 10;
 
 export default function ShopeeShipments() {
-  const { hasAccess: hasShopeeAccess, planRequired } = useFeatureAccess('shopee');
   
   const [filters, setFilters] = useState<ShopeeFiltersState>({
     search: '',

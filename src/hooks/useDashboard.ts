@@ -9,6 +9,17 @@ export interface DashboardStats {
   warehousesCount: number;
 }
 
+export interface LowStockProduct {
+  id: string;
+  name: string;
+  sku: string;
+  unit: string;
+  min_stock: number;
+  currentStock: number;
+  cost: number;
+  price: number;
+}
+
 export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard_stats'],
@@ -91,13 +102,19 @@ export function useLowStockProducts() {
         }
       });
 
-      // Filter low stock
+      // Filter low stock and return with proper types
       return Object.values(productStocks)
         .filter((item) => item.currentStock < item.product.min_stock)
         .map((item) => ({
-          ...item.product,
+          id: item.product.id,
+          name: item.product.name,
+          sku: item.product.sku,
+          unit: item.product.unit,
+          min_stock: item.product.min_stock,
+          cost: item.product.cost,
+          price: item.product.price,
           currentStock: item.currentStock,
-        }));
+        } as LowStockProduct));
     },
   });
 }

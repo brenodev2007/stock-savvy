@@ -30,7 +30,7 @@ import {
   Product,
 } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
-import { useStockByProduct } from "@/hooks/useStockBalances";
+import { useStockBalances } from "@/hooks/useStockBalances";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -100,7 +100,7 @@ const units = [
 export default function Products() {
   const { data: products, isLoading } = useProducts();
   const { data: categories } = useCategories();
-  const { data: stockByProduct } = useStockByProduct();
+  const { data: stockBalances } = useStockBalances();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -283,7 +283,7 @@ export default function Products() {
           </thead>
           <tbody>
             {filteredProducts?.map((product) => {
-              const stock = stockByProduct?.[product.id] ?? 0;
+              const stock = stockBalances?.filter(b => b.product_id === product.id).reduce((sum, b) => sum + b.quantity, 0) ?? 0;
               const isLowStock = stock < product.min_stock;
               const isOutOfStock = stock === 0;
               return (
@@ -387,7 +387,7 @@ export default function Products() {
           </div>
         ) : (
           filteredProducts?.map((product) => {
-            const stock = stockByProduct?.[product.id] ?? 0;
+            const stock = stockBalances?.filter(b => b.product_id === product.id).reduce((sum, b) => sum + b.quantity, 0) ?? 0;
             const isLowStock = stock < product.min_stock;
             const isOutOfStock = stock === 0;
             return (
