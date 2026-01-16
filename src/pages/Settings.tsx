@@ -12,6 +12,7 @@ import { LogOut, Save, User, Mail, CreditCard, Package, AlertCircle, CheckCircle
 import { useAuth } from '@/hooks/useAuth';
 import { useUpdateProfile } from '@/hooks/useProfiles';
 import { toast } from 'sonner';
+import { SubscriptionManager } from '@/components/subscription/SubscriptionManager';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -224,6 +225,9 @@ export default function Settings() {
             )}
           </CardContent>
         </Card>
+
+        {/* Subscription Management */}
+        <SubscriptionManager />
 
         {/* Session & System Cards */}
         <div className="grid gap-6 sm:grid-cols-2">

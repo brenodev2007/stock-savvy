@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SidebarProvider } from "@/hooks/useSidebar";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RootGuard } from "@/components/auth/RootGuard";
 import { lazy, Suspense } from "react";
@@ -30,44 +31,46 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <SidebarProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <Suspense
-              fallback={
-                <div className="flex h-screen items-center justify-center bg-background">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              }
+      <SubscriptionProvider>
+        <SidebarProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
             >
-              <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<RootGuard />} />
-              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-              <Route path="/movements" element={<ProtectedRoute><Movements /></ProtectedRoute>} />
-              <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
-              <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-              <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
-              <Route path="/shopee/callback" element={<ShopeeCallback />} />
-              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-              <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+              <Suspense
+                fallback={
+                  <div className="flex h-screen items-center justify-center bg-background">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<RootGuard />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+                <Route path="/movements" element={<ProtectedRoute><Movements /></ProtectedRoute>} />
+                <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
+                <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+                <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
+                <Route path="/shopee/callback" element={<ShopeeCallback />} />
+                <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
 
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </SidebarProvider>
+                <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </SidebarProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
