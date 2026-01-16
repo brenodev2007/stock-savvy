@@ -30,8 +30,8 @@ export default function Subscription() {
     try {
       setLoading(true);
       const { data } = await api.post('/subscription/create', {
-        email: user?.email,
-        back_url: `${window.location.origin}/subscription?success=true`
+        email: user?.email
+        // back_url is optional - backend will use a default valid URL
       });
 
       if (data?.init_point) {
