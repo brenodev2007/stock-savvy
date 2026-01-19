@@ -266,17 +266,6 @@ export function SubscriptionManager() {
                 <span className="text-4xl font-bold">R$ 10,00</span>
                 <span className="text-muted-foreground">/mês</span>
               </div>
-
-              {!isPro && (
-                <div className="bg-primary/5 rounded-lg p-3 text-center my-4">
-                  <p className="text-primary font-medium text-sm">
-                    ✨ Experimente 14 dias grátis
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Cancele a qualquer momento durante o período de teste
-                  </p>
-                </div>
-              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-3">

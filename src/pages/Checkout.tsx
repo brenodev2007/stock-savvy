@@ -77,19 +77,13 @@ export default function Checkout() {
 
           {/* Conteúdo */}
           <div className="p-8">
-            {/* Badge de Trial */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full mb-6">
-              <CheckCircle className="h-5 w-5" />
-              <span className="font-semibold">14 dias grátis para testar</span>
-            </div>
-
             {/* Preço */}
             <div className="mb-8">
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-5xl font-bold text-gray-900">R$ 10,00</span>
                 <span className="text-gray-500 text-lg">/mês</span>
               </div>
-              <p className="text-gray-600">Após o período de teste gratuito</p>
+              <p className="text-gray-600">Cobrança mensal recorrente</p>
             </div>
 
             {/* Benefícios */}
