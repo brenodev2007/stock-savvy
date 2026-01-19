@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { EnvironmentBadge } from '@/components/ui/environment-badge';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<any>(null);
+  const [environment, setEnvironment] = useState<'development' | 'production'>('development');
 
   useEffect(() => {
     // Busca informações do usuário
@@ -28,10 +30,19 @@ export default function Checkout() {
     try {
       const response = await api.post('/payments/create', {
         plan: 'pro',
-        amount: 50.00
+        amount: 10.00
       });
 
       if (response.data.success && response.data.checkout_url) {
+        // Captura o ambiente da resposta
+        if (response.data.environment) {
+          setEnvironment(response.data.environment);
+          localStorage.setItem('mp_environment', JSON.stringify({
+            environment: response.data.environment,
+            isSandbox: response.data.sandbox
+          }));
+        }
+        
         // Redireciona para o checkout do Mercado Pago
         window.location.href = response.data.checkout_url;
       } else {
@@ -52,12 +63,15 @@ export default function Checkout() {
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header com gradiente */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="h-12 w-12" />
-              <div>
-                <h1 className="text-3xl font-bold">Stock Savvy Pro</h1>
-                <p className="text-blue-100 text-sm">Gestão profissional de estoque</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Shield className="h-12 w-12" />
+                <div>
+                  <h1 className="text-3xl font-bold">Stock Savvy Pro</h1>
+                  <p className="text-blue-100 text-sm">Gestão profissional de estoque</p>
+                </div>
               </div>
+              <EnvironmentBadge environment={environment} className="bg-white/20 border-white/40" />
             </div>
           </div>
 
@@ -72,7 +86,7 @@ export default function Checkout() {
             {/* Preço */}
             <div className="mb-8">
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl font-bold text-gray-900">R$ 0,01</span>
+                <span className="text-5xl font-bold text-gray-900">R$ 10,00</span>
                 <span className="text-gray-500 text-lg">/mês</span>
               </div>
               <p className="text-gray-600">Após o período de teste gratuito</p>

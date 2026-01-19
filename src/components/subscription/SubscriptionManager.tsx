@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { EnvironmentBadge } from '@/components/ui/environment-badge';
 
 export function SubscriptionManager() {
   const { subscription, limits, isPro, refreshSubscription } = useSubscription();
@@ -39,6 +40,7 @@ export function SubscriptionManager() {
   const [loading, setLoading] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [environment, setEnvironment] = useState<'development' | 'production'>('development');
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -140,9 +142,12 @@ export function SubscriptionManager() {
                   {isCancelled && `Cancelado em ${formatDate(subscription?.subscription_end)}`}
                 </CardDescription>
               </div>
-              <Badge variant={getStatusVariant() as any}>
-                {getStatusLabel()}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge variant={getStatusVariant() as any}>
+                  {getStatusLabel()}
+                </Badge>
+                <EnvironmentBadge environment={environment} />
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -151,7 +156,7 @@ export function SubscriptionManager() {
                 <CreditCard className="h-8 w-8 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Valor Mensal</p>
-                  <p className="font-semibold">R$ {subscription?.amount?.toFixed(2) || '0,01'}</p>
+                  <p className="font-semibold">R$ {subscription?.amount?.toFixed(2) || '10,00'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -258,7 +263,7 @@ export function SubscriptionManager() {
               </CardTitle>
               <CardDescription>Para negócios em crescimento</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">R$ 0,01</span>
+                <span className="text-4xl font-bold">R$ 10,00</span>
                 <span className="text-muted-foreground">/mês</span>
               </div>
 
