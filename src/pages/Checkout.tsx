@@ -72,7 +72,7 @@ export default function Checkout() {
             {/* Preço */}
             <div className="mb-8">
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl font-bold text-gray-900">R$ 50</span>
+                <span className="text-5xl font-bold text-gray-900">R$ 0,01</span>
                 <span className="text-gray-500 text-lg">/mês</span>
               </div>
               <p className="text-gray-600">Após o período de teste gratuito</p>
