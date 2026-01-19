@@ -93,7 +93,7 @@ export default function Settings() {
   };
 
   return (
-    <AppLayout title="Configurações" subtitle="Gerencie seu perfil e preferências do sistema">
+    <AppLayout title="Configurações e Assinatura" subtitle="Gerencie seu perfil, plano e preferências do sistema">
       <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Profile Header Card */}
         <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5">

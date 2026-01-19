@@ -20,11 +20,14 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Finance = lazy(() => import("./pages/Finance"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Subscription = lazy(() => import("./pages/Subscription"));
 
 const ShopeeShipments = lazy(() => import("./pages/ShopeeShipments"));
 const ShopeeCallback = lazy(() => import("./pages/ShopeeCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const PaymentFailure = lazy(() => import("./pages/PaymentFailure"));
+const PaymentPending = lazy(() => import("./pages/PaymentPending"));
 
 const queryClient = new QueryClient();
 
@@ -62,7 +65,15 @@ const App = () => (
                 <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                 <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+                
+                {/* Redirect /subscription to /settings - subscription management is now in Settings page */}
+                <Route path="/subscription" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                
+                {/* Payment Routes */}
+                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/failure" element={<PaymentFailure />} />
+                <Route path="/payment/pending" element={<PaymentPending />} />
 
                 <Route path="*" element={<NotFound />} />
                 </Routes>
