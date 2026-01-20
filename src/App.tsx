@@ -33,18 +33,18 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SubscriptionProvider>
-        <SidebarProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <AuthProvider>
+        <SubscriptionProvider>
+          <SidebarProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
               <Suspense
                 fallback={
                   <div className="flex h-screen items-center justify-center bg-background">
@@ -53,36 +53,36 @@ const App = () => (
                 }
               >
                 <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<RootGuard />} />
-                <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-                <Route path="/movements" element={<ProtectedRoute><Movements /></ProtectedRoute>} />
-                <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
-                <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-                <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
-                <Route path="/shopee/callback" element={<ShopeeCallback />} />
-                <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                
-                {/* Redirect /subscription to /settings - subscription management is now in Settings page */}
-                <Route path="/subscription" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                
-                {/* Payment Routes */}
-                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                <Route path="/payment/success" element={<PaymentSuccess />} />
-                <Route path="/payment/failure" element={<PaymentFailure />} />
-                <Route path="/payment/pending" element={<PaymentPending />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/" element={<RootGuard />} />
+                  <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                  <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+                  <Route path="/movements" element={<ProtectedRoute><Movements /></ProtectedRoute>} />
+                  <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
+                  <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+                  <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
+                  <Route path="/shopee/callback" element={<ShopeeCallback />} />
+                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                  <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  
+                  {/* Redirect /subscription to /settings - subscription management is now in Settings page */}
+                  <Route path="/subscription" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  
+                  {/* Payment Routes */}
+                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payment/failure" element={<PaymentFailure />} />
+                  <Route path="/payment/pending" element={<PaymentPending />} />
 
-                <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SidebarProvider>
-      </SubscriptionProvider>
-    </AuthProvider>
+            </TooltipProvider>
+          </SidebarProvider>
+        </SubscriptionProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
