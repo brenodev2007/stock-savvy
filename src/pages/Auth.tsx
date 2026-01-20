@@ -46,6 +46,7 @@ const signupSchema = z
     email: z.string().email("E-mail inválido"),
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z.string(),
+    secretKeyword: z.string().min(3, "Palavra-chave deve ter pelo menos 3 caracteres"),
     cpfCnpj: z.string().optional().refine((val) => !val || isValidCpfCnpj(val), {
       message: "CPF ou CNPJ inválido",
     }),
@@ -57,7 +58,7 @@ const signupSchema = z
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, signIn, signUp, forgotPassword, loading: authLoading } = useAuth();
+  const { user, signIn, signUp, resetPassword, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -72,10 +73,13 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [signupSecretKeyword, setSignupSecretKeyword] = useState("");
   const [signupCpfCnpj, setSignupCpfCnpj] = useState("");
   
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordSecretKeyword, setForgotPasswordSecretKeyword] = useState("");
+  const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState("");
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
   useEffect(() => {
@@ -111,6 +115,7 @@ export default function Auth() {
       email: signupEmail,
       password: signupPassword,
       confirmPassword: signupConfirmPassword,
+      secretKeyword: signupSecretKeyword,
       cpfCnpj: signupCpfCnpj,
     });
 
@@ -126,7 +131,7 @@ export default function Auth() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(signupEmail, signupPassword, signupName, signupCpfCnpj);
+    const { error } = await signUp(signupEmail, signupPassword, signupName, signupSecretKeyword, signupCpfCnpj);
     setIsLoading(false);
 
     if (error) {
@@ -140,15 +145,17 @@ export default function Auth() {
   const handleForgotPasswordRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotPasswordLoading(true);
-    const { error, message } = await forgotPassword(forgotPasswordEmail);
+    const { error, message } = await resetPassword(forgotPasswordEmail, forgotPasswordSecretKeyword, forgotPasswordNewPassword);
     setForgotPasswordLoading(false);
     
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success(message || "Link de recuperação enviado! Verifique seu e-mail.");
+      toast.success(message || "Senha redefinida com sucesso!");
       setIsForgotPasswordOpen(false);
       setForgotPasswordEmail("");
+      setForgotPasswordSecretKeyword("");
+      setForgotPasswordNewPassword("");
     }
   };
 
@@ -308,6 +315,19 @@ export default function Auth() {
                     </div>
                   </div>
 
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-secret-keyword">Palavra-chave Secreta (Recuperação)</Label>
+                      <Input
+                        id="signup-secret-keyword"
+                        placeholder="Ex: Nome do primeiro pet"
+                        value={signupSecretKeyword}
+                        onChange={(e) => setSignupSecretKeyword(e.target.value)}
+                        disabled={isLoading}
+                      />
+                      {errors.secretKeyword && <p className="text-xs text-destructive">{errors.secretKeyword}</p>}
+                    </div>
+
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">E-mail Corporativo</Label>
                     <Input
@@ -399,7 +419,7 @@ export default function Auth() {
           <DialogHeader>
             <DialogTitle>Recuperar Senha</DialogTitle>
             <DialogDescription>
-              Digite seu e-mail abaixo para receber um link de redefinição de senha.
+              Preencha os dados abaixo e sua palavra-chave secreta para redefinir sua senha.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleForgotPasswordRequest} className="space-y-4">
@@ -412,6 +432,28 @@ export default function Auth() {
                 value={forgotPasswordEmail}
                 onChange={(e) => setForgotPasswordEmail(e.target.value)}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="forgot-keyword">Palavra-chave Secreta</Label>
+              <Input
+                id="forgot-keyword"
+                placeholder="Sua palavra-chave de segurança"
+                value={forgotPasswordSecretKeyword}
+                onChange={(e) => setForgotPasswordSecretKeyword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="forgot-new-password">Nova Senha</Label>
+              <Input
+                id="forgot-new-password"
+                type="password"
+                placeholder="••••••••"
+                value={forgotPasswordNewPassword}
+                onChange={(e) => setForgotPasswordNewPassword(e.target.value)}
+                required
+                minLength={6}
               />
             </div>
             <DialogFooter>
