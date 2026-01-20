@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Box, Loader2, AlertCircle, Eye, EyeOff, Check, ArrowRight, Quote } from "lucide-react";
+import { Box, Loader2, AlertCircle, Eye, EyeOff, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -168,7 +168,7 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen w-full lg:grid lg:grid-cols-2 bg-background">
+    <div className="h-screen w-full lg:grid lg:grid-cols-2 bg-background overflow-hidden">
       {/* Left side - Visual Branding */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-primary dark:text-primary-foreground relative overflow-hidden">
         {/* Background Gradients */}
@@ -225,7 +225,13 @@ export default function Auth() {
       </div>
 
       {/* Right side - Form */}
-      <div className="flex items-center justify-center p-4 lg:p-12 overflow-y-auto">
+      <div className="h-full flex flex-col items-center p-8 lg:p-12 overflow-y-auto">
+        <div className="w-full max-w-md mb-8">
+           <Button variant="ghost" className="-ml-4 gap-2 text-muted-foreground hover:text-foreground" onClick={() => navigate("/")}>
+             <ArrowLeft className="h-4 w-4" />
+             Voltar para o início
+           </Button>
+        </div>
         <div className="w-full max-w-md space-y-8">
            <div className="text-center lg:text-left space-y-2">
              <div className="lg:hidden flex justify-center mb-6">
