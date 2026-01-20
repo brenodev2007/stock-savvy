@@ -61,7 +61,7 @@ export default function PaymentSuccess() {
 
           {/* Descrição */}
           <p className="text-xl text-gray-600 mb-8">
-            Bem-vindo ao <span className="font-bold text-green-600">Stock Savvy Pro</span>!
+            Bem-vindo ao <span className="font-bold text-green-600">Estoka Pro</span>!
           </p>
 
           {/* Informações */}
