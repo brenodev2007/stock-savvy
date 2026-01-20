@@ -27,6 +27,17 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/auth';
     }
+
+    if (error.response?.status === 403 && error.response?.data?.upgrade_required) {
+      // Dispara evento global para abrir modal de upgrade
+      const event = new CustomEvent('upgrade-required', { 
+        detail: { 
+          message: error.response.data.message || 'Faça upgrade para acessar este recurso',
+          feature: 'Limite do Plano'
+        } 
+      });
+      window.dispatchEvent(event);
+    }
     return Promise.reject(error);
   }
 );

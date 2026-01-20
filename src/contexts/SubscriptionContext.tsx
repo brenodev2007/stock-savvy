@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { UpgradePromptModal } from '@/components/subscription/UpgradePromptModal';
 
 export interface SubscriptionData {
   id?: string;
@@ -58,6 +59,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalFeature, setModalFeature] = useState('');
+  const [modalDescription, setModalDescription] = useState('');
+
   const fetchSubscription = async () => {
     try {
       if (!user) {
@@ -86,11 +92,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    const handleUpgradeRequired = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setModalFeature('Limite Atingido');
+      setModalDescription(customEvent.detail?.message || 'Faça upgrade para acessar este recurso.');
+      setModalOpen(true);
+    };
+
+    window.addEventListener('upgrade-required', handleUpgradeRequired);
+
     if (user) {
       fetchSubscription();
     } else {
       setLoading(false);
     }
+
+    return () => {
+      window.removeEventListener('upgrade-required', handleUpgradeRequired);
+    };
   }, [user]);
 
   const refreshSubscription = async () => {
@@ -98,8 +117,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   };
 
   const upgradePrompt = (feature: string) => {
-    console.log(`Upgrade required for: ${feature}`);
-    // This will be handled by individual components showing modals
+    setModalFeature(feature);
+    setModalDescription('');
+    setModalOpen(true);
   };
 
   const isPro = subscription?.is_pro && ['active', 'trial'].includes(subscription?.status || '');
@@ -125,6 +145,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      <UpgradePromptModal 
+        open={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        feature={modalFeature} 
+        description={modalDescription}
+      />
     </SubscriptionContext.Provider>
   );
 }
