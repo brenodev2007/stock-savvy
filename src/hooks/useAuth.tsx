@@ -17,6 +17,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, name: string, cpfCnpj?: string) => Promise<{ error: Error | null }>;
+  forgotPassword: (email: string) => Promise<{ error: Error | null; message?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -86,6 +87,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const forgotPassword = async (email: string) => {
+    try {
+      const { data } = await api.post('/auth/forgot-password', { email });
+      return { error: null, message: data.message };
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      return { error: new Error(error.response?.data?.error || 'Erro ao solicitar recuperação de senha') };
+    }
+  };
+
   const signOut = async () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
@@ -103,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signIn,
         signUp,
+        forgotPassword,
         signOut,
         refreshProfile,
       }}

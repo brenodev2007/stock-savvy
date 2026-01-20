@@ -23,7 +23,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Box, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Box, Loader2, AlertCircle, Eye, EyeOff, Check, ArrowRight, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -49,7 +57,7 @@ const signupSchema = z
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, signIn, signUp, loading: authLoading } = useAuth();
+  const { user, signIn, signUp, forgotPassword, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -65,6 +73,10 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [signupCpfCnpj, setSignupCpfCnpj] = useState("");
+  
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -125,7 +137,20 @@ export default function Auth() {
     }
   };
 
-
+  const handleForgotPasswordRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordLoading(true);
+    const { error, message } = await forgotPassword(forgotPasswordEmail);
+    setForgotPasswordLoading(false);
+    
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(message || "Link de recuperação enviado! Verifique seu e-mail.");
+      setIsForgotPasswordOpen(false);
+      setForgotPasswordEmail("");
+    }
+  };
 
   if (authLoading) {
     return (
@@ -136,31 +161,86 @@ export default function Auth() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo */}
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-            <Box className="h-8 w-8 text-primary-foreground" />
+    <div className="min-h-screen w-full lg:grid lg:grid-cols-2 bg-background">
+      {/* Left side - Visual Branding */}
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-primary dark:text-primary-foreground relative overflow-hidden">
+        {/* Background Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-blue-600"></div>
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
+        
+        <div className="relative z-10 text-white">
+          <div className="flex items-center gap-2 font-bold text-2xl mb-12">
+            <div className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+               <Box className="h-6 w-6 text-white" />
+            </div>
+            <span>Estoka</span>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-foreground">Estoka</h1>
-          <p className="text-muted-foreground">Sistema de Gestão de Estoque</p>
+          
+          <div className="space-y-6 max-w-lg">
+            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
+              Gerencie seu estoque com inteligência.
+            </h1>
+            <p className="text-xl text-white/80 font-light">
+              A plataforma completa para empresas que querem crescer sem perder o controle.
+            </p>
+          </div>
         </div>
 
-        <Card className="border-border/50 shadow-lg">
+        <div className="relative z-10 text-white mt-12">
+           <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-lg">
+             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+               Por que escolher o Estoka?
+             </h3>
+             <ul className="space-y-4">
+               <li className="flex items-center gap-3">
+                 <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                   <Check className="h-4 w-4" />
+                 </div>
+                 <span className="text-white/90">Controle total de produtos e armazéns</span>
+               </li>
+               <li className="flex items-center gap-3">
+                 <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                   <Check className="h-4 w-4" />
+                 </div>
+                 <span className="text-white/90">Relatórios financeiros detalhados</span>
+               </li>
+               <li className="flex items-center gap-3">
+                 <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                   <Check className="h-4 w-4" />
+                 </div>
+                 <span className="text-white/90">Segurança de dados e backups diários</span>
+               </li>
+             </ul>
+           </div>
+        </div>
+      </div>
+
+      {/* Right side - Form */}
+      <div className="flex items-center justify-center p-4 lg:p-12 overflow-y-auto">
+        <div className="w-full max-w-md space-y-8">
+           <div className="text-center lg:text-left space-y-2">
+             <div className="lg:hidden flex justify-center mb-6">
+               <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
+                 <Box className="h-6 w-6 text-white" />
+               </div>
+             </div>
+             <h2 className="text-3xl font-bold tracking-tight">Bem-vindo de volta</h2>
+             <p className="text-muted-foreground">
+               Acesse sua conta para gerenciar seu negócio.
+             </p>
+           </div>
+
           <Tabs defaultValue="login" className="w-full">
-            <CardHeader className="pb-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
-              </TabsList>
-            </CardHeader>
-              
-
-
-            <TabsContent value="login" className="mt-0">
-              <form onSubmit={handleLogin}>
-                <CardContent className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1">
+              <TabsTrigger value="login" className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">Cadastro</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login" className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">E-mail</Label>
                     <Input
@@ -170,16 +250,15 @@ export default function Auth() {
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       disabled={isLoading}
+                      className="h-11"
                     />
-                    {errors.email && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.email}
-                      </p>
-                    )}
+                    {errors.email && <p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.email}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Senha</Label>
+                     <div className="flex items-center justify-between">
+                       <Label htmlFor="login-password">Senha</Label>
+                       <Button variant="link" className="px-0 h-auto text-xs text-primary" type="button" onClick={() => setIsForgotPasswordOpen(true)}>Esqueceu a senha?</Button>
+                     </div>
                     <Input
                       id="login-password"
                       type="password"
@@ -187,168 +266,110 @@ export default function Auth() {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       disabled={isLoading}
+                      className="h-11"
                     />
-                    {errors.password && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.password}
-                      </p>
-                    )}
+                    {errors.password && <p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.password}</p>}
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Entrar
-                  </Button>
-                </CardFooter>
+                </div>
+
+                <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                  Entrar na Plataforma
+                </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="mt-0">
-              <form onSubmit={handleSignup}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Razão Social</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Nome da empresa"
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                      disabled={isLoading}
-                    />
-                    {errors.name && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.name}
-                      </p>
-                    )}
+            <TabsContent value="signup" className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+              <form onSubmit={handleSignup} className="space-y-5">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">Razão Social</Label>
+                      <Input
+                        id="signup-name"
+                        placeholder="Nome da empresa"
+                        value={signupName}
+                        onChange={(e) => setSignupName(e.target.value)}
+                        disabled={isLoading}
+                      />
+                      {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-cpf-cnpj">CNPJ / CPF</Label>
+                      <Input
+                        id="signup-cpf-cnpj"
+                        placeholder="000.000.000-00"
+                        value={signupCpfCnpj}
+                        onChange={(e) => setSignupCpfCnpj(formatCpfCnpj(e.target.value))}
+                        disabled={isLoading}
+                        maxLength={18}
+                      />
+                      {errors.cpfCnpj && <p className="text-xs text-destructive">{errors.cpfCnpj}</p>}
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="signup-cpf-cnpj">CNPJ / CPF</Label>
-                    <Input
-                      id="signup-cpf-cnpj"
-                      type="text"
-                      placeholder="00.000.000/0000-00"
-                      value={signupCpfCnpj}
-                      onChange={(e) => setSignupCpfCnpj(formatCpfCnpj(e.target.value))}
-                      disabled={isLoading}
-                      maxLength={18}
-                    />
-                    {errors.cpfCnpj && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.cpfCnpj}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail</Label>
+                    <Label htmlFor="signup-email">E-mail Corporativo</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="seu@email.com"
+                      placeholder="seu@empresa.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       disabled={isLoading}
                     />
-                    {errors.email && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.email}
-                      </p>
-                    )}
+                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        disabled={isLoading}
-                        className="pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className="sr-only">
-                          {showPassword ? "Ocultar senha" : "Mostrar senha"}
-                        </span>
-                      </Button>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Senha</Label>
+                      <div className="relative">
+                        <Input
+                          id="signup-password"
+                          type={showPassword ? "text" : "password"}
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                          disabled={isLoading}
+                          className="pr-8"
+                        />
+                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground">
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                         </button>
+                      </div>
+                      {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                     </div>
-                    {errors.password && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.password}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm-password">
-                      Confirmar Senha
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={signupConfirmPassword}
-                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                        disabled={isLoading}
-                        className="pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className="sr-only">
-                          {showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
-                        </span>
-                      </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-confirm-password">Confirmar</Label>
+                      <div className="relative">
+                        <Input
+                          id="signup-confirm-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={signupConfirmPassword}
+                          onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                          disabled={isLoading}
+                          className="pr-8"
+                        />
+                         <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground">
+                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                         </button>
+                      </div>
+                      {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
                     </div>
-                    {errors.confirmPassword && (
-                      <p className="text-sm text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.confirmPassword}
-                      </p>
-                    )}
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Criar Conta
-                  </Button>
-                </CardFooter>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  Ao criar uma conta, você concorda com nossos <a href="#" className="underline hover:text-primary">Termos de Serviço</a> e <a href="#" className="underline hover:text-primary">Política de Privacidade</a>.
+                </div>
+
+                <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Criar Conta Gratuita"}
+                </Button>
               </form>
             </TabsContent>
           </Tabs>
-        </Card>
+        </div>
       </div>
 
       {/* Alert Dialog for Login Error */}
@@ -360,7 +381,7 @@ export default function Auth() {
               Erro ao fazer login
             </AlertDialogTitle>
             <AlertDialogDescription className="text-left">
-              {loginErrorMessage}
+              {loginErrorMessage || "Verifique suas credenciais e tente novamente."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -370,6 +391,39 @@ export default function Auth() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      
+      {/* Forgot Password Dialog */}
+      <Dialog open={isForgotPasswordOpen} onOpenChange={setIsForgotPasswordOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Recuperar Senha</DialogTitle>
+            <DialogDescription>
+              Digite seu e-mail abaixo para receber um link de redefinição de senha.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgotPasswordRequest} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="forgot-email">E-mail</Label>
+              <Input
+                id="forgot-email"
+                type="email"
+                placeholder="seu@email.com"
+                value={forgotPasswordEmail}
+                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsForgotPasswordOpen(false)}>Cancelar</Button>
+              <Button type="submit" disabled={forgotPasswordLoading}>
+                {forgotPasswordLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Enviar Link
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
