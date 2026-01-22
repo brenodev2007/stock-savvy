@@ -28,6 +28,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentFailure = lazy(() => import("./pages/PaymentFailure"));
 const PaymentPending = lazy(() => import("./pages/PaymentPending"));
+const ShopeeRoiSimulator = lazy(() => import("./pages/ShopeeRoiSimulator"));
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
                   <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
                   <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
                   <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
+                  <Route path="/shopee/roi-simulator" element={<ProtectedRoute><ShopeeRoiSimulator /></ProtectedRoute>} />
                   <Route path="/shopee/callback" element={<ShopeeCallback />} />
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
