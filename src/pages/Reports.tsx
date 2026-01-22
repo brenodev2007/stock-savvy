@@ -24,14 +24,12 @@ import {
   Cell,
   LineChart,
   Line,
-  ResponsiveContainer,
   Tooltip,
-  Legend,
 } from 'recharts';
-import { format, subDays, startOfDay, parseISO } from 'date-fns';
+import { format, startOfDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Package, TrendingUp, DollarSign, FolderTree, Calendar as CalendarIcon } from 'lucide-react';
+import { Package, TrendingUp, DollarSign, FolderTree, Calendar as CalendarIcon, ShoppingBag, Warehouse } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -59,6 +57,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { useShopeeOrders } from '@/hooks/useShopee';
+import { FinanceReport } from '@/components/reports/FinanceReport';
+import { ShopeeReport } from '@/components/reports/ShopeeReport';
+import { WarehouseReport } from '@/components/reports/WarehouseReport';
 
 const COLORS = [
   'hsl(var(--primary))',
@@ -96,6 +99,12 @@ export default function Reports() {
   });
   const { data: stockBalances, isLoading: loadingStock } = useStockBalances();
   const { data: categories, isLoading: loadingCategories } = useCategories();
+  
+  // Fetch shopee orders for export
+  const { data: shopeeOrders } = useShopeeOrders({ 
+    startDate: dateRange.start, 
+    endDate: dateRange.end 
+  });
 
   const isLoading = loadingProducts || loadingMovements || loadingStock || loadingCategories;
 
@@ -302,6 +311,23 @@ export default function Reports() {
         'Qtd Produtos': cat.count,
         'Valor em Estoque': cat.value
       }));
+    } else if (activeTab === 'shopee') {
+      filename = 'relatorio-shopee';
+      data = shopeeOrders?.map(o => ({
+        'Pedido ID': o.order_sn,
+        'Data Compra': format(new Date(o.purchase_date), 'dd/MM/yyyy HH:mm'),
+        'Produto': o.product_name,
+        'SKU': o.sku,
+        'Valor': o.order_total,
+        'Status': o.status,
+        'Rastreio': o.tracking_code || '-',
+        'Transportadora': o.carrier || '-'
+      })) || [];
+      if (data.length === 0) data = [{ Mensagem: "Sem pedidos encontrados no período selecionado." }];
+    } else {
+        // For other custom reports
+        data = [{ Mensagem: "Exportação detalhada disponível nas abas padrão. Para análises avançadas, consulte os cards." }];
+        filename = `relatorio-${activeTab}`;
     }
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -314,7 +340,9 @@ export default function Reports() {
     const doc = new jsPDF();
     const title = activeTab === 'stock' ? 'Saldo de Estoque' :
                  activeTab === 'movements' ? 'Movimentações' :
-                 activeTab === 'value' ? 'Valor do Estoque' : 'Relatório por Categoria';
+                 activeTab === 'value' ? 'Valor do Estoque' : 
+                 activeTab === 'categories' ? 'Relatório por Categoria' :
+                 `Relatório - ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`;
     
     doc.text(title, 14, 20);
     doc.setFontSize(10);
@@ -357,6 +385,10 @@ export default function Reports() {
         cat.count.toString(),
         cat.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
       ]);
+    } else {
+         doc.text("Exportação detalhada para esta aba ainda não implementada.", 14, 40);
+         doc.save(`${title.toLowerCase().replace(/\s/g, '-')}.pdf`);
+         return;
     }
 
     autoTable(doc, {
@@ -394,29 +426,35 @@ export default function Reports() {
     <AppLayout title="Relatórios" subtitle="Análises e exportações de dados">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-          <div className="flex justify-between items-center">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto max-w-[800px]">
-              <TabsTrigger value="stock" className="gap-2 py-3">
-                <Package className="h-4 w-4" />
-                <span className="hidden sm:inline">Saldo de Estoque</span>
-                <span className="sm:hidden">Estoque</span>
-              </TabsTrigger>
-              <TabsTrigger value="movements" className="gap-2 py-3">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">Movimentações</span>
-                <span className="sm:hidden">Movim.</span>
-              </TabsTrigger>
-              <TabsTrigger value="value" className="gap-2 py-3">
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Valor do Estoque</span>
-                <span className="sm:hidden">Valor</span>
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="gap-2 py-3">
-                <FolderTree className="h-4 w-4" />
-                <span className="hidden sm:inline">Por Categoria</span>
-                <span className="sm:hidden">Categ.</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="flex justify-between items-center flex-wrap gap-4">
+             <div className="w-full overflow-x-auto no-scrollbar pb-2">
+                <TabsList className="h-auto p-1 inline-flex w-auto min-w-full md:min-w-0 justify-start">
+                  <TabsTrigger value="stock" className="gap-2 py-2">
+                    <Package className="h-4 w-4" />
+                    <span>Estoque</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="movements" className="gap-2 py-2">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Movim.</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="finance" className="gap-2 py-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Financeiro</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="shopee" className="gap-2 py-2">
+                    <ShoppingBag className="h-4 w-4" />
+                    <span>Shopee</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="warehouses" className="gap-2 py-2">
+                     <Warehouse className="h-4 w-4" />
+                     <span>Armazéns</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="categories" className="gap-2 py-2">
+                    <FolderTree className="h-4 w-4" />
+                    <span>Categorias</span>
+                  </TabsTrigger>
+                </TabsList>
+             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -435,6 +473,18 @@ export default function Reports() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          <TabsContent value="finance" className="space-y-6 animate-fade-in">
+             <FinanceReport />
+          </TabsContent>
+
+          <TabsContent value="shopee" className="space-y-6 animate-fade-in">
+             <ShopeeReport />
+          </TabsContent>
+
+          <TabsContent value="warehouses" className="space-y-6 animate-fade-in">
+             <WarehouseReport />
+          </TabsContent>
 
           {/* Stock Balance Tab */}
           <TabsContent value="stock" className="space-y-6">
@@ -576,7 +626,7 @@ export default function Reports() {
 
         {/* Stock Value Tab */}
         <TabsContent value="value" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
               <CardHeader className="pb-2">
                 <CardDescription>Custo Total do Estoque</CardDescription>

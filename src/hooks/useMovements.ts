@@ -31,11 +31,15 @@ export interface StockMovement {
   };
 }
 
-export function useMovements() {
+export function useMovements(filters?: { startDate?: Date; endDate?: Date }) {
   return useQuery({
-    queryKey: ['movements'],
+    queryKey: ['movements', filters],
     queryFn: async () => {
-      const { data } = await api.get('/stock/movements');
+      const params = new URLSearchParams();
+      if (filters?.startDate) params.append('startDate', filters.startDate.toISOString());
+      if (filters?.endDate) params.append('endDate', filters.endDate.toISOString());
+      
+      const { data } = await api.get(`/stock/movements?${params.toString()}`);
       return data as StockMovement[];
     },
   });

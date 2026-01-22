@@ -13,6 +13,7 @@ import {
   X,
   Truck,
   LineChart,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
   { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
   { name: "Vendas", href: "/shopee", icon: Truck },
+  { name: "Tráfego Pago", href: "/shopee/roi-simulator", icon: Calculator },
   { name: "Financeiro", href: "/finance", icon: LineChart },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
