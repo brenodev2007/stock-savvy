@@ -1,5 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
+import { SetupGuide } from '@/components/dashboard/SetupGuide';
 import { LowStockAlert } from '@/components/dashboard/LowStockAlert';
 import { RecentMovements } from '@/components/dashboard/RecentMovements';
 import { Package, DollarSign, AlertTriangle, ArrowLeftRight, Warehouse } from 'lucide-react';
@@ -64,6 +65,14 @@ export default function Dashboard() {
 
   return (
     <AppLayout title="Dashboard" subtitle="Visão geral do estoque">
+      <div className="mb-6">
+        <SetupGuide 
+          hasWarehouses={(stats?.warehousesCount || 0) > 0} 
+          hasProducts={(stats?.totalProducts || 0) > 0} 
+          hasMovements={(stats?.totalValue || 0) > 0} 
+        />
+      </div>
+
       <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
         <StatCard title="Total de Produtos" value={stats?.totalProducts || 0} icon={Package} />
         <StatCard title="Total em Dinheiro" value={formatCurrency(stats?.totalValue || 0)} icon={DollarSign} variant="primary" />

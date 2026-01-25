@@ -65,6 +65,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCanCreate } from "@/hooks/usePlanLimits";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,83 +76,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UpgradePromptModal } from "@/components/subscription/UpgradePromptModal";
 
-export default function Products() {
-  // ... existing hooks
-  const { data: products, isLoading } = useProducts();
-  const { data: categories } = useCategories();
-  const { data: stockBalances } = useStockBalances();
-  const createProduct = useCreateProduct();
-  const updateProduct = useUpdateProduct();
-  const deleteProduct = useDeleteProduct();
-  const { canCreate, message: limitMessage, usage: productUsage } = useCanCreate('products');
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [categoryFormOpen, setCategoryFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const createCategory = useCreateCategory();
-
-  // ... rest of the component
-
-  // Ensure button is not disabled
-  // Update onClick handler
-
-  return (
-    <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
-      
-      <div className="mb-6 flex flex-col gap-4">
-        {/* ... search and filters ... */}
-        
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              if (!canCreate) {
-                setUpgradeModalOpen(true);
-                return;
-              }
-              setEditingProduct(null);
-              form.reset();
-              setFormOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Produto
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              setEditingCategory(null);
-              setCategoryFormOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Nova Categoria
-          </Button>
-        </div>
-      </div>
-
-      {/* ... list and tables ... */}
-
-      {/* Dialogs */}
-      
-      <UpgradePromptModal
-        open={upgradeModalOpen}
-        onClose={() => setUpgradeModalOpen(false)}
-        feature="Cadastrar Produtos"
-        description={limitMessage || "Você atingiu o limite de produtos do seu plano atual."}
-      />
-
-      <Dialog
-        open={formOpen}
-        // ...
-
+const productSchema = z.object({
   sku: z.string().min(1, "Código é obrigatório").max(50),
   name: z.string().min(1, "Nome é obrigatório").max(200),
   description: z.string().max(500).optional(),
@@ -188,6 +113,7 @@ export default function Products() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const createCategory = useCreateCategory();
 
   const form = useForm({
