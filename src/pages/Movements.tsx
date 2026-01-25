@@ -362,6 +362,7 @@ export default function Movements() {
         onSubmit={handleSubmit}
         isLoading={createMovement.isPending || updateMovement.isPending}
         initialData={editingMovement}
+        onTypeChange={setMovementType}
       />
 
       <AlertDialog

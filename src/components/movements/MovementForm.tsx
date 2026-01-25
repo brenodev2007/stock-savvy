@@ -100,7 +100,8 @@ export function MovementForm({
   onSubmit,
   isLoading,
   initialData,
-}: MovementFormProps) {
+  onTypeChange,
+}: MovementFormProps & { onTypeChange?: (type: MovementType) => void }) {
   const config = movementConfig[type];
   const Icon = config.icon;
 
@@ -182,6 +183,33 @@ export function MovementForm({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <FormItem>
+                <FormLabel>Tipo de Movimentação</FormLabel>
+                <Select
+                  value={type}
+                  onValueChange={(value) => onTypeChange?.(value as MovementType)}
+                  disabled={!onTypeChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(movementConfig).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <config.icon className={`h-4 w-4 ${config.color.split(' ')[0]}`} />
+                          <span>{config.title}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            </div>
+
             <FormField
               control={form.control}
               name="product_id"
