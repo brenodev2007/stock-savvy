@@ -22,12 +22,14 @@ import { useEffect } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Produtos", href: "/products", icon: Package },
-  { name: "Entrada e Saída", href: "/movements", icon: ArrowLeftRight },
-  { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
-  { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
   { name: "Vendas", href: "/shopee", icon: Truck },
   { name: "Tráfego Pago", href: "/shopee/roi-simulator", icon: Calculator },
+  { name: "Produtos", href: "/products", icon: Package },
+  // Estoque Group
+  { name: "Entrada e Saída", href: "/movements", icon: ArrowLeftRight },
+  { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
+  { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
+  
   { name: "Financeiro", href: "/finance", icon: LineChart },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
