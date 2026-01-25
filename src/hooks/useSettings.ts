@@ -8,6 +8,10 @@ interface AppSettings {
     expiringLots: boolean;
     dailyEmail: boolean;
   };
+  shopee: {
+    taxPercentage: number;
+    taxFixed: number;
+  };
 }
 
 const STORAGE_KEY = 'app_settings';
@@ -19,6 +23,10 @@ const defaultSettings: AppSettings = {
     lowStock: true,
     expiringLots: true,
     dailyEmail: false,
+  },
+  shopee: {
+    taxPercentage: 20,
+    taxFixed: 4,
   },
 };
 
