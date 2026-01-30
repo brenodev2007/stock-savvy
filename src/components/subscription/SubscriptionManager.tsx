@@ -156,7 +156,7 @@ export function SubscriptionManager() {
                 <CreditCard className="h-8 w-8 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Valor Mensal</p>
-                  <p className="font-semibold">R$ {Number(subscription?.amount || 24.99).toFixed(2)}</p>
+                  <p className="font-semibold">R$ {Number(subscription?.amount || 0.01).toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ export function SubscriptionManager() {
               </CardTitle>
               <CardDescription>Para negócios em crescimento</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">R$ 24,99</span>
+                <span className="text-4xl font-bold">R$ 0,01</span>
                 <span className="text-muted-foreground">/mês</span>
               </div>
             </CardHeader>

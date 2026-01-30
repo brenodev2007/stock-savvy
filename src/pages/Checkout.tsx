@@ -56,7 +56,7 @@ export default function Checkout() {
     try {
       const response = await api.post('/payments/create', {
         plan: 'pro',
-        amount: 24.99
+        amount: 0.01
       });
 
       if (response.data.success && response.data.checkout_url) {
@@ -131,7 +131,7 @@ export default function Checkout() {
                 {/* Preço */}
                 <div className="bg-background/60 rounded-xl p-6 border border-border/50">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-5xl sm:text-6xl font-bold text-foreground">R$ 24,99</span>
+                    <span className="text-5xl sm:text-6xl font-bold text-foreground">R$ 0,01</span>
                     <span className="text-xl text-muted-foreground">/mês</span>
                   </div>
                   <p className="text-muted-foreground flex items-center gap-2 mt-2">

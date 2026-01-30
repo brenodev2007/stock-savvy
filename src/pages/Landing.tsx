@@ -188,7 +188,7 @@ export default function Landing() {
                   </CardHeader>
                   <CardContent>
                     <div className="mb-6 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">R$ 24,99</span>
+                      <span className="text-4xl font-bold">R$ 0,01</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <ul className="space-y-3 text-sm font-medium">
@@ -328,7 +328,7 @@ export default function Landing() {
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-lg">Como funciona o pagamento do plano Pro?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground text-base">
-                  O plano Pro custa apenas R$ 24,99 mensais. Aceitamos pagamentos via cartão de crédito e PIX através da plataforma segura do Mercado Pago.
+                  O plano Pro custa apenas R$ 0,01 mensais. Aceitamos pagamentos via cartão de crédito e PIX através da plataforma segura do Mercado Pago.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
