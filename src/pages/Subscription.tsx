@@ -123,7 +123,7 @@ export default function Subscription() {
                   <CreditCard className="h-8 w-8 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Valor Mensal</p>
-                    <p className="font-semibold">R$ {subscription?.amount?.toFixed(2) || '0,01'}</p>
+                    <p className="font-semibold">R$ {subscription?.amount?.toFixed(2) || '5,00'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

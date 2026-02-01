@@ -328,7 +328,7 @@ export default function Landing() {
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-lg">Como funciona o pagamento do plano Pro?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground text-base">
-                  O plano Pro custa apenas R$ 0,01 mensais. Aceitamos pagamentos via cartão de crédito e PIX através da plataforma segura do Mercado Pago.
+                  O plano Pro custa apenas R$ 5,00 mensais. Aceitamos pagamentos via cartão de crédito e PIX através da plataforma segura do Mercado Pago.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">

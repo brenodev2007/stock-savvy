@@ -66,7 +66,7 @@ export function UpgradePromptModal({ open, onClose, feature, description }: Upgr
 
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-3xl font-bold">R$ 0,01</span>
+              <span className="text-3xl font-bold">R$ 5,00</span>
               <span className="text-muted-foreground">/mês</span>
             </div>
             <p className="text-sm text-primary font-medium">
