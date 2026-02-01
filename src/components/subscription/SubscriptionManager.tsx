@@ -263,8 +263,8 @@ export function SubscriptionManager() {
               </CardTitle>
               <CardDescription>Para negócios em crescimento</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">R$ 0,01</span>
-                <span className="text-muted-foreground">/mês</span>
+                <span className="text-4xl font-bold">R$ 5,00</span>
+                <span className="text-muted-foreground"> por 30 dias</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

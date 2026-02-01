@@ -31,11 +31,12 @@ export default function Subscription() {
       setLoading(true);
       const { data } = await api.post('/subscription/create', {
         email: user?.email
-        // back_url is optional - backend will use a default valid URL
       });
 
       if (data?.init_point) {
         window.location.href = data.init_point;
+      } else if (data?.sandbox_init_point) {
+        window.location.href = data.sandbox_init_point;
       } else {
         throw new Error("Não foi possível gerar o link de pagamento.");
       }
@@ -227,17 +228,17 @@ export default function Subscription() {
               </CardTitle>
               <CardDescription>Para negócios em crescimento</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">R$ 0,01</span>
-                <span className="text-muted-foreground">/mês</span>
+                <span className="text-4xl font-bold">R$ 5,00</span>
+                <span className="text-muted-foreground"> por 30 dias</span>
               </div>
               
               {!isPro && (
                 <div className="bg-primary/5 rounded-lg p-3 text-center my-4">
                   <p className="text-primary font-medium text-sm">
-                    ✨ Experimente 14 dias grátis
+                    💳 Pagamento único
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Cancele a qualquer momento durante o período de teste
+                    Acesso Pro por 30 dias - Todos os métodos de pagamento
                   </p>
                 </div>
               )}
@@ -295,7 +296,7 @@ export default function Subscription() {
                       Processando...
                     </>
                   ) : (
-                    "Assinar Agora (Teste Grátis)"
+                    "Pagar R$ 5,00 - 30 Dias Pro"
                   )}
                 </Button>
               )}
