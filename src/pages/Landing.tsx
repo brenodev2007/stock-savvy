@@ -188,7 +188,7 @@ export default function Landing() {
                   </CardHeader>
                   <CardContent>
                     <div className="mb-6 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">R$ 0,01</span>
+                      <span className="text-4xl font-bold">R$ 5,00</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <ul className="space-y-3 text-sm font-medium">
