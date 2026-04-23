@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from "@/lib/utils";
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,10 @@ import { LogOut, Save, User, Mail, CreditCard, Package, AlertCircle, CheckCircle
 import { useAuth } from '@/hooks/useAuth';
 import { useUpdateProfile } from '@/hooks/useProfiles';
 import { toast } from 'sonner';
+import { useNotifications, useMarkAllAsRead } from '@/hooks/useNotifications';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Bell, BellOff, Loader2 } from 'lucide-react';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -21,6 +26,8 @@ export default function Settings() {
   const [name, setName] = useState(user?.name || '');
   const [cpfCnpj, setCpfCnpj] = useState(user?.cpf_cnpj || '');
   const [hasChanges, setHasChanges] = useState(false);
+  const { data: notifications, isLoading: loadingNotifs } = useNotifications();
+  const markAllRead = useMarkAllAsRead();
 
   const handleNameChange = (value: string) => {
     setName(value);
@@ -228,58 +235,91 @@ export default function Settings() {
 
 
         {/* Session & System Cards */}
-        <div className="grid gap-6 sm:grid-cols-2">
-          {/* Logout Card */}
-          <Card className="border-destructive/20">
+        {/* Notifications and Session Row */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Internal Notifications */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  Notificações
+                </CardTitle>
+                <CardDescription>Avisos e mensagens do sistema</CardDescription>
+              </div>
+              {notifications && notifications.some(n => !n.read) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs"
+                  onClick={() => markAllRead.mutate()}
+                >
+                  Marcar todas como lidas
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {loadingNotifs ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                    <p>Carregando notificações...</p>
+                  </div>
+                ) : !notifications || notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                    <BellOff className="h-8 w-8 mb-2 opacity-20" />
+                    <p>Nenhuma notificação por enquanto</p>
+                  </div>
+                ) : (
+                  notifications.map((notif) => (
+                    <div 
+                      key={notif.id} 
+                      className={cn(
+                        "p-4 rounded-lg border transition-colors",
+                        notif.read ? "bg-background border-border/50" : "bg-primary/5 border-primary/20 shadow-sm"
+                      )}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="space-y-1">
+                          <p className={cn("font-medium", !notif.read && "text-primary")}>{notif.title}</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{notif.message}</p>
+                        </div>
+                        <span className="text-[10px] whitespace-nowrap text-muted-foreground font-medium">
+                          {format(new Date(notif.created_at), "dd MMM, HH:mm", { locale: ptBR })}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Session Card */}
+          <Card className="border-destructive/20 h-fit bg-destructive/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
                 <LogOut className="h-5 w-5" />
                 Sessão
               </CardTitle>
               <CardDescription>
-                Encerre sua sessão atual no sistema
+                Encerre sua conexão com o sistema com segurança
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <Separator className="bg-destructive/10" />
               <Button 
                 variant="destructive" 
                 onClick={handleSignOut}
-                className="w-full"
+                className="w-full shadow-lg shadow-destructive/20"
                 size="lg"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sair da Conta
               </Button>
-            </CardContent>
-          </Card>
-
-          {/* System Info Card */}
-          <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Sistema
-              </CardTitle>
-              <CardDescription>
-                Informações sobre o sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Versão</span>
-                <Badge variant="secondary">2.0.0</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Backend</span>
-                <Badge variant="outline">Node.js + TypeORM</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge className="bg-green-500 hover:bg-green-600">
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Operacional
-                </Badge>
-              </div>
+              <p className="text-[10px] text-center text-muted-foreground uppercase tracking-wider font-bold">
+                Versão do Sistema: 2.1.0
+              </p>
             </CardContent>
           </Card>
         </div>
