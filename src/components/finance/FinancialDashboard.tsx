@@ -30,7 +30,7 @@ import {
   Download
 } from "lucide-react";
 import { useFinancialSummary } from "@/hooks/useFinancialTransactions";
-import { useShopeeOrderStats } from "@/hooks/useShopee";
+
 import { useFinance } from "@/contexts/FinanceContext";
 import { useMemo, useState } from "react";
 import { TransactionForm } from "./TransactionForm";
@@ -44,7 +44,7 @@ import { Separator } from "@/components/ui/separator";
 export function FinancialDashboard() {
   const { employees } = useFinance();
   const { data: summary, isLoading } = useFinancialSummary();
-  const { data: shopeeStats } = useShopeeOrderStats();
+
   const [showTransactionForm, setShowTransactionForm] = useState(false);
 
   const totalPayroll = useMemo(() => 
@@ -76,7 +76,7 @@ export function FinancialDashboard() {
 
   const pieData = useMemo(() => [
     { name: 'Produtos (CMV)', value: metrics.costs, color: '#3b82f6' },
-    { name: 'Despesas/Folha', value: metrics.expenses, color: '#ef4444' },
+    { name: 'Despesas/Folha', value: metrics.expenses, color: '#f43f5e' },
     { name: 'Lucro Líquido', value: Math.max(0, metrics.profit), color: '#10b981' },
   ], [metrics]);
 
@@ -101,7 +101,7 @@ export function FinancialDashboard() {
             <h2 className="text-2xl font-bold tracking-tight">Painel de Performance</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Relatório consolidado de vendas Shopee, estoque e custos operacionais
+            Relatório consolidado de vendas, estoque e fluxo de caixa operacional
           </p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -117,12 +117,12 @@ export function FinancialDashboard() {
       {/* KPIs com Design Premium */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Faturamento Bruto', value: metrics.revenue, icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50', trend: 'Vendas Diretas' },
-          { label: 'Lucro Líquido', value: metrics.profit, icon: Wallet, color: metrics.profit >= 0 ? 'text-emerald-600' : 'text-red-600', bg: metrics.profit >= 0 ? 'bg-emerald-50' : 'bg-red-50', trend: 'Resultado Final' },
-          { label: 'Margem Operacional', value: `${metrics.margin.toFixed(1)}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Eficiência' },
-          { label: 'Saldo em Caixa', value: metrics.cashBalance, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'Liquidez' }
+          { label: 'Receita Bruta', value: metrics.revenue, icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50/50', trend: 'Faturamento' },
+          { label: 'Lucro Líquido', value: metrics.profit, icon: Wallet, color: metrics.profit >= 0 ? 'text-emerald-600' : 'text-rose-600', bg: metrics.profit >= 0 ? 'bg-emerald-50/50' : 'bg-rose-50/50', trend: 'Resultado' },
+          { label: 'Margem Líquida', value: `${metrics.margin.toFixed(1)}%`, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50/50', trend: 'Eficiência' },
+          { label: 'Saldo de Caixa', value: metrics.cashBalance, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50/50', trend: 'Liquidez' }
         ].map((kpi, i) => (
-          <Card key={i} className="overflow-hidden border-none shadow-md ring-1 ring-border/50">
+          <Card key={i} className="overflow-hidden border-none shadow-lg shadow-black/5 bg-gradient-to-br from-white to-gray-50/50 dark:from-zinc-900 dark:to-zinc-950">
             <CardContent className="p-6">
               <div className="flex justify-between items-start">
                 <div className={cn("p-2 rounded-lg", kpi.bg)}>

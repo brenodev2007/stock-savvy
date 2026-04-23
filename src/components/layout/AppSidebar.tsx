@@ -24,8 +24,8 @@ import { useEffect } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Vendas", href: "/shopee", icon: Truck },
-  { name: "Calculadora de ROI", href: "/roi-calculator", icon: Calculator },
+  { name: "Vendas", href: "/shops", icon: Truck },
+  { name: "Simulações", href: "/simulations", icon: Calculator },
   { name: "Produtos", href: "/products", icon: Package },
   // Estoque Group
   { name: "Entrada e Saída", href: "/movements", icon: ArrowLeftRight },

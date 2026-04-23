@@ -14,15 +14,17 @@ import {
   Filter,
   Download,
   MoreVertical,
-  Zap
+  Zap,
+  ShoppingCart,
+  LineChart
 } from 'lucide-react';
 import { ShopeeOrdersTable } from '@/components/shopee/ShopeeOrdersTable';
 import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/ShopeeFilters';
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
-import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager';
+
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
-import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders, useActiveShopeeAccount } from '@/hooks/useShopee';
+import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders } from '@/hooks/useShopee';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -61,14 +63,12 @@ export default function ShopeeShipments() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
-  const { data: activeAccount } = useActiveShopeeAccount();
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
     startDate: filters.startDate,
     endDate: filters.endDate,
     carrier: filters.carrier,
     search: filters.search,
-    accountId: activeAccount?.id,
   });
 
   const { data: stats, isLoading: statsLoading } = useShopeeOrderStats();
@@ -158,7 +158,7 @@ export default function ShopeeShipments() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <TabsList className="bg-muted/50 p-1">
               <TabsTrigger value="orders" className="gap-2"><ShoppingCart className="h-4 w-4" /> Meus Pedidos</TabsTrigger>
-              <TabsTrigger value="accounts" className="gap-2"><Store className="h-4 w-4" /> Contas Conectadas</TabsTrigger>
+
               <TabsTrigger value="analytics" className="gap-2"><BarChart3 className="h-4 w-4" /> Analytics</TabsTrigger>
             </TabsList>
             
@@ -173,22 +173,7 @@ export default function ShopeeShipments() {
           </div>
 
           <TabsContent value="orders" className="space-y-6 animate-in fade-in duration-500">
-            {activeAccount && (
-              <div className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-full">
-                    <Store className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm">Loja Ativa: {activeAccount.shop_name}</h4>
-                    <p className="text-xs text-muted-foreground">Sincronizado há 5 minutos</p>
-                  </div>
-                </div>
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                  <Zap className="h-3 w-3 mr-1 fill-emerald-700" /> API Conectada
-                </Badge>
-              </div>
-            )}
+
 
             <Card className="border-none shadow-md overflow-hidden">
               <CardHeader className="bg-muted/30 border-b pb-4">
@@ -247,17 +232,7 @@ export default function ShopeeShipments() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="accounts">
-             <Card className="border-none shadow-md">
-                <CardHeader>
-                  <CardTitle>Lojas Conectadas</CardTitle>
-                  <CardDescription>Gerencie suas lojas e credenciais de API</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ShopeeAccountsManager />
-                </CardContent>
-             </Card>
-          </TabsContent>
+
 
           <TabsContent value="analytics" className="h-[400px] flex flex-col items-center justify-center text-center space-y-4 bg-muted/20 rounded-xl border-2 border-dashed">
             <BarChart3 className="h-16 w-16 text-muted-foreground opacity-20" />
