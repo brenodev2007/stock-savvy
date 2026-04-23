@@ -14,10 +14,12 @@ import {
   Truck,
   LineChart,
   Calculator,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/useSidebar";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 
 const navigation = [
@@ -39,8 +41,8 @@ const bottomNavigation = [
 ];
 
 export function AppSidebar() {
-  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } =
-    useSidebar();
+  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } = useSidebar();
+  const { user } = useAuth();
   const location = useLocation();
 
   // Close mobile sidebar on route change
@@ -106,6 +108,24 @@ export function AppSidebar() {
 
       {/* Bottom navigation */}
       <div className="border-t border-sidebar-border px-2 py-4">
+        {user?.role === 'admin' && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors mb-1",
+                collapsed && !isMobile ? "justify-center" : "",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-primary"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )
+            }
+            title={collapsed && !isMobile ? "Admin" : undefined}
+          >
+            <Shield className="h-5 w-5 flex-shrink-0" />
+            {(!collapsed || isMobile) && <span>Admin</span>}
+          </NavLink>
+        )}
         {bottomNavigation.map((item) => (
           <NavLink
             key={item.name}

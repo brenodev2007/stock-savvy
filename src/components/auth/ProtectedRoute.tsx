@@ -5,9 +5,10 @@ import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireAdmin?: boolean;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -27,6 +28,24 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return null;
+  }
+
+  if (!user.is_active) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-background p-4 text-center">
+        <h2 className="text-2xl font-bold mb-2">Conta Inativa</h2>
+        <p className="text-muted-foreground mb-4">Sua conta está inativa ou aguardando aprovação do administrador.</p>
+      </div>
+    );
+  }
+
+  if (requireAdmin && user.role !== 'admin') {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-background p-4 text-center">
+        <h2 className="text-2xl font-bold text-destructive mb-2">Acesso Negado</h2>
+        <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
+      </div>
+    );
   }
 
   return <>{children}</>;

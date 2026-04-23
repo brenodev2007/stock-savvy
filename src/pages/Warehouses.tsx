@@ -8,7 +8,6 @@ import { WarehouseForm } from '@/components/warehouses/WarehouseForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { useCanCreate } from '@/hooks/usePlanLimits';
 
 export default function Warehouses() {
   const { data: warehouses, isLoading } = useWarehouses();
@@ -16,7 +15,6 @@ export default function Warehouses() {
   const createWarehouse = useCreateWarehouse();
   const updateWarehouse = useUpdateWarehouse();
   const deleteWarehouse = useDeleteWarehouse();
-  const { canCreate, message: limitMessage } = useCanCreate('warehouses');
   
   const [formOpen, setFormOpen] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
@@ -66,15 +64,9 @@ export default function Warehouses() {
         <p className="text-sm text-muted-foreground">{warehouses?.length || 0} depósito(s) cadastrado(s)</p>
         <Button 
           onClick={() => { 
-            if (!canCreate) {
-              toast.error(limitMessage);
-              return;
-            }
             setEditingWarehouse(null); 
             setFormOpen(true); 
           }} 
-          disabled={!canCreate}
-          title={limitMessage || undefined}
           className="w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />Novo Depósito

@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SidebarProvider } from "@/hooks/useSidebar";
-import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RootGuard } from "@/components/auth/RootGuard";
 import { lazy, Suspense } from "react";
@@ -20,14 +19,11 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Finance = lazy(() => import("./pages/Finance"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 const ShopeeShipments = lazy(() => import("./pages/ShopeeShipments"));
 const ShopeeCallback = lazy(() => import("./pages/ShopeeCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Checkout = lazy(() => import("./pages/Checkout"));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
-const PaymentFailure = lazy(() => import("./pages/PaymentFailure"));
-const PaymentPending = lazy(() => import("./pages/PaymentPending"));
 const ShopeeRoiSimulator = lazy(() => import("./pages/ShopeeRoiSimulator"));
 
 const queryClient = new QueryClient();
@@ -41,7 +37,6 @@ const App = () => (
       }}
     >
       <AuthProvider>
-        <SubscriptionProvider>
           <SidebarProvider>
             <TooltipProvider>
               <Toaster />
@@ -67,22 +62,13 @@ const App = () => (
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  
-                  {/* Redirect /subscription to /settings - subscription management is now in Settings page */}
-                  <Route path="/subscription" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  
-                  {/* Payment Routes */}
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/payment/success" element={<PaymentSuccess />} />
-                  <Route path="/payment/failure" element={<PaymentFailure />} />
-                  <Route path="/payment/pending" element={<PaymentPending />} />
+                  <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
             </TooltipProvider>
           </SidebarProvider>
-        </SubscriptionProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

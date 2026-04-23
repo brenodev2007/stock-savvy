@@ -7,9 +7,8 @@ interface User {
   name: string;
   cpf_cnpj?: string | null;
   avatar_url?: string | null;
-  is_pro?: boolean;
-  plan?: string | null;
-  subscription_status?: string | null;
+  is_active: boolean;
+  role: string;
 }
 
 interface AuthContextType {

@@ -65,7 +65,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCanCreate } from "@/hooks/usePlanLimits";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,7 +73,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { UpgradePromptModal } from "@/components/subscription/UpgradePromptModal";
 
 const productSchema = z.object({
   sku: z.string().min(1, "Código é obrigatório").max(50),
@@ -104,7 +102,6 @@ export default function Products() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
-  const { canCreate, message: limitMessage, usage: productUsage } = useCanCreate('products');
 
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -113,7 +110,6 @@ export default function Products() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const createCategory = useCreateCategory();
 
   const form = useForm({
@@ -235,10 +231,6 @@ export default function Products() {
             size="sm"
             className="flex-1 sm:flex-none"
             onClick={() => {
-              if (!canCreate) {
-                setUpgradeModalOpen(true);
-                return;
-              }
               setEditingProduct(null);
               form.reset();
               setFormOpen(true);
@@ -455,12 +447,7 @@ export default function Products() {
         )}
       </div>
 
-      <UpgradePromptModal
-        open={upgradeModalOpen}
-        onClose={() => setUpgradeModalOpen(false)}
-        feature="Cadastrar Produtos"
-        description={limitMessage || "Você atingiu o limite de produtos do seu plano atual."}
-      />
+
 
       <Dialog
         open={formOpen}
