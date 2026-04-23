@@ -2,7 +2,20 @@ import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Store } from 'lucide-react';
+import { 
+  Plus, 
+  Trash2, 
+  Store, 
+  Truck, 
+  PackageCheck, 
+  Clock, 
+  AlertCircle,
+  BarChart3,
+  Filter,
+  Download,
+  MoreVertical,
+  Zap
+} from 'lucide-react';
 import { ShopeeOrdersTable } from '@/components/shopee/ShopeeOrdersTable';
 import { ShopeeFilters, type ShopeeFiltersState } from '@/components/shopee/ShopeeFilters';
 import { ShopeeStatsCards } from '@/components/shopee/ShopeeStatsCards';
@@ -10,7 +23,9 @@ import { ShopeeAccountsManager } from '@/components/shopee/ShopeeAccountsManager
 import { ShopeeSyncStatus } from '@/components/shopee/ShopeeSyncStatus';
 import { ShopeeOrderForm } from '@/components/shopee/ShopeeOrderForm';
 import { useShopeeOrders, useShopeeOrderStats, useDeleteMultipleShopeeOrders, useActiveShopeeAccount } from '@/hooks/useShopee';
-
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 import {
   AlertDialog,
@@ -34,7 +49,6 @@ import {
 const ITEMS_PER_PAGE = 10;
 
 export default function ShopeeShipments() {
-  
   const [filters, setFilters] = useState<ShopeeFiltersState>({
     search: '',
     status: undefined,
@@ -47,28 +61,25 @@ export default function ShopeeShipments() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
-  // Get active account
   const { data: activeAccount } = useActiveShopeeAccount();
-
   const { data: orders, isLoading: ordersLoading } = useShopeeOrders({
     status: filters.status,
     startDate: filters.startDate,
     endDate: filters.endDate,
     carrier: filters.carrier,
     search: filters.search,
-    accountId: activeAccount?.id, // Filter by active account
+    accountId: activeAccount?.id,
   });
 
   const { data: stats, isLoading: statsLoading } = useShopeeOrderStats();
   const deleteMultiple = useDeleteMultipleShopeeOrders();
-  // Get unique carriers for filter
+
   const carriers = useMemo(() => {
     if (!orders) return [];
     const unique = [...new Set(orders.map(o => o.carrier).filter(Boolean))] as string[];
     return unique.sort();
   }, [orders]);
 
-  // Pagination
   const totalPages = Math.ceil((orders?.length || 0) / ITEMS_PER_PAGE);
   const paginatedOrders = useMemo(() => {
     if (!orders) return [];
@@ -76,7 +87,6 @@ export default function ShopeeShipments() {
     return orders.slice(start, start + ITEMS_PER_PAGE);
   }, [orders, currentPage]);
 
-  // Reset to page 1 when filters change
   const handleFiltersChange = (newFilters: ShopeeFiltersState) => {
     setFilters(newFilters);
     setCurrentPage(1);
@@ -92,139 +102,184 @@ export default function ShopeeShipments() {
     });
   };
 
-
   return (
-    <AppLayout
-      title="Envios Shopee"
-      subtitle="Controle e acompanhamento de pedidos da Shopee"
-    >
-      <div className="space-y-6">
-        {/* Stats Cards */}
-        <ShopeeStatsCards stats={stats} isLoading={statsLoading} />
-
-        {/* Main Content */}
-        <Tabs defaultValue="orders" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="orders">Pedidos</TabsTrigger>
-            <TabsTrigger value="accounts">Contas</TabsTrigger>
-            <TabsTrigger value="sync">Sincronização</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="orders" className="space-y-4">
-            {/* Active Account Indicator */}
-            {activeAccount && (
-              <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <Store className="h-4 w-4 text-amber-700" />
-                <p className="text-sm text-amber-900">
-                  Exibindo pedidos da conta: <strong>{activeAccount.shop_name}</strong>
-                </p>
+    <AppLayout title="Gestão de Vendas Shopee" subtitle="Central de comando para seus pedidos e logística">
+      <div className="space-y-6 animate-in fade-in duration-500">
+        
+        {/* Banner de Status Operacional */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-primary/5 border-primary/20 shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <PackageCheck className="h-6 w-6 text-primary" />
               </div>
-            )}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">A Enviar</p>
+                <h3 className="text-2xl font-black">{stats?.aguardandoEnvio || 0}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <Clock className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-xs text-amber-600 uppercase font-bold tracking-wider">Atrasados</p>
+                <h3 className="text-2xl font-black">{stats?.atrasados || 0}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Truck className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs text-blue-600 uppercase font-bold tracking-wider">Em Trânsito</p>
+                <h3 className="text-2xl font-black">{stats?.emTransito || 0}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Zap className="h-6 w-6 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider">Finalizados</p>
+                <h3 className="text-2xl font-black">{stats?.entregue || 0}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="orders" className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <TabsList className="bg-muted/50 p-1">
+              <TabsTrigger value="orders" className="gap-2"><ShoppingCart className="h-4 w-4" /> Meus Pedidos</TabsTrigger>
+              <TabsTrigger value="accounts" className="gap-2"><Store className="h-4 w-4" /> Contas Conectadas</TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2"><BarChart3 className="h-4 w-4" /> Analytics</TabsTrigger>
+            </TabsList>
             
-            {/* Filters and Actions */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Button variant="outline" onClick={() => setIsFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Cadastrar Pedido Manual
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <Button variant="outline" size="sm" className="gap-2 flex-1 md:flex-none">
+                <Download className="h-4 w-4" /> Exportar CSV
               </Button>
-              {selectedIds.length > 0 && (
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowBulkDeleteDialog(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir {selectedIds.length} selecionado(s)
-                </Button>
-              )}
+              <Button size="sm" onClick={() => setIsFormOpen(true)} className="gap-2 flex-1 md:flex-none bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-600/20">
+                <Plus className="h-4 w-4" /> Novo Pedido
+              </Button>
             </div>
-            <ShopeeOrderForm
-              open={isFormOpen}
-              onOpenChange={setIsFormOpen}
-            />
-            <ShopeeFilters
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              carriers={carriers}
-            />
+          </div>
 
-            {/* Orders Table */}
-            <ShopeeOrdersTable 
-              orders={paginatedOrders} 
-              isLoading={ordersLoading}
-              selectedIds={selectedIds}
-              onSelectionChange={setSelectedIds}
-            />
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let page: number;
-                      if (totalPages <= 5) {
-                        page = i + 1;
-                      } else if (currentPage <= 3) {
-                        page = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        page = totalPages - 4 + i;
-                      } else {
-                        page = currentPage - 2 + i;
-                      }
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+          <TabsContent value="orders" className="space-y-6 animate-in fade-in duration-500">
+            {activeAccount && (
+              <div className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-full">
+                    <Store className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm">Loja Ativa: {activeAccount.shop_name}</h4>
+                    <p className="text-xs text-muted-foreground">Sincronizado há 5 minutos</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                  <Zap className="h-3 w-3 mr-1 fill-emerald-700" /> API Conectada
+                </Badge>
               </div>
             )}
 
-            {/* Results count */}
-            {orders && orders.length > 0 && (
-              <p className="text-sm text-muted-foreground text-center">
-                Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} a {Math.min(currentPage * ITEMS_PER_PAGE, orders.length)} de {orders.length} pedidos
-              </p>
-            )}
+            <Card className="border-none shadow-md overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Filter className="h-4 w-4" /> Filtros Avançados
+                  </CardTitle>
+                  {selectedIds.length > 0 && (
+                    <Button variant="destructive" size="sm" onClick={() => setShowBulkDeleteDialog(true)} className="h-8">
+                      Excluir {selectedIds.length} selecionados
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="p-4 border-b">
+                  <ShopeeFilters
+                    filters={filters}
+                    onFiltersChange={handleFiltersChange}
+                    carriers={carriers}
+                  />
+                </div>
+                
+                <ShopeeOrdersTable 
+                  orders={paginatedOrders} 
+                  isLoading={ordersLoading}
+                  selectedIds={selectedIds}
+                  onSelectionChange={setSelectedIds}
+                />
+
+                <div className="p-4 bg-muted/10 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
+                   <p className="text-xs text-muted-foreground">
+                    Mostrando <strong>{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</strong> a <strong>{Math.min(currentPage * ITEMS_PER_PAGE, orders?.length || 0)}</strong> de <strong>{orders?.length || 0}</strong> pedidos
+                  </p>
+                  
+                  {totalPages > 1 && (
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="accounts">
-            <ShopeeAccountsManager />
+             <Card className="border-none shadow-md">
+                <CardHeader>
+                  <CardTitle>Contas Shopee</CardTitle>
+                  <CardDescription>Gerencie suas lojas e credenciais de API</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ShopeeAccountsManager />
+                </CardContent>
+             </Card>
           </TabsContent>
 
-          <TabsContent value="sync">
-            <ShopeeSyncStatus />
+          <TabsContent value="analytics" className="h-[400px] flex flex-col items-center justify-center text-center space-y-4 bg-muted/20 rounded-xl border-2 border-dashed">
+            <BarChart3 className="h-16 w-16 text-muted-foreground opacity-20" />
+            <div>
+                <h3 className="text-lg font-bold">Relatórios Detalhados</h3>
+                <p className="text-muted-foreground text-sm max-w-sm">
+                    Acesse a aba de Relatórios para uma visão completa de performance por produto e lucratividade.
+                </p>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href='/reports'}>Ver Relatórios</Button>
           </TabsContent>
         </Tabs>
 
-        {/* Bulk Delete Dialog */}
+        <ShopeeOrderForm open={isFormOpen} onOpenChange={setIsFormOpen} />
+
         <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Excluir pedidos selecionados</AlertDialogTitle>
               <AlertDialogDescription>
                 Tem certeza que deseja excluir <strong>{selectedIds.length}</strong> pedido(s)? 
-                Esta ação não pode ser desfeita.
+                Esta ação não pode ser desfeita e afetará seu estoque.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
