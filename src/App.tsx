@@ -24,7 +24,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const ShopeeShipments = lazy(() => import("./pages/ShopeeShipments"));
 const ShopeeCallback = lazy(() => import("./pages/ShopeeCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ShopeeRoiSimulator = lazy(() => import("./pages/ShopeeRoiSimulator"));
+const EcommerceRoiCalculator = lazy(() => import("./pages/EcommerceRoiCalculator"));
 
 const queryClient = new QueryClient();
 
@@ -57,7 +57,7 @@ const App = () => (
                   <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
                   <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
                   <Route path="/shopee" element={<ProtectedRoute><ShopeeShipments /></ProtectedRoute>} />
-                  <Route path="/shopee/roi-simulator" element={<ProtectedRoute><ShopeeRoiSimulator /></ProtectedRoute>} />
+                  <Route path="/roi-calculator" element={<ProtectedRoute><EcommerceRoiCalculator /></ProtectedRoute>} />
                   <Route path="/shopee/callback" element={<ShopeeCallback />} />
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />

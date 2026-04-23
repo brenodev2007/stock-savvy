@@ -103,7 +103,7 @@ export default function ShopeeShipments() {
   };
 
   return (
-    <AppLayout title="Gestão de Vendas Shopee" subtitle="Central de comando para seus pedidos e logística">
+    <AppLayout title="Gestão de Vendas E-commerce" subtitle="Central de comando universal para pedidos de qualquer plataforma">
       <div className="space-y-6 animate-in fade-in duration-500">
         
         {/* Banner de Status Operacional */}
@@ -250,7 +250,7 @@ export default function ShopeeShipments() {
           <TabsContent value="accounts">
              <Card className="border-none shadow-md">
                 <CardHeader>
-                  <CardTitle>Contas Shopee</CardTitle>
+                  <CardTitle>Lojas Conectadas</CardTitle>
                   <CardDescription>Gerencie suas lojas e credenciais de API</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -294,6 +294,37 @@ export default function ShopeeShipments() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Resumo Omnichannel no final da página */}
+        <div className="mt-8 border-t pt-8">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Visão Geral Omnichannel
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="p-6 text-center">
+                <Store className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="font-semibold">Integrações Universais</p>
+                <p className="text-sm text-muted-foreground mt-1">Conecte Amazon, Mercado Livre, Shopify e Nuvemshop.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="p-6 text-center">
+                <PackageCheck className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="font-semibold">Estoque Centralizado</p>
+                <p className="text-sm text-muted-foreground mt-1">Vendeu em um canal, baixou em todos os outros automaticamente.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="p-6 text-center">
+                <LineChart className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="font-semibold">Analytics Global</p>
+                <p className="text-sm text-muted-foreground mt-1">Veja qual plataforma traz mais faturamento para o seu negócio.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
