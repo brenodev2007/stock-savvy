@@ -712,18 +712,24 @@ export function useShopeeOrderStats() {
 
       const { data, error } = await supabase
         .from('shopee_orders')
-        .select('status')
+        .select('status, estimated_delivery')
         .in('account_id', accountIds);
       
       if (error) throw error;
 
+      const now = new Date();
       const stats = {
         total: data.length,
         aguardandoEnvio: data.filter(o => o.status === 'AGUARDANDO_ENVIO').length,
         enviado: data.filter(o => o.status === 'ENVIADO').length,
-        emTransporte: data.filter(o => o.status === 'EM_TRANSPORTE').length,
+        emTransito: data.filter(o => o.status === 'EM_TRANSPORTE').length,
         entregue: data.filter(o => o.status === 'ENTREGUE').length,
         cancelado: data.filter(o => o.status === 'CANCELADO' || o.status === 'DEVOLVIDO').length,
+        atrasados: data.filter(o => {
+          if (['ENTREGUE', 'CANCELADO', 'DEVOLVIDO'].includes(o.status as string)) return false;
+          if (!o.estimated_delivery) return false;
+          return new Date(o.estimated_delivery) < now;
+        }).length
       };
 
       return stats;

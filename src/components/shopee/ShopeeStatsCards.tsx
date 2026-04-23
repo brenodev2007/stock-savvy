@@ -8,9 +8,10 @@ interface ShopeeStatsCardsProps {
     total: number;
     aguardandoEnvio: number;
     enviado: number;
-    emTransporte: number;
+    emTransito: number;
     entregue: number;
     cancelado: number;
+    atrasados?: number;
   } | undefined;
   isLoading?: boolean;
 }
@@ -19,7 +20,7 @@ const statItems = [
   { key: 'total', label: 'Total de Pedidos', icon: ShoppingBag, color: 'text-foreground', bg: 'bg-muted' },
   { key: 'aguardandoEnvio', label: 'Aguardando Envio', icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-100' },
   { key: 'enviado', label: 'Enviados', icon: Package, color: 'text-blue-600', bg: 'bg-blue-100' },
-  { key: 'emTransporte', label: 'Em Transporte', icon: Truck, color: 'text-purple-600', bg: 'bg-purple-100' },
+  { key: 'emTransito', label: 'Em Trânsito', icon: Truck, color: 'text-purple-600', bg: 'bg-purple-100' },
   { key: 'entregue', label: 'Entregues', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' },
   { key: 'cancelado', label: 'Cancelados', icon: XCircle, color: 'text-red-600', bg: 'bg-red-100' },
 ] as const;
