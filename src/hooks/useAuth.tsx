@@ -31,15 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        // Mock a user for "Offline/Demo" mode as requested by user
-        const mockUser: User = {
-          id: 'mock-123',
-          email: 'usuario@exemplo.com',
-          name: 'Usuário Universal',
-          is_active: true,
-          role: 'admin'
-        };
-        setUser(mockUser);
+        setUser(null);
         setLoading(false);
         return;
       }
@@ -48,15 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data);
     } catch (error) {
       console.error('Error fetching user data:', error);
-      // Fallback to mock user on error too
-      const mockUser: User = {
-        id: 'mock-123',
-        email: 'usuario@exemplo.com',
-        name: 'Usuário Universal',
-        is_active: true,
-        role: 'admin'
-      };
-      setUser(mockUser);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -68,8 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log(`[AUTH] Iniciando login para ${email}...`);
       const { data } = await api.post('/auth/login', { email, password });
       
+      console.log(`[AUTH] Login bem-sucedido para ${email}. Token recebido.`);
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
@@ -83,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string, secretKeyword: string, cpfCnpj?: string) => {
     try {
+      console.log(`[AUTH] Iniciando registro para ${email}...`);
       const { data } = await api.post('/auth/register', {
         email,
         password,
@@ -91,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cpf_cnpj: cpfCnpj
       });
       
+      console.log(`[AUTH] Registro bem-sucedido para ${email}.`);
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);

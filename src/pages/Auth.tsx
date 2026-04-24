@@ -92,17 +92,41 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
 
+    const validation = loginSchema.safeParse({
+      email: loginEmail,
+      password: loginPassword,
+    });
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setIsLoading(true);
-
-    const { error } = await signIn(loginEmail, loginPassword);
-    setIsLoading(false);
-
-    if (error) {
-     toast.error("E-mail ou senha incorretos. Por favor, verifique suas credenciais e tente novamente.");
-      setShowLoginErrorDialog(true);
-    } else {
-      toast.success("Login realizado com sucesso!");
-      navigate("/dashboard");
+    try {
+      console.log("Tentando login para:", loginEmail);
+      const { error } = await signIn(loginEmail, loginPassword);
+      
+      if (error) {
+        console.error("Erro no login:", error);
+        setLoginErrorMessage(error.message);
+        toast.error(error.message);
+        setShowLoginErrorDialog(true);
+      } else {
+        toast.success("Login realizado com sucesso!");
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Erro crítico no handleLogin:", err);
+      toast.error("Ocorreu um erro inesperado ao tentar fazer login.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,14 +155,22 @@ export default function Auth() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(signupEmail, signupPassword, signupName, signupSecretKeyword, signupCpfCnpj);
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message || "Erro ao criar conta");
-    } else {
-      toast.success("Conta criada com sucesso!");
-      navigate("/dashboard");
+    try {
+      console.log("Tentando cadastro para:", signupEmail);
+      const { error } = await signUp(signupEmail, signupPassword, signupName, signupSecretKeyword, signupCpfCnpj);
+      
+      if (error) {
+        console.error("Erro no cadastro:", error);
+        toast.error(error.message || "Erro ao criar conta");
+      } else {
+        toast.success("Conta criada com sucesso!");
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Erro crítico no handleSignup:", err);
+      toast.error("Ocorreu um erro inesperado ao tentar criar conta.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
