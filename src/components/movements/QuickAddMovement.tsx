@@ -250,7 +250,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
         <div className="flex items-center gap-4 text-xs text-muted-foreground bg-background/50 p-2 rounded-lg border border-primary/5">
             <div className="flex items-center gap-1">
                 <span className="font-bold">Saldo atual:</span>
-                <span className="text-primary">{selectedProduct.stock} {selectedProduct.unit}</span>
+                <span className="text-primary">{selectedProduct.unit} {selectedProduct.unit}</span>
             </div>
             {selectedProduct.price && (
                 <div className="flex items-center gap-1">
