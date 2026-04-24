@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CategoryForm } from "@/components/categories/CategoryForm";
-import { useCreateCategory, Category } from "@/hooks/useCategories";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +29,13 @@ import {
   useDeleteProduct,
   Product,
 } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
+import { 
+  useCategories, 
+  useUpdateCategory, 
+  useDeleteCategory,
+  useCreateCategory, 
+  Category 
+} from "@/hooks/useCategories";
 import { useStockBalances } from "@/hooks/useStockBalances";
 import { toast } from "sonner";
 import {
@@ -72,6 +78,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const productSchema = z.object({
@@ -110,7 +126,14 @@ export default function Products() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<Category | null>(null);
+  
   const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "products";
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -154,8 +177,25 @@ export default function Products() {
     name: string;
     description?: string;
   }) => {
-    await createCategory.mutateAsync(data);
+    if (editingCategory) {
+      await updateCategory.mutateAsync({ id: editingCategory.id, ...data });
+    } else {
+      await createCategory.mutateAsync(data);
+    }
     setCategoryFormOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setCategoryFormOpen(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (deleteCategoryTarget) {
+      await deleteCategory.mutateAsync(deleteCategoryTarget.id);
+      setDeleteCategoryTarget(null);
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -197,7 +237,17 @@ export default function Products() {
 
   return (
     <AppLayout title="Produtos" subtitle="Gerencie o catálogo de produtos">
-     
+      <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-6">
+        <TabsList className="bg-muted/50 p-1 rounded-xl w-fit">
+          <TabsTrigger value="products" className="gap-2 px-6">
+            <Package className="h-4 w-4" /> Produtos
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="gap-2 px-6">
+            <Filter className="h-4 w-4" /> Categorias
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="products" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 outline-none">
       
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex items-center gap-2">
@@ -258,113 +308,119 @@ export default function Products() {
       </p>
 
       {/* Desktop table */}
-      <div className="hidden lg:block rounded-lg border border-border bg-card overflow-hidden">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Código (Ref.)</th>
-              <th>Categoria</th>
-              <th className="text-right">Estoque</th>
-              <th className="text-right">Custo</th>
-              <th className="text-right">Preço</th>
-              <th className="text-center">Status</th>
-              <th className="w-12"></th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="hidden lg:block rounded-xl border border-border bg-card overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              <TableHead className="w-[300px]">Produto</TableHead>
+              <TableHead>Código (Ref.)</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead className="text-right">Estoque</TableHead>
+              <TableHead className="text-right">Custo</TableHead>
+              <TableHead className="text-right">Preço</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredProducts?.map((product) => {
               const stock = stockBalances?.filter(b => b.product_id === product.id).reduce((sum, b) => sum + b.quantity, 0) ?? 0;
               const isLowStock = stock < product.min_stock;
               const isOutOfStock = stock === 0;
               return (
-                <tr key={product.id}>
-                  <td>
+                <TableRow key={product.id} className="group transition-colors duration-200">
+                  <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                        <Package className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                        <Package className="h-5 w-5" />
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-foreground leading-tight">
                           {product.name}
-                        </p>
+                        </span>
                         {product.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-1">
+                          <span className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
                             {product.description}
-                          </p>
+                          </span>
                         )}
                       </div>
                     </div>
-                  </td>
-                  <td>
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono">
+                  </TableCell>
+                  <TableCell>
+                    <code className="rounded bg-muted/50 px-2 py-0.5 text-xs font-mono text-muted-foreground border border-border/50">
                       {product.sku}
                     </code>
-                  </td>
-                  <td className="text-muted-foreground">
-                    {product.category?.name ?? "-"}
-                  </td>
-                  <td className="text-right">
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-medium text-muted-foreground/80">
+                      {product.category?.name ?? "-"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
                     <span
                       className={cn(
-                        "font-medium",
+                        "font-bold text-base",
                         isOutOfStock && "text-destructive",
                         isLowStock && !isOutOfStock && "text-warning"
                       )}
                     >
                       {stock}
                     </span>
-                    <span className="text-sm text-muted-foreground ml-1">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground/60 ml-1.5 tracking-wide">
                       {product.unit}
                     </span>
-                  </td>
-                  <td className="text-right text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="text-right font-medium text-muted-foreground/70">
                     {formatCurrency(product.cost)}
-                  </td>
-                  <td className="text-right font-medium">
-                    {formatCurrency(product.price)}
-                  </td>
-                  <td className="text-center">
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className="font-black text-primary">
+                      {formatCurrency(product.price)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
                     {isOutOfStock ? (
-                      <span className="badge-danger">Sem estoque</span>
+                      <span className="badge-danger px-3 py-1 font-black text-[10px] uppercase tracking-wider">Sem estoque</span>
                     ) : isLowStock ? (
-                      <span className="badge-warning">Baixo</span>
+                      <span className="badge-warning px-3 py-1 font-black text-[10px] uppercase tracking-wider">Baixo</span>
                     ) : (
-                      <span className="badge-success">OK</span>
+                      <span className="badge-success px-3 py-1 font-black text-[10px] uppercase tracking-wider">OK</span>
                     )}
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-popover">
-                        <DropdownMenuItem onClick={() => handleEdit(product)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
+                      <DropdownMenuContent align="end" className="bg-popover border-border shadow-xl rounded-xl p-1.5 min-w-[140px]">
+                        <DropdownMenuItem onClick={() => handleEdit(product)} className="rounded-lg gap-2 cursor-pointer">
+                          <Edit className="h-4 w-4" />
+                          <span className="font-medium text-sm">Editar</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="my-1" />
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget(product)}
-                          className="text-destructive"
+                          className="text-destructive focus:text-destructive rounded-lg gap-2 cursor-pointer"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Excluir
+                          <Trash2 className="h-4 w-4" />
+                          <span className="font-medium text-sm">Excluir</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         {filteredProducts?.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Package className="h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 font-medium">Nenhum produto cadastrado</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/5">
+            <div className="p-4 bg-muted/20 rounded-full mb-4">
+              <Package className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <p className="font-bold text-muted-foreground/60 uppercase tracking-widest text-xs">Nenhum produto cadastrado</p>
           </div>
         )}
       </div>
@@ -446,6 +502,80 @@ export default function Products() {
           })
         )}
       </div>
+      </TabsContent>
+
+      <TabsContent value="categories" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 outline-none">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            {categories?.length || 0} categoria(s) cadastrada(s)
+          </p>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditingCategory(null);
+              setCategoryFormOpen(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Nova Categoria
+          </Button>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+          <Table>
+            <TableHeader className="bg-muted/30">
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead className="text-right w-24">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories?.map((category) => (
+                <TableRow key={category.id} className="group">
+                  <TableCell className="font-semibold text-foreground leading-tight">
+                    {category.name}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground italic">
+                    {category.description || <span className="text-muted-foreground/30 font-normal">Sem descrição</span>}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover border-border shadow-xl rounded-xl p-1.5 min-w-[140px]">
+                        <DropdownMenuItem onClick={() => handleEditCategory(category)} className="rounded-lg gap-2 cursor-pointer">
+                          <Edit className="h-4 w-4" />
+                          <span className="font-medium text-sm">Editar</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="my-1" />
+                        <DropdownMenuItem
+                          onClick={() => setDeleteCategoryTarget(category)}
+                          className="text-destructive focus:text-destructive rounded-lg gap-2 cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="font-medium text-sm">Excluir</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {categories?.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/5">
+              <div className="p-4 bg-muted/20 rounded-full mb-4">
+                <Filter className="h-10 w-10 text-muted-foreground/30" />
+              </div>
+              <p className="font-bold text-muted-foreground/60 uppercase tracking-widest text-xs">Nenhuma categoria cadastrada</p>
+            </div>
+          )}
+        </div>
+      </TabsContent>
+      </Tabs>
 
 
 
@@ -662,12 +792,39 @@ export default function Products() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={!!deleteCategoryTarget}
+        onOpenChange={() => setDeleteCategoryTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão de categoria</AlertDialogTitle>
+            <AlertDialogDescription>
+              Excluir a categoria <strong>{deleteCategoryTarget?.name}</strong>? 
+              Isso pode afetar produtos vinculados. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCategory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <CategoryForm
         open={categoryFormOpen}
-        onOpenChange={(open) => setCategoryFormOpen(open)}
+        onOpenChange={(open) => {
+          setCategoryFormOpen(open);
+          if (!open) setEditingCategory(null);
+        }}
         category={editingCategory}
         onSubmit={handleCreateCategory}
-        isLoading={createCategory.isPending}
+        isLoading={createCategory.isPending || updateCategory.isPending}
       />
     </AppLayout>
   );

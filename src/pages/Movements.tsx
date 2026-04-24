@@ -9,6 +9,7 @@ import {
   Search,
   Pencil,
   Trash2,
+  MoreHorizontal,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,10 +30,26 @@ import {
   MovementType,
   StockMovement,
 } from "@/hooks/useMovements";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useProducts } from "@/hooks/useProducts";
 import { useWarehouses } from "@/hooks/useWarehouses";
 import { MovementForm } from "@/components/movements/MovementForm";
+import { QuickAddMovement } from "@/components/movements/QuickAddMovement";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -174,6 +191,14 @@ export default function Movements() {
         </div>
       </div>
 
+      <QuickAddMovement 
+        products={products || []} 
+        warehouses={warehouses || []}
+        onAdd={async (data) => {
+          await createMovement.mutateAsync(data);
+        }}
+      />
+
       {filteredMovements?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <ArrowRightLeft className="h-12 w-12 text-muted-foreground/50" />
@@ -187,86 +212,99 @@ export default function Movements() {
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block rounded-lg border border-border bg-card overflow-hidden">
-            <table className="data-table">
-              <thead>
-                <tr className="text-center">
-                  <th className="text-center">Tipo</th>
-                  <th className="text-center">Produto</th>
-                  <th className="text-center">Origem</th>
-                  <th className="text-center">Destino</th>
-                  <th className="text-center">Qtd</th>
-                  <th className="text-center">Referência</th>
-                  <th className="text-center">Data</th>
-                  <th className="text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+            <Table className="table-fixed">
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="text-center">Tipo</TableHead>
+                  <TableHead className="text-center">Produto</TableHead>
+                  <TableHead className="text-center">Origem</TableHead>
+                  <TableHead className="text-center">Destino</TableHead>
+                  <TableHead className="text-center">Quantidade</TableHead>
+                  <TableHead className="text-center">Referência</TableHead>
+                  <TableHead className="text-center">Data</TableHead>
+                  <TableHead className="text-center">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredMovements?.map((movement) => {
                   const config = typeConfig[movement.type];
                   const Icon = config.icon;
                   return (
-                    <tr key={movement.id} className="text-center hover:bg-muted/50 transition-colors">
-                      <td className="text-center align-middle">
+                    <TableRow key={movement.id} className="group transition-colors duration-200">
+                      <TableCell className="text-center">
                         <div
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${config.color}`}
                         >
                           <Icon className="h-3 w-3" />
                           {config.label}
                         </div>
-                      </td>
-                      <td className="text-center align-middle">
-                        <div className="flex flex-col items-center justify-center">
-                          <p className="font-medium">
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col text-center">
+                          <span className="font-semibold text-foreground leading-tight">
                             {movement.product?.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
+                          </span>
+                          <span className="text-[10px] font-mono text-muted-foreground mt-0.5">
                             {movement.product?.sku}
-                          </p>
+                          </span>
                         </div>
-                      </td>
-                      <td className="text-center text-muted-foreground align-middle">
-                        {movement.warehouse_from?.name || "-"}
-                      </td>
-                      <td className="text-center text-muted-foreground align-middle">
-                        {movement.warehouse_to?.name || "-"}
-                      </td>
-                      <td className="text-center font-medium align-middle">
-                        {movement.quantity}
-                      </td>
-                      <td className="text-center align-middle">
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                          {movement.reference || "-"}
-                        </code>
-                      </td>
-                      <td className="text-center text-muted-foreground text-sm align-middle">
+                      </TableCell>
+                      <TableCell className="text-muted-foreground/80 font-medium text-center">
+                        {movement.warehouse_from?.name || <span className="text-muted-foreground/30">—</span>}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground/80 font-medium text-center">
+                        {movement.warehouse_to?.name || <span className="text-muted-foreground/30">—</span>}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-black text-primary text-base">
+                          {movement.quantity}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {movement.reference ? (
+                          <code className="rounded bg-muted/50 px-2 py-0.5 text-xs font-mono text-muted-foreground border border-border/50">
+                            {movement.reference}
+                          </code>
+                        ) : (
+                          <span className="text-muted-foreground/30">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         {format(
                           new Date(movement.created_at),
                           "dd/MM/yy HH:mm",
                           { locale: ptBR }
                         )}
-                      </td>
-                      <td className="text-center align-middle">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(movement)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setMovementToDelete(movement)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover border-border shadow-xl rounded-xl p-1.5 min-w-[140px]">
+                            <DropdownMenuItem onClick={() => handleEdit(movement)} className="rounded-lg gap-2 cursor-pointer">
+                              <Pencil className="h-4 w-4" />
+                              <span className="font-medium text-sm">Editar</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1" />
+                            <DropdownMenuItem
+                              onClick={() => setMovementToDelete(movement)}
+                              className="text-destructive focus:text-destructive rounded-lg gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="font-medium text-sm">Excluir</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {/* Mobile cards */}

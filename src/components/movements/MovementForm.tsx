@@ -46,7 +46,7 @@ const createMovementSchema = (type: MovementType) => z.object({
     ? z.string().min(1, 'Selecione o depósito de origem')
     : z.string().optional(),
   warehouse_to_id: (type === 'IN' || type === 'TRANSFER' || type === 'ADJUST')
-    ? z.string().min(1, 'Selecione o depósito')
+    ? z.string().min(1, 'Selecione o depósito de destino')
     : z.string().optional(),
   quantity: z.coerce.number().min(1, 'Quantidade deve ser maior que zero'),
   reason: z.string().max(200, 'Motivo muito longo').optional(),
@@ -525,13 +525,15 @@ export function MovementForm({
                 </div>
             )}
 
-            {(type === 'OUT' || type === 'TRANSFER') && (
+            {(type === 'IN' || type === 'OUT' || type === 'TRANSFER') && (
               <FormField
                 control={form.control}
                 name="warehouse_from_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>De onde vai sair?</FormLabel>
+                    <FormLabel>
+                      {type === 'IN' ? 'Origem (opcional)' : 'De onde vai sair?'}
+                    </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -552,14 +554,14 @@ export function MovementForm({
               />
             )}
 
-            {(type === 'IN' || type === 'TRANSFER' || type === 'ADJUST') && (
+            {(type === 'IN' || type === 'OUT' || type === 'TRANSFER' || type === 'ADJUST') && (
               <FormField
                 control={form.control}
                 name="warehouse_to_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {type === 'TRANSFER' ? 'Para onde vai?' : 'Em qual local?'}
+                      {type === 'TRANSFER' ? 'Para onde vai?' : type === 'OUT' ? 'Destino (opcional)' : 'Em qual local?'}
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>

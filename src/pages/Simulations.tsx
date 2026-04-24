@@ -105,14 +105,14 @@ const Simulations = () => {
 
                     {/* ROI Tab Content */}
                     <TabsContent value="roi" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 outline-none">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-indigo-600 to-blue-700 p-6 rounded-2xl text-white shadow-xl">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-primary to-primary/80 p-6 rounded-2xl text-primary-foreground shadow-xl">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-md">
-                                    <TrendingUp className="h-6 w-6 text-white" />
+                                    <TrendingUp className="h-6 w-6 text-primary-foreground" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold">Simulador de ROI Ads</h2>
-                                    <p className="text-indigo-100 text-sm">Descubra a viabilidade das suas campanhas pagas</p>
+                                    <p className="text-primary-foreground/80 text-sm">Descubra a viabilidade das suas campanhas pagas</p>
                                 </div>
                             </div>
                             <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => {
@@ -126,29 +126,29 @@ const Simulations = () => {
                             {/* Inputs */}
                             <div className="xl:col-span-4 space-y-4">
                                 <Card className="border-none shadow-md overflow-hidden">
-                                    <div className="h-1 w-full bg-blue-500"></div>
+                                    <div className="h-1 w-full bg-primary"></div>
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-base flex items-center gap-2"><MousePointer2 className="h-4 w-4 text-blue-500"/> Investimento</CardTitle>
+                                        <CardTitle className="text-base flex items-center gap-2"><MousePointer2 className="h-4 w-4 text-primary"/> Investimento</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-6">
                                         <div className="space-y-3">
                                             <Label className="flex justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                                 Orçamento Diário
-                                                <span className="text-blue-600">{formatCurrency(budget)}</span>
+                                                <span className="text-primary">{formatCurrency(budget)}</span>
                                             </Label>
                                             <Slider value={[budget]} min={10} max={2000} step={10} onValueChange={(v) => setBudget(v[0])} />
                                         </div>
                                         <div className="space-y-3">
                                             <Label className="flex justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                                 CPC Médio
-                                                <span className="text-blue-600">{formatCurrency(cpc)}</span>
+                                                <span className="text-primary">{formatCurrency(cpc)}</span>
                                             </Label>
                                             <Slider value={[cpc]} min={0.05} max={5.0} step={0.05} onValueChange={(v) => setCpc(v[0])} />
                                         </div>
                                         <div className="space-y-3">
                                             <Label className="flex justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                                 Taxa de Conversão
-                                                <span className="text-blue-600">{conversionRate.toFixed(1)}%</span>
+                                                <span className="text-primary">{conversionRate.toFixed(1)}%</span>
                                             </Label>
                                             <Slider value={[conversionRate]} min={0.1} max={15} step={0.1} onValueChange={(v) => setConversionRate(v[0])} />
                                         </div>
@@ -156,9 +156,9 @@ const Simulations = () => {
                                 </Card>
 
                                 <Card className="border-none shadow-md overflow-hidden">
-                                    <div className="h-1 w-full bg-emerald-500"></div>
+                                    <div className="h-1 w-full bg-success"></div>
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4 text-emerald-500"/> Margem do Produto</CardTitle>
+                                        <CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4 text-success"/> Margem do Produto</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="grid grid-cols-1 gap-4">
@@ -193,30 +193,30 @@ const Simulations = () => {
                             {/* Results */}
                             <div className="xl:col-span-8 space-y-6">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <Card className="border-none shadow-sm bg-blue-50/50 dark:bg-blue-900/10">
+                                    <Card className="border-none shadow-sm bg-primary/5">
                                         <CardContent className="p-4 pt-6 text-center">
-                                            <ShoppingCart className="h-5 w-5 mx-auto mb-2 text-blue-600" />
+                                            <ShoppingCart className="h-5 w-5 mx-auto mb-2 text-primary" />
                                             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">Vendas Est.</p>
                                             <h4 className="text-2xl font-black">{roiResults.sales}</h4>
                                         </CardContent>
                                     </Card>
-                                    <Card className="border-none shadow-sm bg-indigo-50/50 dark:bg-indigo-900/10">
+                                    <Card className="border-none shadow-sm bg-secondary">
                                         <CardContent className="p-4 pt-6 text-center">
-                                            <Wallet className="h-5 w-5 mx-auto mb-2 text-indigo-600" />
+                                            <Wallet className="h-5 w-5 mx-auto mb-2 text-secondary-foreground" />
                                             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">Faturamento</p>
                                             <h4 className="text-2xl font-black">{formatCurrency(roiResults.revenue)}</h4>
                                         </CardContent>
                                     </Card>
-                                    <Card className="border-none shadow-sm bg-amber-50/50 dark:bg-amber-900/10">
+                                    <Card className="border-none shadow-sm bg-accent/10">
                                         <CardContent className="p-4 pt-6 text-center">
-                                            <Zap className="h-5 w-5 mx-auto mb-2 text-amber-600" />
+                                            <Zap className="h-5 w-5 mx-auto mb-2 text-accent" />
                                             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">ROAS</p>
                                             <h4 className="text-2xl font-black">{roiResults.roas.toFixed(2)}x</h4>
                                         </CardContent>
                                     </Card>
-                                    <Card className="border-none shadow-sm bg-emerald-50/50 dark:bg-emerald-900/10">
+                                    <Card className="border-none shadow-sm bg-success/5">
                                         <CardContent className="p-4 pt-6 text-center">
-                                            <TrendingUp className="h-5 w-5 mx-auto mb-2 text-emerald-600" />
+                                            <TrendingUp className="h-5 w-5 mx-auto mb-2 text-success" />
                                             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">ROI</p>
                                             <h4 className="text-2xl font-black">{roiResults.roi.toFixed(1)}%</h4>
                                         </CardContent>
@@ -244,7 +244,7 @@ const Simulations = () => {
                                             <Separator />
                                             <div className="flex justify-between items-center pt-2">
                                                 <span className="font-black text-lg">Lucro Final</span>
-                                                <span className={cn("text-3xl font-black", roiResults.profit > 0 ? "text-emerald-600" : "text-red-600")}>
+                                                <span className={cn("text-3xl font-black", roiResults.profit > 0 ? "text-success" : "text-destructive")}>
                                                     {formatCurrency(roiResults.profit)}
                                                 </span>
                                             </div>
@@ -254,19 +254,19 @@ const Simulations = () => {
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="border-none shadow-md bg-orange-50/20 dark:bg-orange-900/5">
+                                    <Card className="border-none shadow-md bg-accent/5">
                                         <CardHeader>
-                                            <CardTitle className="text-base flex items-center gap-2 text-orange-700"><Target className="h-4 w-4" /> Ponto de Equilíbrio</CardTitle>
+                                            <CardTitle className="text-base flex items-center gap-2 text-accent"><Target className="h-4 w-4" /> Ponto de Equilíbrio</CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-6">
-                                            <div className="text-center p-6 bg-orange-100/50 dark:bg-orange-900/20 rounded-2xl border border-orange-200">
-                                                <p className="text-[10px] uppercase font-black text-orange-800 tracking-widest mb-1">ROAS de Break-even</p>
-                                                <h3 className="text-5xl font-black text-orange-600">
+                                            <div className="text-center p-6 bg-accent/10 rounded-2xl border border-accent/20">
+                                                <p className="text-[10px] uppercase font-black text-accent tracking-widest mb-1">ROAS de Break-even</p>
+                                                <h3 className="text-5xl font-black text-accent">
                                                     {roiResults.breakEvenRoas.toFixed(2)}<span className="text-2xl font-bold">x</span>
                                                 </h3>
-                                                <p className="text-xs text-orange-800/70 mt-2 font-medium">Mínimo necessário para não ter prejuízo</p>
+                                                <p className="text-xs text-accent/70 mt-2 font-medium">Mínimo necessário para não ter prejuízo</p>
                                             </div>
-                                            <Alert className={cn("border-none", roiResults.roas >= roiResults.breakEvenRoas ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800")}>
+                                            <Alert className={cn("border-none", roiResults.roas >= roiResults.breakEvenRoas ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive")}>
                                                 <div className="flex items-center gap-3">
                                                     {roiResults.roas >= roiResults.breakEvenRoas ? <Zap className="h-5 w-5" /> : <BarChart3 className="h-5 w-5" />}
                                                     <p className="text-xs font-bold leading-tight">
@@ -283,16 +283,15 @@ const Simulations = () => {
                         </div>
                     </TabsContent>
 
-                    {/* Pricing Tab Content */}
-                    <TabsContent value="pricing" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 outline-none">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-emerald-600 to-teal-700 p-6 rounded-2xl text-white shadow-xl">
+                                       <TabsContent value="pricing" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 outline-none">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-success to-success/80 p-6 rounded-2xl text-success-foreground shadow-xl">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-md">
-                                    <DollarSign className="h-6 w-6 text-white" />
+                                    <DollarSign className="h-6 w-6 text-success-foreground" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold">Simulador de Precificação</h2>
-                                    <p className="text-emerald-100 text-sm">Ajuste seu preço para maximizar a margem de lucro</p>
+                                    <p className="text-success-foreground/80 text-sm">Ajuste seu preço para maximizar a margem de lucro</p>
                                 </div>
                             </div>
                         </div>
@@ -300,7 +299,7 @@ const Simulations = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             <div className="lg:col-span-5 space-y-6">
                                 <Card className="border-none shadow-md overflow-hidden">
-                                    <div className="h-1 w-full bg-emerald-500"></div>
+                                    <div className="h-1 w-full bg-success"></div>
                                     <CardHeader>
                                         <CardTitle className="text-lg">Configurar Valores</CardTitle>
                                         <CardDescription>Defina os parâmetros do seu produto</CardDescription>
@@ -310,7 +309,7 @@ const Simulations = () => {
                                             <Label className="text-sm font-bold">Preço de Venda Desejado</Label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-lg">R$</span>
-                                                <Input type="number" className="pl-12 h-14 text-2xl font-black bg-emerald-50/30 border-emerald-100" value={pSellingPrice} onChange={e => setPSellingPrice(Number(e.target.value))} />
+                                                <Input type="number" className="pl-12 h-14 text-2xl font-black bg-success/5 border-success/20" value={pSellingPrice} onChange={e => setPSellingPrice(Number(e.target.value))} />
                                             </div>
                                         </div>
                                         
@@ -345,14 +344,14 @@ const Simulations = () => {
 
                             <div className="lg:col-span-7 space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Card className="border-none shadow-lg bg-emerald-50 dark:bg-emerald-950/20">
+                                    <Card className="border-none shadow-lg bg-success/10">
                                         <CardContent className="p-8">
-                                            <p className="text-[10px] uppercase font-black text-emerald-800 tracking-widest mb-2">Lucro Líquido Unitário</p>
-                                            <h2 className={cn("text-5xl font-black", pricingResults.profit >= 0 ? "text-emerald-600" : "text-red-600")}>
+                                            <p className="text-[10px] uppercase font-black text-success tracking-widest mb-2">Lucro Líquido Unitário</p>
+                                            <h2 className={cn("text-5xl font-black", pricingResults.profit >= 0 ? "text-success" : "text-destructive")}>
                                                 {formatCurrency(pricingResults.profit)}
                                             </h2>
                                             <div className="mt-4 flex items-center gap-2">
-                                                <Badge className={cn("border-none", pricingResults.profit >= 0 ? "bg-emerald-200 text-emerald-900" : "bg-red-200 text-red-900")}>
+                                                <Badge className={cn("border-none", pricingResults.profit >= 0 ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive")}>
                                                     Margem: {pricingResults.marginPercent.toFixed(2)}%
                                                 </Badge>
                                             </div>
