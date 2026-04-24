@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { startOfDay, endOfDay } from 'date-fns';
-import type { ShopeeAccount, ShopeeOrder, ShopeeShipmentStatus } from '@/types/shopee';
+import type { OrderAccount, Order, OrderShipmentStatus } from '@/types/orders';
 
 // Utility para gerenciar LocalStorage
 const getLocalData = <T>(key: string, defaultValue: T): T => {
@@ -12,80 +12,80 @@ const setLocalData = (key: string, value: any) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-const ACCOUNTS_KEY = 'mock_shopee_accounts';
-const ORDERS_KEY = 'mock_shopee_orders';
+const ACCOUNTS_KEY = 'mock_universal_accounts';
+const ORDERS_KEY = 'mock_universal_orders';
 
-export function useShopeeAccounts() {
+export function useOrderAccounts() {
   return useQuery({
-    queryKey: ['shopee-accounts'],
-    queryFn: async () => getLocalData<ShopeeAccount[]>(ACCOUNTS_KEY, []),
+    queryKey: ['order-accounts'],
+    queryFn: async () => getLocalData<OrderAccount[]>(ACCOUNTS_KEY, []),
   });
 }
 
-export function useActiveShopeeAccount() {
+export function useActiveOrderAccount() {
   return useQuery({
-    queryKey: ['shopee-active-account'],
+    queryKey: ['order-active-account'],
     queryFn: async () => {
-      const accounts = getLocalData<ShopeeAccount[]>(ACCOUNTS_KEY, []);
+      const accounts = getLocalData<OrderAccount[]>(ACCOUNTS_KEY, []);
       return accounts.find(a => a.is_active) || null;
     },
   });
 }
 
-export function useCreateShopeeAccount() {
+export function useCreateOrderAccount() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (account: any) => {
-      const accounts = getLocalData<ShopeeAccount[]>(ACCOUNTS_KEY, []);
+      const accounts = getLocalData<OrderAccount[]>(ACCOUNTS_KEY, []);
       const newAccount = { ...account, id: Date.now().toString(), created_at: new Date().toISOString() };
       setLocalData(ACCOUNTS_KEY, [...accounts, newAccount]);
       return newAccount;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
-      toast({ title: 'Conta Shopee adicionada com sucesso!' });
+      queryClient.invalidateQueries({ queryKey: ['order-accounts'] });
+      toast({ title: 'Conta de e-commerce adicionada!' });
     },
   });
 }
 
-export function useDeleteShopeeAccount() {
+export function useDeleteOrderAccount() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (accountId: string) => {
-      const accounts = getLocalData<ShopeeAccount[]>(ACCOUNTS_KEY, []).filter(a => a.id !== accountId);
+      const accounts = getLocalData<OrderAccount[]>(ACCOUNTS_KEY, []).filter(a => a.id !== accountId);
       setLocalData(ACCOUNTS_KEY, accounts);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
-      toast({ title: 'Conta deletada com sucesso!' });
+      queryClient.invalidateQueries({ queryKey: ['order-accounts'] });
+      toast({ title: 'Conta removida com sucesso!' });
     },
   });
 }
 
-export function useSetActiveShopeeAccount() {
+export function useSetActiveOrderAccount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (accountId: string) => {
-      const accounts = getLocalData<ShopeeAccount[]>(ACCOUNTS_KEY, []).map(a => ({
+      const accounts = getLocalData<OrderAccount[]>(ACCOUNTS_KEY, []).map(a => ({
         ...a,
         is_active: a.id === accountId
       }));
       setLocalData(ACCOUNTS_KEY, accounts);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['shopee-active-account'] });
+      queryClient.invalidateQueries({ queryKey: ['order-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['order-active-account'] });
     },
   });
 }
 
-export function useShopeeOrders(filters?: any) {
+export function useOrders(filters?: any) {
   return useQuery({
-    queryKey: ['shopee-orders', filters],
+    queryKey: ['orders', filters],
     queryFn: async () => {
-      let orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []);
+      let orders = getLocalData<Order[]>(ORDERS_KEY, []);
       if (filters?.status) orders = orders.filter(o => o.status === filters.status);
       if (filters?.carrier) orders = orders.filter(o => o.carrier === filters.carrier);
       if (filters?.search) {
@@ -97,11 +97,11 @@ export function useShopeeOrders(filters?: any) {
   });
 }
 
-export function useShopeeOrder(orderId: string) {
+export function useOrder(orderId: string) {
   return useQuery({
-    queryKey: ['shopee-order', orderId],
+    queryKey: ['order', orderId],
     queryFn: async () => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []);
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []);
       return orders.find(o => o.id === orderId) || null;
     },
     enabled: !!orderId,
@@ -113,7 +113,7 @@ export function useCreateManualOrder() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (order: any) => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []);
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []);
       const newOrder = { 
         ...order, 
         id: Date.now().toString(), 
@@ -124,19 +124,19 @@ export function useCreateManualOrder() {
       return newOrder;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order-stats'] });
       toast({ title: 'Pedido cadastrado com sucesso!' });
     },
   });
 }
 
-export function useUpdateShopeeOrder() {
+export function useUpdateOrder() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...updateData }: any) => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []);
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []);
       const index = orders.findIndex(o => o.id === id);
       if (index !== -1) {
         orders[index] = { ...orders[index], ...updateData };
@@ -147,50 +147,50 @@ export function useUpdateShopeeOrder() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order-stats'] });
       toast({ title: 'Pedido atualizado!' });
     },
   });
 }
 
-export function useDeleteShopeeOrder() {
+export function useDeleteOrder() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []).filter(o => o.id !== orderId);
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []).filter(o => o.id !== orderId);
       setLocalData(ORDERS_KEY, orders);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order-stats'] });
       toast({ title: 'Pedido excluído!' });
     },
   });
 }
 
-export function useDeleteMultipleShopeeOrders() {
+export function useDeleteMultipleOrders() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (orderIds: string[]) => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []).filter(o => !orderIds.includes(o.id));
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []).filter(o => !orderIds.includes(o.id));
       setLocalData(ORDERS_KEY, orders);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopee-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['shopee-order-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order-stats'] });
       toast({ title: 'Pedidos excluídos!' });
     },
   });
 }
 
-export function useShopeeOrderStats() {
+export function useOrderStats() {
   return useQuery({
-    queryKey: ['shopee-order-stats'],
+    queryKey: ['order-stats'],
     queryFn: async () => {
-      const orders = getLocalData<ShopeeOrder[]>(ORDERS_KEY, []);
+      const orders = getLocalData<Order[]>(ORDERS_KEY, []);
       const now = new Date();
       return {
         total: orders.length,
@@ -205,9 +205,9 @@ export function useShopeeOrderStats() {
   });
 }
 
-export function useShopeeSyncLogs() {
+export function useOrderSyncLogs() {
   return useQuery({
-    queryKey: ['shopee-sync-logs'],
+    queryKey: ['order-sync-logs'],
     queryFn: async () => [],
   });
 }
@@ -216,21 +216,21 @@ export function useCreateSyncLog() {
   return useMutation({ mutationFn: async () => {} });
 }
 
-export function useSyncShopeeOrders() {
+export function useSyncOrders() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       return new Promise(resolve => setTimeout(resolve, 1000));
     },
     onSuccess: () => {
-      toast({ title: 'Sincronização simulada concluída com sucesso!' });
+      toast({ title: 'Sincronização manual concluída!' });
     }
   });
 }
 
-export function useShopeeOrderEditHistory() {
+export function useOrderEditHistory() {
   return useQuery({
-    queryKey: ['shopee-order-edit-history'],
+    queryKey: ['order-edit-history'],
     queryFn: async () => [],
   });
 }

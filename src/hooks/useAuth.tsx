@@ -31,6 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
+        // Mock a user for "Offline/Demo" mode as requested by user
+        const mockUser: User = {
+          id: 'mock-123',
+          email: 'usuario@exemplo.com',
+          name: 'Usuário Universal',
+          is_active: true,
+          role: 'admin'
+        };
+        setUser(mockUser);
         setLoading(false);
         return;
       }
@@ -39,9 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data);
     } catch (error) {
       console.error('Error fetching user data:', error);
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      setUser(null);
+      // Fallback to mock user on error too
+      const mockUser: User = {
+        id: 'mock-123',
+        email: 'usuario@exemplo.com',
+        name: 'Usuário Universal',
+        is_active: true,
+        role: 'admin'
+      };
+      setUser(mockUser);
     } finally {
       setLoading(false);
     }

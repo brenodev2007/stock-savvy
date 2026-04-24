@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils';
-import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus } from '@/types/shopee';
+import { SHIPMENT_STATUS_CONFIG, type OrderShipmentStatus } from '@/types/orders';
 import { Package, Truck, CheckCircle, XCircle, Clock, RotateCcw, Box, Tag } from 'lucide-react';
 
-interface ShopeeStatusBadgeProps {
-  status: ShopeeShipmentStatus;
+interface OrderStatusBadgeProps {
+  status: OrderShipmentStatus;
   className?: string;
 }
 
-const statusIcons: Record<ShopeeShipmentStatus, React.ReactNode> = {
+const statusIcons: Record<OrderShipmentStatus, React.ReactNode> = {
   AGUARDANDO_ENVIO: <Clock className="h-3 w-3" />,
   EMPACOTADO: <Box className="h-3 w-3" />,
   ETIQUETADO: <Tag className="h-3 w-3" />,
@@ -18,13 +18,15 @@ const statusIcons: Record<ShopeeShipmentStatus, React.ReactNode> = {
   DEVOLVIDO: <RotateCcw className="h-3 w-3" />,
 };
 
-export function ShopeeStatusBadge({ status, className }: ShopeeStatusBadgeProps) {
+export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
   const config = SHIPMENT_STATUS_CONFIG[status];
   
+  if (!config) return null;
+
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-tight shadow-sm',
         config.bgColor,
         config.color,
         className
