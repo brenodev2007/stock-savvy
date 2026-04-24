@@ -131,7 +131,7 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
                 </div>
                 {order.sku && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="font-mono">SKU: {order.sku}</span>
+                    <span>SKU: {order.sku}</span>
                   </div>
                 )}
                 {order.order_total && (
@@ -178,7 +178,7 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
                   </div>
                 )}
                 {order.tracking_code && (
-                  <div className="flex items-center gap-2 text-sm font-mono">
+                  <div className="flex items-center gap-2 text-sm">
                     Rastreio: {order.tracking_code}
                   </div>
                 )}

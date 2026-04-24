@@ -178,11 +178,11 @@ export function AppSidebar() {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-500 ease-in-out",
+          "fixed left-0 top-0 z-50 h-screen bg-sidebar transition-all duration-300 ease-in-out",
           isMobile
             ? mobileOpen
-              ? "w-64 translate-x-0"
-              : "-translate-x-full w-64"
+              ? "w-72 translate-x-0"
+              : "-translate-x-full w-72"
             : collapsed
             ? "w-20"
             : "w-72"

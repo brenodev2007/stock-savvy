@@ -73,9 +73,9 @@ export function ProductsTable({
                   </div>
                 </td>
                 <td>
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono">
+                  <span className="rounded bg-muted px-1.5 py-0.5 text-sm font-sans">
                     {product.sku}
-                  </code>
+                  </span>
                 </td>
                 <td>
                   <span className="text-sm text-muted-foreground">

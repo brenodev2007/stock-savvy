@@ -27,7 +27,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { SHIPMENT_STATUS_CONFIG, type OrderShipmentStatus } from '@/types/orders';
+import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus as OrderShipmentStatus } from '@/types/shopee';
 
 export interface OrderFiltersState {
   search: string;

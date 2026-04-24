@@ -38,12 +38,12 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
       {/* Main content */}
       <div
         className={cn(
-          'transition-all duration-300 min-h-screen flex flex-col',
-          isMobile ? 'ml-0' : collapsed ? 'ml-16' : 'ml-64'
+          'transition-all duration-300 min-h-screen flex flex-col main-scrollbar overflow-y-auto',
+          isMobile ? 'ml-0' : collapsed ? 'ml-20' : 'ml-72'
         )}
       >
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
           <div className="flex items-center gap-3 md:gap-4">
             {/* Mobile menu button */}
             {isMobile && (

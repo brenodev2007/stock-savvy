@@ -23,12 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { OrderStatusBadge } from './OrderStatusBadge';
-import { OrderDetails } from './OrderDetails';
-import { OrderForm } from './OrderForm';
-import { OrderEditHistory } from './OrderEditHistory';
-import { useDeleteOrder } from '@/hooks/useOrders';
-import type { Order } from '@/types/orders';
+import { ShopeeStatusBadge as OrderStatusBadge } from './ShopeeStatusBadge';
+import { ShopeeOrderDetails as OrderDetails } from './OrderDetails';
+import { ShopeeOrderForm as OrderForm } from './OrderForm';
+import { ShopeeOrderEditHistory as OrderEditHistory } from './OrderEditHistory';
+import { useDeleteShopeeOrder as useDeleteOrder } from '@/hooks/useShopee';
+import type { ShopeeOrder as Order } from '@/types/shopee';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -152,13 +152,13 @@ export function OrdersTable({ orders, isLoading, selectedIds = [], onSelectionCh
                       className="rounded-md"
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-xs font-bold text-primary">{order.order_sn}</TableCell>
+                  <TableCell className="text-xs font-bold text-primary">{order.order_sn}</TableCell>
                   <TableCell>
                     <div className="max-w-[200px] truncate font-medium text-sm" title={order.product_name}>
                       {order.product_name}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground text-xs font-mono">
+                  <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
                     {order.sku || '-'}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">

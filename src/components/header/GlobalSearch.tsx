@@ -172,10 +172,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
         {/* Shortcuts */}
         <div className="border-t border-border p-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>Pressione <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">ESC</kbd> para fechar</span>
+          <span>Pressione <kbd className="px-1.5 py-0.5 rounded bg-muted font-sans text-[10px]">ESC</kbd> para fechar</span>
           <span>
-            <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">⌘</kbd> + 
-            <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">K</kbd> para buscar
+            <kbd className="px-1.5 py-0.5 rounded bg-muted font-sans text-[10px]">⌘</kbd> + 
+            <kbd className="px-1.5 py-0.5 rounded bg-muted font-sans text-[10px]">K</kbd> para buscar
           </span>
         </div>
       </DialogContent>

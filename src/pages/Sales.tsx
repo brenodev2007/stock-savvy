@@ -22,9 +22,9 @@ import { OrdersTable } from '@/components/orders/OrdersTable';
 import { OrderFilters, type OrderFiltersState } from '@/components/orders/OrderFilters';
 import { OrderStatsCards } from '@/components/orders/OrderStatsCards';
 
-import { OrderSyncStatus } from '@/components/orders/OrderSyncStatus';
-import { OrderForm } from '@/components/orders/OrderForm';
-import { useOrders, useOrderStats, useDeleteMultipleOrders } from '@/hooks/useOrders';
+import { ShopeeSyncStatus as OrderSyncStatus } from '@/components/orders/OrderSyncStatus';
+import { ShopeeOrderForm as OrderForm } from '@/components/orders/OrderForm';
+import { useShopeeOrders as useOrders, useShopeeOrderStats as useOrderStats, useDeleteMultipleShopeeOrders as useDeleteMultipleOrders } from '@/hooks/useShopee';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';

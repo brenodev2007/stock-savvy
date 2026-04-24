@@ -275,7 +275,7 @@ export function FinancialDashboard() {
                   {/* Custos Variáveis */}
                   <tr className="hover:bg-muted/10 transition-colors text-muted-foreground">
                     <td className="p-4 pl-8">(-) CMV (Custo das Mercadorias)</td>
-                    <td className="p-4 text-right font-mono text-red-500">- {formatCurrency(metrics.costs)}</td>
+                    <td className="p-4 text-right text-red-500">- {formatCurrency(metrics.costs)}</td>
                     <td className="p-4 text-right">{((metrics.costs / Math.max(1, metrics.revenue)) * 100).toFixed(1)}%</td>
                   </tr>
                   {/* Margem Bruta */}
@@ -287,12 +287,12 @@ export function FinancialDashboard() {
                   {/* Despesas Operacionais */}
                   <tr className="hover:bg-muted/10 transition-colors text-muted-foreground">
                     <td className="p-4 pl-8">(-) Despesas Administrativas</td>
-                    <td className="p-4 text-right font-mono text-red-500">- {formatCurrency(summary?.expenses || 0)}</td>
+                    <td className="p-4 text-right text-red-500">- {formatCurrency(summary?.expenses || 0)}</td>
                     <td className="p-4 text-right">{(((summary?.expenses || 0) / Math.max(1, metrics.revenue)) * 100).toFixed(1)}%</td>
                   </tr>
                   <tr className="hover:bg-muted/10 transition-colors text-muted-foreground">
                     <td className="p-4 pl-8">(-) Folha de Pagamento / Pró-labore</td>
-                    <td className="p-4 text-right font-mono text-red-500">- {formatCurrency(totalPayroll)}</td>
+                    <td className="p-4 text-right text-red-500">- {formatCurrency(totalPayroll)}</td>
                     <td className="p-4 text-right">{((totalPayroll / Math.max(1, metrics.revenue)) * 100).toFixed(1)}%</td>
                   </tr>
                   {/* Resultado Líquido */}

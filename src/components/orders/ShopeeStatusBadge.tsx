@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils';
-import { SHIPMENT_STATUS_CONFIG, type OrderShipmentStatus } from '@/types/orders';
+import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus } from '@/types/shopee';
 import { Package, Truck, CheckCircle, XCircle, Clock, RotateCcw, Box, Tag } from 'lucide-react';
 
-interface OrderStatusBadgeProps {
-  status: OrderShipmentStatus;
+interface ShopeeStatusBadgeProps {
+  status: ShopeeShipmentStatus;
   className?: string;
 }
 
-const statusIcons: Record<OrderShipmentStatus, React.ReactNode> = {
+const statusIcons: Record<ShopeeShipmentStatus, React.ReactNode> = {
   AGUARDANDO_ENVIO: <Clock className="h-3 w-3" />,
   EMPACOTADO: <Box className="h-3 w-3" />,
   ETIQUETADO: <Tag className="h-3 w-3" />,
@@ -18,7 +18,7 @@ const statusIcons: Record<OrderShipmentStatus, React.ReactNode> = {
   DEVOLVIDO: <RotateCcw className="h-3 w-3" />,
 };
 
-export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
+export function ShopeeStatusBadge({ status, className }: ShopeeStatusBadgeProps) {
   const config = SHIPMENT_STATUS_CONFIG[status];
   
   if (!config) return null;
