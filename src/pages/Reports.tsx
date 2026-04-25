@@ -202,12 +202,7 @@ export default function Reports() {
             <TabsTrigger value="abc" className="gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg shadow-primary/20 transition-all font-bold">
                 <TrendingUp className="h-4 w-4" /> Curva ABC
             </TabsTrigger>
-            <TabsTrigger value="shopee" className="gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg shadow-primary/20 transition-all font-bold">
-                <ShoppingBag className="h-4 w-4" /> Performance Ecommerce
-            </TabsTrigger>
-            <TabsTrigger value="finance" className="gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg shadow-primary/20 transition-all font-bold">
-                <DollarSign className="h-4 w-4" /> Fluxo Financeiro
-            </TabsTrigger>
+           
           </TabsList>
 
           {/* TAB: VISÃO GERAL */}
@@ -283,83 +278,7 @@ export default function Reports() {
                 ))}
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 border-none shadow-xl shadow-black/5 bg-background rounded-3xl overflow-hidden">
-                    <CardHeader className="border-b bg-muted/20 pb-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="text-lg font-black uppercase tracking-tight">Performance Mensal</CardTitle>
-                                <CardDescription>Crescimento de vendas vs pedidos</CardDescription>
-                            </div>
-                            <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={abcData.slice(0, 7)}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10}} hide />
-                                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10}} tickFormatter={(val) => `R$ ${val/1000}k`} />
-                                    <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'}} />
-                                    <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-none shadow-xl shadow-black/5 bg-background rounded-3xl overflow-hidden">
-                    <CardHeader className="border-b bg-muted/20 pb-4">
-                        <CardTitle className="text-lg font-black uppercase tracking-tight">Estoque por Grupo</CardTitle>
-                        <CardDescription>Distribuição ABC de valor</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="h-[250px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={[
-                                            { name: 'Grupo A', value: abcData.filter(p => p.group === 'A').reduce((s, p) => s + p.value, 0), color: '#10b981' },
-                                            { name: 'Grupo B', value: abcData.filter(p => p.group === 'B').reduce((s, p) => s + p.value, 0), color: '#3b82f6' },
-                                            { name: 'Grupo C', value: abcData.filter(p => p.group === 'C').reduce((s, p) => s + p.value, 0), color: '#64748b' },
-                                        ]}
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={10}
-                                        dataKey="value"
-                                    >
-                                        {[0,1,2].map((_, i) => (
-                                            <Cell key={i} fill={['#10b981', '#3b82f6', '#64748b'][i]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="space-y-3 mt-4">
-                            <div className="flex items-center justify-between text-xs font-bold uppercase">
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Grupo A</span>
-                                <span>70%</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs font-bold uppercase">
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" /> Grupo B</span>
-                                <span>20%</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs font-bold uppercase">
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-500" /> Grupo C</span>
-                                <span>10%</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-             </div>
+             
           </TabsContent>
 
           {/* TAB: ABC CURVE */}
@@ -450,13 +369,7 @@ export default function Reports() {
              </Card>
           </TabsContent>
 
-          <TabsContent value="shopee" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
-             <ShopeeReport />
-          </TabsContent>
-
-          <TabsContent value="finance" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
-             <FinanceReport />
-          </TabsContent>
+       
         </Tabs>
       </div>
     </AppLayout>

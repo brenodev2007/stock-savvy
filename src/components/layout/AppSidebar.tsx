@@ -9,13 +9,10 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Box,
   X,
-  Truck,
-  LineChart,
   Calculator,
   Shield,
-  ShoppingBag
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,11 +25,9 @@ const navigation = [
   { name: "Vendas", href: "/shops", icon: ShoppingBag },
   { name: "Simulações", href: "/simulations", icon: Calculator },
   { name: "Produtos", href: "/products", icon: Package },
-  // Estoque Group
   { name: "Entrada e Saída", href: "/movements", icon: ArrowLeftRight },
   { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
   { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
-  
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
 
@@ -51,6 +46,26 @@ export function AppSidebar() {
     }
   }, [location.pathname, isMobile, setMobileOpen]);
 
+  const navLinkClass = (isActive: boolean) =>
+    cn(
+      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 group",
+      collapsed && !isMobile ? "justify-center" : "",
+      isActive
+        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+    );
+
+  const bottomNavLinkClass = (isActive: boolean) =>
+    cn(
+      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 group",
+      collapsed && !isMobile ? "justify-center" : "",
+      isActive
+        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+    );
+
+  const iconClass = "h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110";
+
   const sidebarContent = (
     <div className="flex h-full flex-col bg-sidebar dark:bg-zinc-950 border-r border-sidebar-border shadow-2xl shadow-black/10">
       {/* Logo */}
@@ -62,10 +77,10 @@ export function AppSidebar() {
           {(!collapsed || isMobile) && (
             <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">
               <span className="text-sm font-black text-sidebar-foreground tracking-tight uppercase">
-                Stock Savvy
+                ESTOKA
               </span>
               <span className="text-[10px] text-sidebar-foreground/50 font-bold uppercase tracking-widest">
-                Universal Edition
+                Controle de Estoque
               </span>
             </div>
           )}
@@ -88,18 +103,10 @@ export function AppSidebar() {
           <NavLink
             key={item.name}
             to={item.href}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 group",
-                collapsed && !isMobile ? "justify-center" : "",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              )
-            }
+            className={({ isActive }) => navLinkClass(isActive)}
             title={collapsed && !isMobile ? item.name : undefined}
           >
-            <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110")} />
+            <item.icon className={iconClass} />
             {(!collapsed || isMobile) && <span>{item.name}</span>}
           </NavLink>
         ))}
@@ -107,21 +114,13 @@ export function AppSidebar() {
 
       {/* Bottom navigation */}
       <div className="border-t border-sidebar-border px-3 py-4 space-y-1.5">
-        {user?.role === 'admin' && (
+        {user?.role === "admin" && (
           <NavLink
             to="/admin"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
-                collapsed && !isMobile ? "justify-center" : "",
-                isActive
-                  ? "bg-primary/20 text-primary"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              )
-            }
+            className={({ isActive }) => bottomNavLinkClass(isActive)}
             title={collapsed && !isMobile ? "Admin" : undefined}
           >
-            <Shield className="h-5 w-5 flex-shrink-0" />
+            <Shield className={iconClass} />
             {(!collapsed || isMobile) && <span>Painel Admin</span>}
           </NavLink>
         )}
@@ -129,18 +128,10 @@ export function AppSidebar() {
           <NavLink
             key={item.name}
             to={item.href}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
-                collapsed && !isMobile ? "justify-center" : "",
-                isActive
-                  ? "bg-primary/20 text-primary"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              )
-            }
+            className={({ isActive }) => bottomNavLinkClass(isActive)}
             title={collapsed && !isMobile ? item.name : undefined}
           >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <item.icon className={iconClass} />
             {(!collapsed || isMobile) && <span>{item.name}</span>}
           </NavLink>
         ))}
