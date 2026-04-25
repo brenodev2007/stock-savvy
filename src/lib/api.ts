@@ -22,22 +22,27 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url ?? '';
+    const isAuthRoute = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+
+    // Só redireciona para /auth em 401 se NÃO for uma rota de autenticação
+    // (evita recarregar a página antes do toast aparecer)
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       window.location.href = '/auth';
     }
 
     if (error.response?.status === 403 && error.response?.data?.upgrade_required) {
-      // Dispara evento global para abrir modal de upgrade
-      const event = new CustomEvent('upgrade-required', { 
-        detail: { 
+      const event = new CustomEvent('upgrade-required', {
+        detail: {
           message: error.response.data.message || 'Faça upgrade para acessar este recurso',
-          feature: 'Limite do Plano'
-        } 
+          feature: 'Limite do Plano',
+        },
       });
       window.dispatchEvent(event);
     }
+
     return Promise.reject(error);
   }
 );

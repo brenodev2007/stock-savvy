@@ -17,7 +17,6 @@ const Movements = lazy(() => import("./pages/Movements"));
 const Warehouses = lazy(() => import("./pages/Warehouses"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const Reports = lazy(() => import("./pages/Reports"));
-const Finance = lazy(() => import("./pages/Finance"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Admin = lazy(() => import("./pages/Admin"));
 
@@ -58,7 +57,7 @@ const App = () => (
                   <Route path="/shops" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
                   <Route path="/simulations" element={<ProtectedRoute><Simulations /></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                  <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+                
                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
 
