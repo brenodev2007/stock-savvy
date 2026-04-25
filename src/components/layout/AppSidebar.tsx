@@ -33,7 +33,6 @@ const navigation = [
   { name: "Contagem de Estoque", href: "/inventory", icon: ClipboardList },
   { name: "Locais de Estoque", href: "/warehouses", icon: Warehouse },
   
-  { name: "Financeiro", href: "/finance", icon: LineChart },
   { name: "Relatórios", href: "/reports", icon: FileText },
 ];
 
