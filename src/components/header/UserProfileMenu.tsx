@@ -46,7 +46,7 @@ export function UserProfileMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-popover">
+      <DropdownMenuContent align="end" className="w-70 bg-popover">
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
