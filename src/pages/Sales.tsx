@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -102,6 +102,79 @@ export default function Sales() {
     });
   };
 
+  const handleExportCSV = useCallback(() => {
+    if (!orders || orders.length === 0) return;
+
+    const headers = [
+      'Número do Pedido',
+      'Produto',
+      'SKU',
+      'Cliente',
+      'Status',
+      'Transportadora',
+      'Código de Rastreio',
+      'Data do Pedido',
+      'Previsão de Entrega',
+      'Valor Total',
+      'Endereço de Entrega',
+    ];
+
+    const escapeCSV = (value: string | number | null | undefined) => {
+      if (value == null) return '';
+      const str = String(value);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const formatDate = (dateStr: string | null | undefined) => {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00');
+        return d.toLocaleDateString('pt-BR');
+      } catch {
+        return '';
+      }
+    };
+
+    const statusLabels: Record<string, string> = {
+      AGUARDANDO_ENVIO: 'Aguardando Envio',
+      EMPACOTADO: 'Empacotado',
+      ETIQUETADO: 'Etiquetado',
+      ENVIADO: 'Enviado',
+      EM_TRANSPORTE: 'Em Transporte',
+      ENTREGUE: 'Entregue',
+      CANCELADO: 'Cancelado',
+      DEVOLVIDO: 'Devolvido',
+    };
+
+    const rows = orders.map(order => [
+      escapeCSV(order.order_sn),
+      escapeCSV(order.product_name),
+      escapeCSV(order.sku),
+      escapeCSV(order.customer_name),
+      escapeCSV(statusLabels[order.status] || order.status),
+      escapeCSV(order.carrier),
+      escapeCSV(order.tracking_code),
+      escapeCSV(formatDate(order.purchase_date)),
+      escapeCSV(formatDate(order.estimated_delivery)),
+      escapeCSV(order.order_total != null ? Number(order.order_total).toFixed(2).replace('.', ',') : ''),
+      escapeCSV(order.shipping_address),
+    ].join(','));
+
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const date = new Date().toISOString().split('T')[0];
+    link.href = url;
+    link.download = `pedidos_${date}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [orders]);
+
   return (
     <AppLayout title="Gestão de Vendas E-commerce" subtitle="Central de comando universal para pedidos de qualquer plataforma">
       <div className="space-y-6 animate-in fade-in duration-500">
@@ -158,11 +231,10 @@ export default function Sales() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <TabsList className="bg-muted/50 p-1 rounded-xl">
               <TabsTrigger value="orders" className="gap-2 px-4 rounded-lg data-[state=active]:shadow-sm"><ShoppingCart className="h-4 w-4" /> Meus Pedidos</TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2 px-4 rounded-lg data-[state=active]:shadow-sm"><BarChart3 className="h-4 w-4" /> Analytics</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <Button variant="outline" size="sm" className="gap-2 flex-1 md:flex-none rounded-lg">
+              <Button variant="outline" size="sm" className="gap-2 flex-1 md:flex-none rounded-lg" onClick={handleExportCSV} disabled={!orders || orders.length === 0}>
                 <Download className="h-4 w-4" /> Exportar CSV
               </Button>
               <Button size="sm" onClick={() => setIsFormOpen(true)} className="gap-2 flex-1 md:flex-none bg-primary hover:opacity-90 shadow-lg shadow-primary/20 rounded-lg">
@@ -228,17 +300,6 @@ export default function Sales() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="analytics" className="h-[400px] flex flex-col items-center justify-center text-center space-y-4 bg-muted/20 rounded-2xl border-2 border-dashed outline-none">
-            <BarChart3 className="h-16 w-16 text-muted-foreground opacity-20" />
-            <div>
-                <h3 className="text-lg font-bold">Relatórios Detalhados</h3>
-                <p className="text-muted-foreground text-sm max-w-sm">
-                    Acesse a aba de Relatórios para uma visão completa de performance por produto e lucratividade.
-                </p>
-            </div>
-            <Button variant="outline" className="rounded-lg" onClick={() => window.location.href='/reports'}>Ver Relatórios</Button>
-          </TabsContent>
         </Tabs>
 
         <OrderForm open={isFormOpen} onOpenChange={setIsFormOpen} />
@@ -263,43 +324,6 @@ export default function Sales() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Resumo Omnichannel no final da página */}
-        <div className="mt-8 border-t pt-8">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Visão Geral Omnichannel
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-muted/30 border-none shadow-sm hover:shadow-md transition-all rounded-2xl group">
-              <CardContent className="p-8 text-center">
-                <div className="bg-background w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                  <Store className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="font-bold text-lg">Integrações Universais</p>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">Conecte Amazon, Mercado Livre, Shopify e Nuvemshop de forma centralizada.</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-muted/30 border-none shadow-sm hover:shadow-md transition-all rounded-2xl group">
-              <CardContent className="p-8 text-center">
-                <div className="bg-background w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                  <PackageCheck className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="font-bold text-lg">Estoque Centralizado</p>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">Venda em qualquer canal e tenha a baixa automática em todo o seu ecossistema.</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-muted/30 border-none shadow-sm hover:shadow-md transition-all rounded-2xl group">
-              <CardContent className="p-8 text-center">
-                <div className="bg-background w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                  <LineChart className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="font-bold text-lg">Analytics Global</p>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">Identifique qual plataforma gera mais lucro e otimize seu investimento.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
     </AppLayout>
   );

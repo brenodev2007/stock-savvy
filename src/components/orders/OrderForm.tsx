@@ -239,7 +239,7 @@ export function ShopeeOrderForm({ order, open, onOpenChange }: ShopeeOrderFormPr
         purchase_date: order.purchase_date,
         estimated_delivery: order.estimated_delivery,
       };
-      await updateOrder.mutateAsync({ id: order.id, previousValues, ...orderData });
+      await updateOrder.mutateAsync({ orderId: order.id, updates: { ...orderData, previousValues } });
     } else {
       await createOrder.mutateAsync(orderData);
     }

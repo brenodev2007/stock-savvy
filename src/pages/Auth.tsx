@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Box,
   Loader2,
   AlertCircle,
   Eye,
@@ -207,10 +206,10 @@ export default function Auth() {
 
         <div className="relative z-10 text-white">
           <div className="flex items-center gap-2 font-bold text-2xl mb-12">
-            <div className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
-              <Box className="h-6 w-6 text-white" />
+            <div className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 overflow-hidden">
+              <img src="/logo-estoka.png" alt="ESTOKA" className="h-8 w-8 object-contain" />
             </div>
-            <span>Estoka</span>
+            <span>ESTOKA</span>
           </div>
 
           <div className="space-y-6 max-w-lg">
@@ -227,7 +226,7 @@ export default function Auth() {
         <div className="relative z-10 text-white mt-12">
           <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-lg font-semibold mb-4">
-              Por que escolher o Estoka?
+              Por que escolher o ESTOKA?
             </h3>
             <ul className="space-y-4">
               {[
@@ -263,8 +262,8 @@ export default function Auth() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left space-y-2">
             <div className="lg:hidden flex justify-center mb-6">
-              <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
-                <Box className="h-6 w-6 text-white" />
+              <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center overflow-hidden">
+                <img src="/logo-estoka.png" alt="ESTOKA" className="h-9 w-9 object-contain" />
               </div>
             </div>
             <h2 className="text-3xl font-bold tracking-tight">

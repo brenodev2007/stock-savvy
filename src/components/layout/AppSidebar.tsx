@@ -71,8 +71,8 @@ export function AppSidebar() {
       {/* Logo */}
       <div className="flex h-20 items-center justify-between gap-3 px-6 mb-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-transform hover:scale-110">
-            <ShoppingBag className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-transform hover:scale-110 overflow-hidden">
+            <img src="/logo-estoka.png" alt="ESTOKA" className="h-8 w-8 object-contain" />
           </div>
           {(!collapsed || isMobile) && (
             <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">

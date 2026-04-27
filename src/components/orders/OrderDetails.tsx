@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ExternalLink, MapPin, Phone, User, Truck, Package, Calendar } from 'lucide-react';
 import {
@@ -15,6 +15,22 @@ import { useShopeeOrder } from '@/hooks/useShopee';
 import { SHIPMENT_STATUS_CONFIG, type ShopeeShipmentStatus } from '@/types/shopee';
 import { cn } from '@/lib/utils';
 
+function formatDateSafe(dateString: string | null | undefined, withTime = false) {
+  if (!dateString) return '-';
+  try {
+    let date: Date;
+    if (dateString.includes('T')) {
+      date = new Date(dateString);
+    } else {
+      date = new Date(dateString + 'T12:00:00');
+    }
+    if (!isValid(date)) return '-';
+    return format(date, withTime ? "dd/MM/yyyy 'às' HH:mm" : 'dd/MM/yyyy', { locale: ptBR });
+  } catch {
+    return '-';
+  }
+}
+
 interface ShopeeOrderDetailsProps {
   orderId: string | null;
   open: boolean;
@@ -23,6 +39,8 @@ interface ShopeeOrderDetailsProps {
 
 const statusOrder: ShopeeShipmentStatus[] = [
   'AGUARDANDO_ENVIO',
+  'EMPACOTADO',
+  'ETIQUETADO',
   'ENVIADO',
   'EM_TRANSPORTE',
   'ENTREGUE',
@@ -98,7 +116,7 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
                           </p>
                           {historyItem && (
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {format(new Date(historyItem.occurred_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                              {formatDateSafe(historyItem.occurred_at, true)}
                               {historyItem.location && ` • ${historyItem.location}`}
                             </p>
                           )}
@@ -134,9 +152,9 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
                     <span>SKU: {order.sku}</span>
                   </div>
                 )}
-                {order.order_total && (
+                {order.order_total != null && Number(order.order_total) > 0 && (
                   <div className="text-sm font-medium text-primary mt-2">
-                    R$ {order.order_total.toFixed(2)}
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(order.order_total))}
                   </div>
                 )}
               </div>
@@ -184,18 +202,18 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
                 )}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  Compra: {format(new Date(order.purchase_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  Compra: {formatDateSafe(order.purchase_date, true)}
                 </div>
                 {order.estimated_delivery && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    Previsão: {format(new Date(order.estimated_delivery), 'dd/MM/yyyy', { locale: ptBR })}
+                    Previsão: {formatDateSafe(order.estimated_delivery)}
                   </div>
                 )}
                 {order.actual_delivery && (
                   <div className="flex items-center gap-2 text-sm text-green-600">
                     <Calendar className="h-4 w-4" />
-                    Entregue: {format(new Date(order.actual_delivery), 'dd/MM/yyyy', { locale: ptBR })}
+                    Entregue: {formatDateSafe(order.actual_delivery)}
                   </div>
                 )}
               </div>
@@ -203,7 +221,7 @@ export function ShopeeOrderDetails({ orderId, open, onOpenChange }: ShopeeOrderD
 
             {/* Last update */}
             <p className="text-xs text-muted-foreground text-center">
-              Última atualização: {format(new Date(order.updated_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+              Última atualização: {formatDateSafe(order.updated_at, true)}
             </p>
           </div>
         ) : (
