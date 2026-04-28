@@ -198,37 +198,34 @@ export default function Auth() {
   return (
     <div className="h-screen w-full lg:grid lg:grid-cols-2 bg-background overflow-hidden">
       {/* Left side - Visual Branding */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-primary dark:text-primary-foreground relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-8 bg-primary dark:text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-blue-600" />
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
 
         <div className="relative z-10 text-white">
-          <div className="flex items-center gap-2 font-bold text-2xl mb-12">
-            <div className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 overflow-hidden">
-              <img src="/logo-estoka.png" alt="ESTOKA" className="h-8 w-8 object-contain" />
-            </div>
-            <span>ESTOKA</span>
+          <div className="flex items-center justify-start mb-6">
+            <img src="/logo-estoka.png" alt="ESTOKA" className="h-16 w-16 object-contain drop-shadow-lg" />
           </div>
 
-          <div className="space-y-6 max-w-lg">
-            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
+          <div className="space-y-4 max-w-lg">
+            <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
               Gerencie seu estoque com inteligência.
             </h1>
-            <p className="text-xl text-white/80 font-light">
+            <p className="text-lg text-white/80 font-light">
               A plataforma completa para empresas que querem crescer sem perder o
               controle.
             </p>
           </div>
         </div>
 
-        <div className="relative z-10 text-white mt-12">
-          <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-lg">
+        <div className="relative z-10 text-white mt-6">
+          <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-lg font-semibold mb-4">
               Por que escolher o ESTOKA?
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {[
                 "Controle total de produtos e armazéns",
                 "Relatórios financeiros detalhados",
@@ -248,23 +245,11 @@ export default function Auth() {
 
       {/* Right side - Form */}
       <div className="h-full flex flex-col items-center p-8 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-md mb-8">
-          <Button
-            variant="ghost"
-            className="-ml-4 gap-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar para o início
-          </Button>
-        </div>
 
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left space-y-2">
             <div className="lg:hidden flex justify-center mb-6">
-              <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center overflow-hidden">
-                <img src="/logo-estoka.png" alt="ESTOKA" className="h-9 w-9 object-contain" />
-              </div>
+              <img src="/logo-estoka.png" alt="ESTOKA" className="h-24 w-24 object-contain" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight">
               Bem-vindo de volta

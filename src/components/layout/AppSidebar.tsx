@@ -69,21 +69,11 @@ export function AppSidebar() {
   const sidebarContent = (
     <div className="flex h-full flex-col bg-sidebar dark:bg-zinc-950 border-r border-sidebar-border shadow-2xl shadow-black/10">
       {/* Logo */}
-      <div className="flex h-20 items-center justify-between gap-3 px-6 mb-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-transform hover:scale-110 overflow-hidden">
-            <img src="/logo-estoka.png" alt="ESTOKA" className="h-8 w-8 object-contain" />
+      <div className="flex h-24 items-center justify-center px-4 mb-0">
+        <div className="flex items-center justify-center">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-transform hover:scale-110 overflow-hidden">
+            <img src="/logo-estoka.png" alt="ESTOKA" className="h-20 w-20 object-contain" />
           </div>
-          {(!collapsed || isMobile) && (
-            <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">
-              <span className="text-sm font-black text-sidebar-foreground tracking-tight uppercase">
-                ESTOKA
-              </span>
-              <span className="text-[10px] text-sidebar-foreground/50 font-bold uppercase tracking-widest">
-                Controle de Estoque
-              </span>
-            </div>
-          )}
         </div>
         {isMobile && mobileOpen && (
           <Button
