@@ -39,6 +39,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
   const [type, setType] = useState<MovementType>("IN");
   const [warehouseId, setWarehouseId] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [platform, setPlatform] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [fastMode, setFastMode] = useState(false);
 
@@ -76,6 +77,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
         warehouse_to_id: type === "IN" ? warehouseId : undefined,
         quantity,
         reason: "Lançamento rápido",
+        platform: type === "OUT" && platform ? platform : undefined,
       });
       
       toast.success("Movimentação registrada!");
@@ -84,6 +86,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
       setSelectedProductId("");
       if (!fastMode) {
         setQuantity(1);
+        setPlatform("");
       }
     } catch (error) {
       toast.error("Erro ao registrar");
@@ -95,7 +98,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
   const selectedProduct = products.find((p) => p.id === selectedProductId);
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5 shadow-sm mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="flex flex-col gap-3 p-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-sm mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
           <Plus className="h-4 w-4" />
@@ -139,7 +142,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
         </div>
 
         {/* PRODUCT */}
-        <div className="flex-1 min-w-[250px]">
+        <div className="flex-1 min-w-[200px]">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -169,14 +172,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
                       onSelect={() => {
                         setSelectedProductId(product.id);
                         setOpen(false);
-                        // Focus quantity if not in fast mode
-                        if (!fastMode) {
-                          setTimeout(() => quantityRef.current?.focus(), 100);
-                        } else {
-                            // In fast mode, maybe add immediately?
-                            // For safety, let the user hit Enter, but focus quantity anyway.
-                            setTimeout(() => quantityRef.current?.focus(), 100);
-                        }
+                        setTimeout(() => quantityRef.current?.focus(), 100);
                       }}
                     >
                       <Check
@@ -196,7 +192,7 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
         </div>
 
         {/* WAREHOUSE */}
-        <div className="w-[180px]">
+        <div className="w-[150px]">
           <Select value={warehouseId} onValueChange={setWarehouseId}>
             <SelectTrigger className="h-10 rounded-lg border-primary/20 focus:ring-primary">
               <SelectValue placeholder="Depósito" />
@@ -211,8 +207,20 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
           </Select>
         </div>
 
+        {/* PLATFORM - only for OUT */}
+        {type === "OUT" && (
+          <div className="w-[140px] animate-in fade-in slide-in-from-left-2 duration-200">
+            <Input
+              placeholder="Plataforma..."
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="h-10 rounded-lg border-primary/20 focus:ring-primary text-sm"
+            />
+          </div>
+        )}
+
         {/* QUANTITY */}
-        <div className="w-[100px]">
+        <div className="w-[90px]">
           <Input
             ref={quantityRef}
             type="number"
@@ -249,8 +257,8 @@ export function QuickAddMovement({ products, warehouses, onAdd }: QuickAddMoveme
       {selectedProduct && (
         <div className="flex items-center gap-4 text-xs text-muted-foreground bg-background/50 p-2 rounded-lg border border-primary/5">
             <div className="flex items-center gap-1">
-                <span className="font-bold">Saldo atual:</span>
-                <span className="text-primary">{selectedProduct.unit} {selectedProduct.unit}</span>
+                <span className="font-bold">Unidade:</span>
+                <span className="text-primary">{selectedProduct.unit}</span>
             </div>
             {selectedProduct.price && (
                 <div className="flex items-center gap-1">

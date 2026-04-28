@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,10 @@ import {
   Pencil,
   Trash2,
   MoreHorizontal,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Package,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -76,6 +80,8 @@ const typeConfig = {
   },
 };
 
+type FilterTab = "ALL" | "IN" | "OUT" | "TRANSFER";
+
 export default function Movements() {
   const { data: movements, isLoading } = useMovements();
   const { data: products } = useProducts();
@@ -87,6 +93,7 @@ export default function Movements() {
   const [formOpen, setFormOpen] = useState(false);
   const [movementType, setMovementType] = useState<MovementType>("IN");
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
   const [editingMovement, setEditingMovement] = useState<StockMovement | null>(null);
   const [movementToDelete, setMovementToDelete] = useState<StockMovement | null>(
     null
@@ -121,12 +128,51 @@ export default function Movements() {
     }
   };
 
-  const filteredMovements = movements?.filter(
-    (m) =>
-      m.product?.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.product?.sku.toLowerCase().includes(search.toLowerCase()) ||
-      m.reference?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Stats
+  const stats = useMemo(() => {
+    if (!movements) return { entries: 0, exits: 0, transfers: 0, total: 0 };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMovements = movements.filter(
+      (m) => new Date(m.created_at) >= today
+    );
+    return {
+      entries: todayMovements.filter((m) => m.type === "IN").reduce((s, m) => s + m.quantity, 0),
+      exits: todayMovements.filter((m) => m.type === "OUT").reduce((s, m) => s + m.quantity, 0),
+      transfers: todayMovements.filter((m) => m.type === "TRANSFER").length,
+      total: movements.length,
+    };
+  }, [movements]);
+
+  // Filtered movements
+  const filteredMovements = useMemo(() => {
+    let result = movements || [];
+    
+    // Tab filter
+    if (activeTab !== "ALL") {
+      result = result.filter((m) => m.type === activeTab);
+    }
+
+    // Search filter
+    if (search) {
+      result = result.filter(
+        (m) =>
+          m.product?.name.toLowerCase().includes(search.toLowerCase()) ||
+          m.product?.sku.toLowerCase().includes(search.toLowerCase()) ||
+          m.reference?.toLowerCase().includes(search.toLowerCase()) ||
+          m.platform?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    return result;
+  }, [movements, activeTab, search]);
+
+  const tabs: { key: FilterTab; label: string; count: number; icon: any; color: string }[] = [
+    { key: "ALL", label: "Todas", count: movements?.length || 0, icon: Package, color: "text-primary" },
+    { key: "IN", label: "Entradas", count: movements?.filter((m) => m.type === "IN").length || 0, icon: ArrowDownLeft, color: "text-success" },
+    { key: "OUT", label: "Saídas", count: movements?.filter((m) => m.type === "OUT").length || 0, icon: ArrowUpRight, color: "text-destructive" },
+    { key: "TRANSFER", label: "Transferências", count: movements?.filter((m) => m.type === "TRANSFER").length || 0, icon: ArrowRightLeft, color: "text-info" },
+  ];
 
   if (isLoading) {
     return (
@@ -135,6 +181,11 @@ export default function Movements() {
         subtitle="Registre entradas, saídas e transferências"
       >
         <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} className="h-16 rounded-lg" />
           ))}
@@ -148,49 +199,49 @@ export default function Movements() {
       title="Entrada e Saída"
       subtitle="Registre o que entra e sai do estoque"
     >
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por produto ou referência..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="relative overflow-hidden rounded-xl border border-success/20 bg-gradient-to-br from-success/5 to-success/10 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-success/10 hover:scale-[1.02] group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-success/70">Entradas Hoje</p>
+              <p className="text-3xl font-black text-success mt-1">{stats.entries}</p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-success/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <TrendingUp className="h-6 w-6 text-success" />
+            </div>
+          </div>
+          <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-success/5 blur-2xl" />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={() => openForm("IN")}
-          >
-            <ArrowDownLeft className="mr-2 h-4 w-4 text-success" />
-            <span className="hidden xs:inline">Entrada</span>
-            <span className="xs:hidden">Ent.</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={() => openForm("OUT")}
-          >
-            <ArrowUpRight className="mr-2 h-4 w-4 text-destructive" />
-            <span className="hidden xs:inline">Saída</span>
-            <span className="xs:hidden">Saída</span>
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={() => openForm("TRANSFER")}
-          >
-            <ArrowRightLeft className="mr-2 h-4 w-4" />
-            <span className="hidden xs:inline">Transferência</span>
-            <span className="xs:hidden">Transf.</span>
-          </Button>
+
+        <div className="relative overflow-hidden rounded-xl border border-destructive/20 bg-gradient-to-br from-destructive/5 to-destructive/10 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-destructive/10 hover:scale-[1.02] group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-destructive/70">Saídas Hoje</p>
+              <p className="text-3xl font-black text-destructive mt-1">{stats.exits}</p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-destructive/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <TrendingDown className="h-6 w-6 text-destructive" />
+            </div>
+          </div>
+          <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-destructive/5 blur-2xl" />
+        </div>
+
+        <div className="relative overflow-hidden rounded-xl border border-info/20 bg-gradient-to-br from-info/5 to-info/10 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-info/10 hover:scale-[1.02] group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-info/70">Total de Movimentações</p>
+              <p className="text-3xl font-black text-info mt-1">{stats.total}</p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-info/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ArrowRightLeft className="h-6 w-6 text-info" />
+            </div>
+          </div>
+          <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-info/5 blur-2xl" />
         </div>
       </div>
 
+      {/* Quick Add Section */}
       <QuickAddMovement 
         products={products || []} 
         warehouses={warehouses || []}
@@ -199,15 +250,99 @@ export default function Movements() {
         }}
       />
 
+      {/* Action Buttons + Search */}
+      <div className="mb-4 flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 border-success/30 text-success hover:bg-success/10 hover:text-success hover:border-success/50 transition-all"
+              onClick={() => openForm("IN")}
+            >
+              <ArrowDownLeft className="h-4 w-4" />
+              Nova Entrada
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
+              onClick={() => openForm("OUT")}
+            >
+              <ArrowUpRight className="h-4 w-4" />
+              Nova Saída
+            </Button>
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => openForm("TRANSFER")}
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+              Transferência
+            </Button>
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar produto, referência ou plataforma..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-1 p-1 bg-muted/50 rounded-xl w-fit">
+          {tabs.map((tab) => {
+            const TabIcon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
+                  ${isActive 
+                    ? "bg-background shadow-sm text-foreground" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }
+                `}
+              >
+                <TabIcon className={`h-4 w-4 ${isActive ? tab.color : ""}`} />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className={`
+                  text-[10px] font-black rounded-full px-1.5 py-0.5 min-w-[20px] text-center
+                  ${isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}
+                `}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {filteredMovements?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <ArrowRightLeft className="h-12 w-12 text-muted-foreground/50" />
-          <p className="mt-4 font-medium text-foreground">
+          <div className="h-20 w-20 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+            <ArrowRightLeft className="h-10 w-10 text-muted-foreground/30" />
+          </div>
+          <p className="mt-2 font-semibold text-foreground text-lg">
             Nenhuma movimentação encontrada
           </p>
-          <p className="text-sm text-muted-foreground">
-            Registre sua primeira movimentação acima.
+          <p className="text-sm text-muted-foreground mt-1">
+            {search ? "Tente outro termo de busca." : "Registre sua primeira movimentação acima."}
           </p>
+          {!search && (
+            <Button
+              className="mt-4 gap-2"
+              onClick={() => openForm("IN")}
+            >
+              <Plus className="h-4 w-4" />
+              Criar Movimentação
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -216,22 +351,27 @@ export default function Movements() {
             <Table className="table-fixed">
               <TableHeader className="bg-muted/30">
                 <TableRow>
-                  <TableHead className="text-center">Tipo</TableHead>
+                  <TableHead className="text-center w-[120px]">Tipo</TableHead>
                   <TableHead className="text-center">Produto</TableHead>
                   <TableHead className="text-center">Origem</TableHead>
                   <TableHead className="text-center">Destino</TableHead>
-                  <TableHead className="text-center">Quantidade</TableHead>
+                  <TableHead className="text-center w-[90px]">Qtd</TableHead>
+                  <TableHead className="text-center">Plataforma</TableHead>
                   <TableHead className="text-center">Referência</TableHead>
-                  <TableHead className="text-center">Data</TableHead>
-                  <TableHead className="text-center">Ações</TableHead>
+                  <TableHead className="text-center w-[120px]">Data</TableHead>
+                  <TableHead className="text-center w-[60px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMovements?.map((movement) => {
+                {filteredMovements?.map((movement, index) => {
                   const config = typeConfig[movement.type];
                   const Icon = config.icon;
                   return (
-                    <TableRow key={movement.id} className="group transition-colors duration-200">
+                    <TableRow 
+                      key={movement.id} 
+                      className="group transition-all duration-200 hover:bg-muted/30 animate-in fade-in slide-in-from-bottom-1"
+                      style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                    >
                       <TableCell className="text-center">
                         <div
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${config.color}`}
@@ -262,6 +402,15 @@ export default function Movements() {
                         </span>
                       </TableCell>
                       <TableCell className="text-center">
+                        {movement.platform ? (
+                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                            {movement.platform}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground/30">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         {movement.reference ? (
                           <code className="rounded bg-muted/50 px-2 py-0.5 text-xs font-mono text-muted-foreground border border-border/50">
                             {movement.reference}
@@ -270,7 +419,7 @@ export default function Movements() {
                           <span className="text-muted-foreground/30">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center text-xs text-muted-foreground">
                         {format(
                           new Date(movement.created_at),
                           "dd/MM/yy HH:mm",
@@ -280,7 +429,7 @@ export default function Movements() {
                       <TableCell className="text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all opacity-0 group-hover:opacity-100">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -309,20 +458,28 @@ export default function Movements() {
 
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
-            {filteredMovements?.map((movement) => {
+            {filteredMovements?.map((movement, index) => {
               const config = typeConfig[movement.type];
               const Icon = config.icon;
               return (
                 <div
                   key={movement.id}
-                  className="rounded-lg border border-border bg-card p-4 space-y-3"
+                  className="rounded-xl border border-border bg-card p-4 space-y-3 transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-bottom-2"
+                  style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}
                 >
                   <div className="flex items-center justify-between">
-                    <div
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${config.color}`}
-                    >
-                      <Icon className="h-3 w-3" />
-                      {config.label}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${config.color}`}
+                      >
+                        <Icon className="h-3 w-3" />
+                        {config.label}
+                      </div>
+                      {movement.platform && (
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">
+                          {movement.platform}
+                        </span>
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(movement.created_at), "dd/MM/yy HH:mm", {
@@ -331,7 +488,7 @@ export default function Movements() {
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium">{movement.product?.name}</p>
+                    <p className="font-semibold">{movement.product?.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {movement.product?.sku}
                     </p>
@@ -341,7 +498,7 @@ export default function Movements() {
                       {movement.warehouse_from && (
                         <p className="text-muted-foreground">
                           De:{" "}
-                          <span className="text-foreground">
+                          <span className="text-foreground font-medium">
                             {movement.warehouse_from.name}
                           </span>
                         </p>
@@ -349,35 +506,32 @@ export default function Movements() {
                       {movement.warehouse_to && (
                         <p className="text-muted-foreground">
                           Para:{" "}
-                          <span className="text-foreground">
+                          <span className="text-foreground font-medium">
                             {movement.warehouse_to.name}
                           </span>
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold">{movement.quantity}</p>
-                      {movement.reference && (
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                          {movement.reference}
-                        </code>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="ml-2"
-                        onClick={() => handleEdit(movement)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="ml-2"
-                        onClick={() => setMovementToDelete(movement)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                    <div className="text-right flex items-center gap-2">
+                      <p className="text-2xl font-black text-primary">{movement.quantity}</p>
+                      <div className="flex gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleEdit(movement)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => setMovementToDelete(movement)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>

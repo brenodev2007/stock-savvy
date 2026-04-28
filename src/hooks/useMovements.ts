@@ -14,6 +14,7 @@ export interface StockMovement {
   user_id: string;
   reason: string | null;
   reference: string | null;
+  platform: string | null;
   lot_id: string | null;
   created_at: string;
   product?: {
@@ -57,6 +58,7 @@ export function useCreateMovement() {
       type: MovementType;
       reason?: string;
       reference?: string;
+      platform?: string;
     }) => {
       const { data } = await api.post('/stock/movements', movement);
       return data;
@@ -85,6 +87,7 @@ export function useUpdateMovement() {
       type: MovementType;
       reason?: string;
       reference?: string;
+      platform?: string;
     }) => {
       const { id, ...updateData } = movement;
       const { data } = await api.put(`/stock/movements/${id}`, updateData);
