@@ -69,10 +69,13 @@ export function AppSidebar() {
   const sidebarContent = (
     <div className="flex h-full flex-col bg-sidebar dark:bg-zinc-950 border-r border-sidebar-border shadow-2xl shadow-black/10">
       {/* Logo */}
-      <div className="flex h-20 items-center px-6 mb-0">
+      <div className={cn("flex h-20 items-center mb-0 transition-all duration-300", collapsed && !isMobile ? "justify-center px-3" : "px-6")}>
         <div className="flex items-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-transform hover:scale-110 overflow-hidden">
-            <img src="/logo-estoka.png" alt="ESTOKA" className="h-14 w-14 object-contain" />
+          <div className={cn(
+            "flex items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20 flex-shrink-0 transition-all duration-300 hover:scale-110 overflow-hidden",
+            collapsed && !isMobile ? "h-10 w-10 rounded-xl" : "h-16 w-16"
+          )}>
+            <img src="/logo-estoka.png" alt="ESTOKA" className={cn("object-contain transition-all duration-300", collapsed && !isMobile ? "h-8 w-8" : "h-14 w-14")} />
           </div>
         </div>
         {isMobile && mobileOpen && (
